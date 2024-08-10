@@ -26,4 +26,4 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
 
 cuda_add_executable(trf ${SOURCES} ${HEADERS})
 target_include_directories(trf PUBLIC ${TRF_INCLUDE_DIR})
-#target_compile_options(trf PUBLIC $<$<COMPILE_LANGUAGE:CUDA>: --allow_unsupported_compiler>)
+target_link_options(trf PUBLIC "$<$<CONFIG:Release>:/NODEFAULTLIB:libcmt.lib>") 
