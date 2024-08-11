@@ -1,13 +1,14 @@
 #ifndef __TENSOR__
 #define __TENSOR__
 
+#include <iostream>
 #include <vector>
 #include <array>
+#include <memory>
 
 #include <cuda_runtime.h>
 #include "utils.hpp"
 
-#include <iostream>
 
 const int MAX_TENSOR_DIM = 8;
 
@@ -150,7 +151,8 @@ MemoryBuffer<device>::~MemoryBuffer()
 *  alignment - alignment requirement of the tensor internal axis (padding may be applied)
 *  shape - shape of the tensor
 *  stride - stride of the tensor
-*  mem_buffer - a MemoryBuffer object
+*  data - pointer to the buffer memory
+*  mem_buffer - a MemoryBuffer object (for tracking the memory)
 */
 template<DataType dtype, Device device=Device::CUDA>
 struct Tensor
@@ -161,8 +163,9 @@ struct Tensor
 	int alignment;  // in bytes
 	Shape shape;
 	Stride stride;
+	char* data;
 
-	MemoryBuffer<device> mem_buffer;
+	std::shared_ptr<MemoryBuffer<device>> mem_buffer;
 
 	explicit Tensor()
 	{
@@ -179,13 +182,19 @@ struct Tensor
 };
 
 template<DataType dtype, Device device>
-Tensor<dtype, device>::Tensor(const std::vector<int>& shape) : mem_buffer(bitsize_of_datatypes[(int)dtype], shape)
+Tensor<dtype, device>::Tensor(
+	const std::vector<int>& shape
+    )
+	    
 {
 	id = GlobalUUDGenerator::generate_id();
 	dim = static_cast<int>(shape.size());
 
 	alignment = bytesize_of_datatypes[(int)device];
 	offset = 0;
+
+	mem_buffer = std::make_shared<MemoryBuffer<device>>(bitsize_of_datatypes[(int)dtype], shape);
+	data = mem_buffer->buffer;
 
 	// calculating default stride
 	this->shape[dim - 1] = shape[dim - 1];

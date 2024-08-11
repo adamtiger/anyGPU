@@ -34,8 +34,14 @@ int main()
 	Tensor<INT8, CPU> tensor({ 3, 5, 7 });
 
 	std::cout << tensor.id << std::endl;
-	std::cout << tensor.mem_buffer.id << std::endl;
-	std::cout << tensor.mem_buffer.capacity << std::endl;
+	std::cout << tensor.mem_buffer->id << std::endl;
+	std::cout << tensor.mem_buffer->capacity << std::endl;
+
+	{
+		auto t2 = tensor;
+		t2.data[1] = 4;
+	}
+	tensor.data[1] = 3;
 
 	return 0;
 }
