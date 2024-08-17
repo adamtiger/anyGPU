@@ -31,17 +31,9 @@ int main()
 		std::cout << ha[ix] << " " << hb[ix] << " " << hc[ix] << "\n";
 	}
 
-	Tensor<INT8, CPU> tensor({ 3, 5, 7 });
+	auto tensor = crt_random_tensor<bfloat16, CPU>({ 3, 4 });
 
-	std::cout << tensor.id << std::endl;
-	std::cout << tensor.mem_buffer->id << std::endl;
-	std::cout << tensor.mem_buffer->capacity << std::endl;
-
-	{
-		auto t2 = tensor;
-		t2.data[1] = 4;
-	}
-	tensor.data[1] = 3;
+	std::cout << represent_tensor(tensor, 5);
 
 	return 0;
 }
