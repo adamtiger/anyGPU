@@ -2,148 +2,11 @@
 #define __TENSOR__
 
 #include <sstream>
-#include <iostream>
-#include <vector>
-#include <array>
 #include <memory>
 #include <random>
 
-#include <cuda_runtime.h>
-#include <cuda_fp16.h>
-#include <cuda_bf16.h>
+#include "datatypes.hpp"
 #include "utils.hpp"
-
-
-const int MAX_TENSOR_DIM = 8;
-
-using Shape = std::array<int, MAX_TENSOR_DIM>;
-using Stride = std::array<int, MAX_TENSOR_DIM>;
-
-enum Device
-{
-	CPU,
-	CUDA
-};
-
-enum DataType
-{
-	INT4,
-	INT8,
-	INT16,
-	INT32,
-	BFLOAT16,
-	FLOAT16,
-	FLOAT32
-};
-
-static int bitsize_of_datatypes[] = {
-	4, 8, 16, 32, 16, 16, 32
-};
-
-// int4 is 0.5 bytes long, from alignment perspective it is handled like 1
-static int bytesize_of_datatypes[] = {
-	1, 1, 2, 4, 2, 2, 4
-};
-
-using int8 = char;
-using int16 = short signed int;
-using int32 = signed int;
-using bfloat16 = nv_bfloat16;
-using float16 = half;
-using float32 = float;
-
-// helper functions for tensor size calculations
-
-/*
-*  If the alignment is the default for the given data type,
-*  this function returns the number of elements in the tensor.
-*  Default alignment means the byte size of 1 tensor element.
-*/
-int calc_default_size(const std::vector<int>& shape);
-
-/*
-*  Calculates the default stride from the given shape.
-*/
-std::vector<int> calc_default_stride(const std::vector<int>& shape);
-
-/*
-*  Transforms int vector to array.
-*  Vector can be shape or stride.
-*/
-std::array<int, MAX_TENSOR_DIM> cvt_vector2array(const std::vector<int>& v);
-
-/*
-*  Dimension from vector.
-*/
-int calc_dim(const std::vector<int>& v);
-
-/*
-*  Returns the bitsize of the data type
-*/
-template<typename T> static int get_bitsize()
-{
-	return sizeof(T) * 8;
-}
-
-/*
-*  Converting the int vector into any target data type.
-*/
-template<typename T> 
-static std::vector<T> cvt_int_vector_to_any(const std::vector<int>& hdata)
-{
-	std::vector<T> out_data(hdata.size());
-
-	for (size_t ix = 0; ix < hdata.size(); ++ix)
-	{
-		out_data[ix] = static_cast<T>(hdata[ix]);
-	}
-
-	return out_data;
-}
-
-template<>
-static std::vector<float16> cvt_int_vector_to_any(const std::vector<int>& hdata)
-{
-	std::vector<float16> out_data(hdata.size());
-
-	for (size_t ix = 0; ix < hdata.size(); ++ix)
-	{
-		out_data[ix] = __int2half_rn(hdata[ix]);
-	}
-
-	return out_data;
-}
-
-template<>
-static std::vector<bfloat16> cvt_int_vector_to_any(const std::vector<int>& hdata)
-{
-	std::vector<bfloat16> out_data(hdata.size());
-
-	for (size_t ix = 0; ix < hdata.size(); ++ix)
-	{
-		out_data[ix] = __int2bfloat16_rn(hdata[ix]);
-	}
-
-	return out_data;
-}
-
-template<typename T>
-static float32 cvt_any_to_float32(const T value)
-{
-	return static_cast<float32>(value);
-}
-
-template<>
-static float32 cvt_any_to_float32<float16>(const float16 value)
-{
-	return __half2float(value);
-}
-
-template<>
-static float32 cvt_any_to_float32<bfloat16>(const bfloat16 value)
-{
-	return __bfloat162float(value);
-}
 
 /*
 *  Contains a flat memory for storing the tensor data.
@@ -172,14 +35,14 @@ struct MemoryBuffer
 template<Device device>
 MemoryBuffer<device>::MemoryBuffer() : capacity(0)
 {
-	id = GlobalUUDGenerator::generate_id();
+	id = GlobalUUIDGenerator::generate_id();
 	buffer = nullptr;
 }
 
 template<Device device>
 MemoryBuffer<device>::MemoryBuffer(const int capacity) : capacity(capacity)
 {
-	id = GlobalUUDGenerator::generate_id();
+	id = GlobalUUIDGenerator::generate_id();
 
 	if constexpr (device == Device::CPU)
 	{
@@ -196,7 +59,7 @@ MemoryBuffer<device>::MemoryBuffer(const int capacity) : capacity(capacity)
 template<Device device>
 MemoryBuffer<device>::MemoryBuffer(const int data_bit_size, const std::vector<int>& shape)
 {
-	id = GlobalUUDGenerator::generate_id();
+	id = GlobalUUIDGenerator::generate_id();
 
 	int bitsize = calc_default_size(shape) * data_bit_size;
 	capacity = (bitsize >> 3);
@@ -215,6 +78,8 @@ MemoryBuffer<device>::MemoryBuffer(const int data_bit_size, const std::vector<in
 template<Device device>
 MemoryBuffer<device>::~MemoryBuffer()
 {
+	std::cout << "destroying buffer ... \n";
+
 	if (buffer == nullptr)
 		return;
 
@@ -229,6 +94,8 @@ MemoryBuffer<device>::~MemoryBuffer()
 	
 	buffer = nullptr;
 	capacity = 0;
+
+	std::cout << "destroyed buffer ... \n";
 }
 
 
@@ -268,12 +135,28 @@ struct Tensor
 		return shape[0] * stride[0];
 	}
 
+	// deep copies the tensor to host
+	Tensor<dtype, CPU> copy_to_host() const;
+
+	// deep copies the tensor to cuda
+	Tensor<dtype, CUDA> copy_to_cuda() const;
+
 	explicit Tensor()
 	{
-		id = GlobalUUDGenerator::generate_id();
+		id = GlobalUUIDGenerator::generate_id();
 		dim = 0;
 		offset = 0;
 		alignment = 1;
+	}
+
+	explicit Tensor(const int capacity)
+	{
+		id = GlobalUUIDGenerator::generate_id();
+		dim = 0;
+		offset = 0;
+		alignment = 1;
+
+		mem_buffer = std::make_shared<MemoryBuffer<device>>(capacity);
 	}
 
 	/*
@@ -294,7 +177,7 @@ private:
 template<typename dtype, Device device>
 Tensor<dtype, device>::Tensor(const std::vector<int>& shape)
 {
-	id = GlobalUUDGenerator::generate_id();
+	id = GlobalUUIDGenerator::generate_id();
 	dim = calc_dim(shape);
 
 	alignment = bytesize_of_datatypes[(int)device];
@@ -323,14 +206,59 @@ Tensor<dtype, device>::Tensor(const std::vector<int>& shape, const std::vector<d
 	}
 }
 
-// tensor print, string representations
+template<typename dtype, Device device>
+Tensor<dtype, CPU> Tensor<dtype, device>::copy_to_host() const
+{
+	int capacity = this->mem_buffer->capacity;
 
-/**
-  String representation of a shape or stride.
-  It will be in the form of [d1, d2, d3] for 3 dimension.
-  No new line character at the end.
-*/
-std::string represent_array(const int dim, const std::array<int, MAX_TENSOR_DIM>& arr);
+	Tensor<dtype, CPU> tensor(capacity);
+	tensor.dim = this->dim;
+	tensor.shape = this->shape;
+	tensor.stride = this->stride;
+	tensor.alignment = this->alignment;
+	tensor.offset = this->offset;
+	
+	dtype* trg = tensor.buffer();
+	dtype* src = this->buffer();
+	if constexpr (device == CPU)
+	{
+		memcpy(trg, src, capacity);
+	}
+	else if constexpr (device == CUDA)
+	{
+		cudaMemcpy(trg, src, capacity, cudaMemcpyDeviceToHost);
+	}
+
+	return tensor;
+}
+
+template<typename dtype, Device device>
+Tensor<dtype, CUDA> Tensor<dtype, device>::copy_to_cuda() const
+{
+	int capacity = this->mem_buffer->capacity;
+
+	Tensor<dtype, CUDA> tensor(capacity);
+	tensor.dim = this->dim;
+	tensor.shape = this->shape;
+	tensor.stride = this->stride;
+	tensor.alignment = this->alignement;
+	tensor.offset = this->offset;
+
+	dtype* trg = tensor.buffer();
+	dtype* src = this->buffer();
+	if constexpr (device == CPU)
+	{
+		cudaMemcpy(trg, src, sizeof(dtype) * capacity, cudaMemcpyHostToDevice);
+	}
+	else if constexpr (device == CUDA)
+	{
+		cudaMemcpy(trg, src, sizeof(dtype) * capacity, cudaMemcpyDeviceToDevice);
+	}
+
+	return tensor;
+}
+
+// tensor print, string representations
 
 /**
   String representation of tensor.
@@ -345,6 +273,7 @@ static std::string represent_tensor(const Tensor<dtype, CPU>& tensor, const int 
 
 	ss << "-- Tensor -- \n";
 	ss << "  id:         " << tensor.id << "\n";
+	ss << "  dtype:      " << get_datatype_enum<dtype>() << "\n";
 	ss << "  dim:        " << tensor.dim << "\n";
 	ss << "  alignment:  " << tensor.alignment << "\n";
 	ss << "  offset:     " << tensor.offset << "\n";

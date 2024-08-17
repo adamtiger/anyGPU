@@ -23,7 +23,8 @@ set (HEADERS
 )
 
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
 
 cuda_add_executable(trf ${SOURCES} ${HEADERS})
 target_include_directories(trf PUBLIC ${TRF_INCLUDE_DIR})
-target_link_options(trf PUBLIC "$<$<CONFIG:Release>:/NODEFAULTLIB:libcmt.lib>") 
+target_link_options(trf PUBLIC "/NODEFAULTLIB:libcmt.lib") 
