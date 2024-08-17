@@ -78,8 +78,6 @@ MemoryBuffer<device>::MemoryBuffer(const int data_bit_size, const std::vector<in
 template<Device device>
 MemoryBuffer<device>::~MemoryBuffer()
 {
-	std::cout << "destroying buffer ... \n";
-
 	if (buffer == nullptr)
 		return;
 
@@ -94,8 +92,6 @@ MemoryBuffer<device>::~MemoryBuffer()
 	
 	buffer = nullptr;
 	capacity = 0;
-
-	std::cout << "destroyed buffer ... \n";
 }
 
 
@@ -125,14 +121,33 @@ struct Tensor
 	Shape shape;
 	Stride stride;
 
+	// returns the start of tensor elements
+	//   takes into account the offset
 	dtype* buffer() const
 	{
 		return reinterpret_cast<dtype*>(mem_buffer->buffer + offset);
 	}
 
+	// pointer of the memory buffer
+	//   does not take into account the offset
+	char* raw_buffer() const
+	{
+		return mem_buffer->buffer;
+	}
+
 	int numel() const
 	{
 		return shape[0] * stride[0];
+	}
+
+	int capacity() const
+	{
+		return mem_buffer->capacity;
+	}
+
+	int buffer_id() const
+	{
+		return mem_buffer->id;
 	}
 
 	// deep copies the tensor to host
@@ -155,6 +170,8 @@ struct Tensor
 		dim = 0;
 		offset = 0;
 		alignment = 1;
+		shape = {};
+		stride = {};
 
 		mem_buffer = std::make_shared<MemoryBuffer<device>>(capacity);
 	}
@@ -218,8 +235,8 @@ Tensor<dtype, CPU> Tensor<dtype, device>::copy_to_host() const
 	tensor.alignment = this->alignment;
 	tensor.offset = this->offset;
 	
-	dtype* trg = tensor.buffer();
-	dtype* src = this->buffer();
+	char* trg = tensor.raw_buffer();
+	char* src = this->raw_buffer();
 	if constexpr (device == CPU)
 	{
 		memcpy(trg, src, capacity);
@@ -241,18 +258,18 @@ Tensor<dtype, CUDA> Tensor<dtype, device>::copy_to_cuda() const
 	tensor.dim = this->dim;
 	tensor.shape = this->shape;
 	tensor.stride = this->stride;
-	tensor.alignment = this->alignement;
+	tensor.alignment = this->alignment;
 	tensor.offset = this->offset;
 
-	dtype* trg = tensor.buffer();
-	dtype* src = this->buffer();
+	char* trg = tensor.raw_buffer();
+	char* src = this->raw_buffer();
 	if constexpr (device == CPU)
 	{
-		cudaMemcpy(trg, src, sizeof(dtype) * capacity, cudaMemcpyHostToDevice);
+		cudaMemcpy(trg, src, capacity, cudaMemcpyHostToDevice);
 	}
 	else if constexpr (device == CUDA)
 	{
-		cudaMemcpy(trg, src, sizeof(dtype) * capacity, cudaMemcpyDeviceToDevice);
+		cudaMemcpy(trg, src, capacity, cudaMemcpyDeviceToDevice);
 	}
 
 	return tensor;
@@ -279,6 +296,7 @@ static std::string represent_tensor(const Tensor<dtype, CPU>& tensor, const int 
 	ss << "  offset:     " << tensor.offset << "\n";
 	ss << "  shape:      " << represent_array(tensor.dim, tensor.shape) << "\n";
 	ss << "  stride:     " << represent_array(tensor.dim, tensor.stride) << "\n";
+	ss << "  capacity:   " << tensor.capacity() << "\n";
 
 	ss << "  buffer content: \n";
 	ss << "      [";

@@ -31,9 +31,10 @@ int main()
 		std::cout << ha[ix] << " " << hb[ix] << " " << hc[ix] << "\n";
 	}
 
-	auto tensor = crt_random_tensor<float16, CUDA>({ 3, 4 });
+	auto tensor = crt_random_tensor<float16, CPU>({ 3, 4 });
+	auto cuda_tensor = tensor.copy_to_cuda();
 
-	auto cpu_tensor = tensor.copy_to_host();
+	auto cpu_tensor = cuda_tensor.copy_to_host();
 
 	std::cout << represent_tensor(cpu_tensor, 5);
 
