@@ -193,6 +193,11 @@ struct Tensor
 	explicit Tensor(const std::vector<int>& shape);
 
 	/*
+	*  Creates a tensor with default alignment (1 tensor element).
+	*/
+	explicit Tensor(const int dim, const Shape& shape, const Stride& stride);
+
+	/*
 	*  Creates a tensor with default strides and alignment.
 	*  Also uses the tensor values given on the host.
 	*/
@@ -208,7 +213,7 @@ Tensor<dtype, device>::Tensor(const std::vector<int>& shape)
 	id = GlobalUUIDGenerator::generate_id();
 	dim = calc_dim(shape);
 
-	alignment = bytesize_of_datatypes[(int)device];
+	alignment = 1;
 	offset = 0;
 
 	mem_buffer = std::make_shared<MemoryBuffer<device>>(get_bitsize<dtype>(), shape);
@@ -217,6 +222,22 @@ Tensor<dtype, device>::Tensor(const std::vector<int>& shape)
 	auto stride = calc_default_stride(shape);
 	this->shape = cvt_vector2array(shape);
 	this->stride = cvt_vector2array(stride);
+}
+
+template<typename dtype, Device device>
+Tensor<dtype, device>::Tensor(const int dim, const Shape& shape, const Stride& stride)
+{
+	id = GlobalUUIDGenerator::generate_id();
+
+	alignment = 1;
+	offset = 0;
+
+	int capacity = get_bitsize<dtype>() * shape[0] * stride[0];
+	mem_buffer = std::make_shared<MemoryBuffer<device>>(capacity);
+
+	// calculating default stride
+	this->shape = shape;
+	this->stride = stride;
 }
 
 template<typename dtype, Device device>
@@ -375,5 +396,19 @@ static Tensor<dtype, device> crt_pattern_tensor(const std::vector<int>& shape)
 
 	return tensor;
 }
+
+/**
+  Comparators for tensors.
+*/
+template<typename dtype, Device device>
+bool elementwise_compatible(const Tensor<dtype, device>& lhs, const Tensor<dtype, device>& rhs)
+{
+	bool cp = true;
+	cp = cp && (lhs.dim == rhs.dim);
+	cp = cp && equal(lhs.dim, lhs.shape, rhs.shape);
+	cp = cp && equal(lhs.dim, lhs.stride, rhs.stride);
+	return cp;
+}
+
 
 #endif  // __TENSOR__

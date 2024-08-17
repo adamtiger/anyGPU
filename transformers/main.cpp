@@ -1,42 +1,30 @@
-#include "add_vec.hpp"
 #include <vector>
 #include <random>
 #include <iostream>
 
 #include "tensor.hpp"
 
+#include "binary_ops.hpp"
 
 int main()
 {
 	// experiment
-	int length = 1000;
-	std::vector<float> ha(length);
-	std::vector<float> hb(length);
-	std::vector<float> hc(length);
+	auto ta = crt_random_tensor<int32, CPU>({ 3, 4 }, 11);
+	auto tb = crt_random_tensor<int32, CPU>({ 3, 4 }, 18);
 
-	std::default_random_engine engine;
-	std::uniform_real_distribution<float> uni_distr(1.f, 10.f);
+	auto tc = tensor_add(ta, tb);
 
-	for (int ix = 0; ix < length; ++ix)
-	{
-		ha[ix] = uni_distr(engine);
-		hb[ix] = uni_distr(engine);
-	}
+	std::cout << represent_tensor(ta) << std::endl;
+	std::cout << represent_tensor(tb) << std::endl;
+	std::cout << represent_tensor(tc) << std::endl;
 
-	//add_vectors(length, ha, hb, hc);
 
-	// print
-	for (int ix = 0; ix < 10; ++ix)
-	{
-		std::cout << ha[ix] << " " << hb[ix] << " " << hc[ix] << "\n";
-	}
-
-	auto tensor = crt_random_tensor<float16, CPU>({ 3, 4 });
+	/*auto tensor = crt_random_tensor<float16, CPU>({ 3, 4 });
 	auto cuda_tensor = tensor.copy_to_cuda();
 
 	auto cpu_tensor = cuda_tensor.copy_to_host();
 
-	std::cout << represent_tensor(cpu_tensor, 5);
+	std::cout << represent_tensor(cpu_tensor, 5);*/
 
 	return 0;
 }

@@ -2,6 +2,7 @@
 #define __DATA_TYPES__
 
 #include <type_traits>
+#include <concepts>
 #include <vector>
 #include <array>
 #include <iostream>
@@ -16,6 +17,8 @@ const int MAX_TENSOR_DIM = 8;
 using DimArray = std::array<int, MAX_TENSOR_DIM>;
 using Shape = DimArray;
 using Stride = DimArray;
+
+bool equal(const int dim, const DimArray& lhs, const DimArray& rhs);
 
 enum Device
 {
@@ -48,6 +51,28 @@ using int32 = signed int;
 using bfloat16 = nv_bfloat16;
 using float16 = half;
 using float32 = float;
+
+/*
+  Concepts to group the data types.
+*/
+
+template<typename T>
+concept ArithmeticType = (std::floating_point<T> || std::integral<T>);
+
+template<typename T>
+concept FloatingPointType = std::floating_point<T>;
+
+template<typename T>
+concept IntegerType = std::integral<T>;
+
+template<typename T>
+concept HalfFloatType = (std::floating_point<T> && sizeof(T) == 2);
+
+template<typename T>
+concept PreciseFloatType = (std::floating_point<T> && sizeof(T) > 2);
+
+template<typename T>
+concept NotHalfFloatType = (std::integral<T> || (std::floating_point<T> && sizeof(T) > 2));
 
 /*
   Returns the bitsize of the data type

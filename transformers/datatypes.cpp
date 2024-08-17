@@ -2,6 +2,16 @@
 #include <sstream>
 #include <cassert>
 
+bool equal(const int dim, const DimArray& lhs, const DimArray& rhs)
+{
+	bool eq = true;
+	for (int idx = 0; idx < dim; ++idx)
+	{
+		eq = eq && (lhs[idx] == rhs[idx]);
+	}
+	return eq;
+}
+
 std::string represent_datatype(const DataType dtype)
 {
 	static std::string names[] =
