@@ -44,7 +44,7 @@ std::ostream& operator<<(std::ostream& os, const Device device)
 	return os;
 }
 
-std::string represent_array(const int dim, const std::array<int, MAX_TENSOR_DIM>& arr)
+std::string represent_array(const int dim, const DimArray& arr)
 {
 	std::stringstream ss;
 

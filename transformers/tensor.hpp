@@ -135,11 +135,22 @@ struct Tensor
 		return mem_buffer->buffer;
 	}
 
+	// number of elements in tensor
+	//  no padding is included
+	//  like the tensor stride is default
 	int numel() const
+	{
+		return calc_default_size(dim, shape);
+	}
+
+	// number of elements in tensor
+	//  includes the padding too (due to stride)
+	int size() const
 	{
 		return shape[0] * stride[0];
 	}
 
+	// total size of the underlying memory (bytes)
 	int capacity() const
 	{
 		return mem_buffer->capacity;
@@ -301,7 +312,7 @@ static std::string represent_tensor(const Tensor<dtype, CPU>& tensor, const int 
 	ss << "  buffer content: \n";
 	ss << "      [";
 
-	int num_tensor_elements = tensor.numel();
+	int num_tensor_elements = tensor.size();
 	int num_data_to_print = std::min(head, num_tensor_elements);
 
 	dtype* data = tensor.buffer();

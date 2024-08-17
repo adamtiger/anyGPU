@@ -13,8 +13,9 @@
 
 const int MAX_TENSOR_DIM = 8;
 
-using Shape = std::array<int, MAX_TENSOR_DIM>;
-using Stride = std::array<int, MAX_TENSOR_DIM>;
+using DimArray = std::array<int, MAX_TENSOR_DIM>;
+using Shape = DimArray;
+using Stride = DimArray;
 
 enum Device
 {
@@ -128,7 +129,7 @@ std::ostream& operator<<(std::ostream& os, const Device device);
   It will be in the form of [d1, d2, d3] for 3 dimension.
   No new line character at the end.
 */
-std::string represent_array(const int dim, const std::array<int, MAX_TENSOR_DIM>& arr);
+std::string represent_array(const int dim, const DimArray& arr);
 
 /*
   Converting the int vector into any target data type.

@@ -19,6 +19,16 @@ int calc_default_size(const std::vector<int>& shape)
 	return tensor_size;
 }
 
+int calc_default_size(const int dim, const DimArray& shape)
+{
+	int tensor_size = 1;
+	for (int dix = 0; dix < dim; ++dix)
+	{
+		tensor_size *= shape[dix];
+	}
+	return tensor_size;
+}
+
 std::vector<int> calc_default_stride(const std::vector<int>& shape)
 {
 	int dim = calc_dim(shape);
@@ -31,9 +41,9 @@ std::vector<int> calc_default_stride(const std::vector<int>& shape)
 	return stride;
 }
 
-std::array<int, MAX_TENSOR_DIM> cvt_vector2array(const std::vector<int>& v)
+DimArray cvt_vector2array(const std::vector<int>& v)
 {
-	std::array<int, MAX_TENSOR_DIM> arr = {};
+	DimArray arr = {};
 	int dim = calc_dim(v);
 	for (int dix = 0; dix < dim; ++dix)
 	{
