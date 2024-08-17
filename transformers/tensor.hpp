@@ -5,8 +5,7 @@
 #include <memory>
 #include <random>
 
-#include "datatypes.hpp"
-#include "utils.hpp"
+#include "core.hpp"
 
 /*
 *  Contains a flat memory for storing the tensor data.
@@ -228,11 +227,12 @@ template<typename dtype, Device device>
 Tensor<dtype, device>::Tensor(const int dim, const Shape& shape, const Stride& stride)
 {
 	id = GlobalUUIDGenerator::generate_id();
+	this->dim = dim;
 
 	alignment = 1;
 	offset = 0;
 
-	int capacity = get_bitsize<dtype>() * shape[0] * stride[0];
+	int capacity = sizeof(dtype) * shape[0] * stride[0];
 	mem_buffer = std::make_shared<MemoryBuffer<device>>(capacity);
 
 	// calculating default stride
@@ -400,6 +400,13 @@ static Tensor<dtype, device> crt_pattern_tensor(const std::vector<int>& shape)
 /**
   Comparators for tensors.
 */
+
+/**
+  Decides if two tensors have the same ordering of elements 
+  in memory buffer.
+  This is important for elementwise operations because
+  the element offsets will be the same in both tensors.
+*/
 template<typename dtype, Device device>
 bool elementwise_compatible(const Tensor<dtype, device>& lhs, const Tensor<dtype, device>& rhs)
 {
@@ -410,5 +417,24 @@ bool elementwise_compatible(const Tensor<dtype, device>& lhs, const Tensor<dtype
 	return cp;
 }
 
+/**
+  Automatically calculates the grid and block sizes for
+  elementwise (pointwise) operations.
+*/
+template<typename dtype, Device device>
+KernelParameters calc_kernel_prms_pointwise(const Tensor<dtype, device>& tensor)
+{
+	int num_operations = tensor.size();
+	unsigned int threads_per_block = 32 * 8;
+
+	unsigned int num_grids = num_operations / threads_per_block;
+	num_grids += ((num_operations % threads_per_block > 0) ? 1 : 0);
+
+	KernelParameters kpms = {};
+	kpms.block_size = { threads_per_block, 1, 1 };
+	kpms.grid_size = { num_grids, 1, 1 };
+
+	return kpms;
+}
 
 #endif  // __TENSOR__

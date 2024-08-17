@@ -1,5 +1,5 @@
-#ifndef __DATA_TYPES__
-#define __DATA_TYPES__
+#ifndef __CORE__
+#define __CORE__
 
 #include <type_traits>
 #include <concepts>
@@ -7,10 +7,15 @@
 #include <array>
 #include <iostream>
 #include <string>
+#include <sstream>
+#include <cassert>
 
 #include <cuda_runtime.h>
 #include <cuda_fp16.h>
 #include <cuda_bf16.h>
+
+
+/* Shape related */
 
 const int MAX_TENSOR_DIM = 8;
 
@@ -19,6 +24,9 @@ using Shape = DimArray;
 using Stride = DimArray;
 
 bool equal(const int dim, const DimArray& lhs, const DimArray& rhs);
+
+
+/* Enums */
 
 enum Device
 {
@@ -35,6 +43,9 @@ enum DataType
 	FLOAT16,
 	FLOAT32
 };
+
+
+/* Data type related */
 
 static int bitsize_of_datatypes[] = {
 	4, 8, 16, 32, 16, 16, 32
@@ -111,11 +122,8 @@ template<typename T> static DataType get_datatype_enum()
 	}
 	else if constexpr (std::is_same_v<T, int8>)
 	{
+		static_assert(std::is_same_v<T, int8>);
 		return DataType::INT8;
-	}
-	else
-	{
-		return DataType::UNK;
 	}
 }
 
@@ -222,4 +230,61 @@ static float32 cvt_any_to_float32<bfloat16>(const bfloat16 value)
 }
 
 
-#endif  // __DATA_TYPES__
+/* Cuda related */
+
+// The size of the grid and block.
+struct KernelParameters
+{
+	dim3 grid_size;
+	dim3 block_size;
+};
+
+
+/* Miscallenous */
+
+/*
+  Generates global universal unique ids.
+*/
+class GlobalUUIDGenerator
+{
+public:
+	static int generate_id();
+
+private:
+	static int next_id;
+};
+
+
+// helper functions for tensor size calculations
+
+/*
+  If the alignment is the default for the given data type,
+  this function returns the number of elements in the tensor.
+  Default alignment means the byte size of 1 tensor element.
+*/
+int calc_default_size(const std::vector<int>& shape);
+
+/*
+  If the alignment is the default for the given data type,
+  this function returns the number of elements in the tensor.
+  Default alignment means the byte size of 1 tensor element.
+*/
+int calc_default_size(const int dim, const DimArray& shape);
+
+/*
+  Calculates the default stride from the given shape.
+*/
+std::vector<int> calc_default_stride(const std::vector<int>& shape);
+
+/*
+  Transforms int vector to array.
+  Vector can be shape or stride.
+*/
+DimArray cvt_vector2array(const std::vector<int>& v);
+
+/*
+  Dimension from vector.
+*/
+int calc_dim(const std::vector<int>& v);
+
+#endif  // __CORE__

@@ -9,14 +9,14 @@
 int main()
 {
 	// experiment
-	auto ta = crt_random_tensor<int32, CPU>({ 3, 4 }, 11);
-	auto tb = crt_random_tensor<int32, CPU>({ 3, 4 }, 18);
+	auto ta = crt_random_tensor<int32, CUDA>({ 5, 300 }, 11);
+	auto tb = crt_random_tensor<int32, CUDA>({ 5, 300 }, 18);
 
 	auto tc = tensor_add(ta, tb);
 
-	std::cout << represent_tensor(ta) << std::endl;
-	std::cout << represent_tensor(tb) << std::endl;
-	std::cout << represent_tensor(tc) << std::endl;
+	std::cout << represent_tensor(ta.copy_to_host()) << std::endl;
+	std::cout << represent_tensor(tb.copy_to_host()) << std::endl;
+	std::cout << represent_tensor(tc.copy_to_host()) << std::endl;
 
 
 	/*auto tensor = crt_random_tensor<float16, CPU>({ 3, 4 });
