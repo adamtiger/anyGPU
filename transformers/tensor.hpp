@@ -416,6 +416,19 @@ bool elementwise_compatible(const Tensor<dtype, device>& lhs, const Tensor<dtype
 }
 
 /**
+  Decides if two tensors can be matrix multiplied by each other.
+*/
+template<typename dtype, Device device>
+bool matmul_compatible(const Tensor<dtype, device>& lhs, const Tensor<dtype, device>& rhs)
+{
+	bool cp = true;
+	cp = cp && (lhs.dim == 2);
+	cp = cp && (rhs.dim == 2);
+	cp = cp && (lhs.shape[1] == rhs.shape[0]);
+	return cp;
+}
+
+/**
   Automatically calculates the grid and block sizes for
   elementwise (pointwise) operations.
 */

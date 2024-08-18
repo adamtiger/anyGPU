@@ -2,10 +2,11 @@
 
 int main()
 {
-	std::cout << print_cuda_device_props();
+	//std::cout << print_cuda_device_props();
 
 	//test_binary_add_f32();
 	//test_binary_add_i32();
+	test_mm_f32();
 
 	// experiment
 	/*auto ta = crt_random_tensor<int32, CUDA>({ 5, 300 }, 11);
