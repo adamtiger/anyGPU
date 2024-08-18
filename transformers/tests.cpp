@@ -73,16 +73,12 @@ void test_mm_f32()
 	// cuda based calculation
 	auto dta = crt_random_tensor<float32, CUDA>({ 4, 3 }, 11);
 	auto dtb = crt_random_tensor<float32, CUDA>({ 3, 5 }, 18);
-	auto dtc = tensor_add(dta, dtb);
+	auto dtc = tensor_mm(dta, dtb);
 
 	// cpu based calculation (expected result)
 	auto hta = dta.copy_to_host();
 	auto htb = dtb.copy_to_host();
 	auto htc = tensor_mm(hta, htb);
-
-	std::cout << represent_tensor(hta, 10) << std::endl;
-	std::cout << represent_tensor(htb, 10) << std::endl;
-	std::cout << represent_tensor(htc, 10) << std::endl;
 
 	// compare
 	auto htc_from_cuda = dtc.copy_to_host();

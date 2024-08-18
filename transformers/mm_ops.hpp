@@ -49,23 +49,20 @@ Tensor<dtype, CUDA> tensor_mm(const Tensor<dtype, CUDA>& lhs, const Tensor<dtype
 {
 	assert(matmul_compatible(lhs, rhs));
 
-	/*int length = lhs.size();
-	auto kpms = calc_kernel_prms_pointwise(lhs);*/
-
 	int m = lhs.shape[0];
 	int n = rhs.shape[1];
 	std::vector<int> res_shape({ m, n });
-	Tensor<dtype, CPU> res(res_shape);
+	Tensor<dtype, CUDA> res(res_shape);
 
-	/*if constexpr (std::is_same_v<dtype, float32>)
+	if constexpr (std::is_same_v<dtype, float32>)
 	{
-		tensor_add_f32(kpms, lhs, rhs, res);
+		tensor_mm_f32(lhs, rhs, res);
 	}
 	else
 	{
 		static_assert(std::is_same_v<dtype, int32>, "Unsupported data type");
-		tensor_add_i32(kpms, lhs, rhs, res);
-	}*/
+		//tensor_add_i32(kpms, lhs, rhs, res);
+	}
 
 	return res;
 }
