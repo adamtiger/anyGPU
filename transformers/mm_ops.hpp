@@ -29,14 +29,17 @@ Tensor<dtype, CPU> tensor_mm(const Tensor<dtype, CPU>& lhs, const Tensor<dtype, 
 	{
 		for (int c = 0; c < n; ++c)
 		{
+			float32 acc = 0.f;
 			int offs_out = r * res.stride[0] + c * res.stride[1];
 			for (int l = 0; l < k; ++l)
 			{
 				int offs_lhs = r * lhs.stride[0] + l * lhs.stride[1];
 				int offs_rhs = l * rhs.stride[0] + c * rhs.stride[1];
 				
-				res_data[offs_out] += lhs_data[offs_lhs] * rhs_data[offs_rhs];
+				acc += lhs_data[offs_lhs] * rhs_data[offs_rhs];
 			}
+
+			res_data[offs_out] = acc;
 		}
 	}
 
