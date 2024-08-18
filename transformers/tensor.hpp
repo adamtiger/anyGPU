@@ -1,10 +1,8 @@
 #ifndef __TENSOR__
 #define __TENSOR__
 
-#include <sstream>
 #include <memory>
 #include <random>
-
 #include "core.hpp"
 
 /*

@@ -1,6 +1,11 @@
 #ifndef __CORE_CONCEPTS__
 #define __CORE_CONCEPTS__
 
+/*
+   NVCC can not compile everything, e.g. concepts.
+   Therefore this file is separated.
+*/
+
 #include "core.hpp"
 #include <type_traits>
 #include <concepts>

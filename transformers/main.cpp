@@ -1,29 +1,18 @@
-#include <vector>
-#include <random>
-#include <iostream>
-
-#include "tensor.hpp"
-
-#include "binary_ops.hpp"
+#include "tests.hpp"
 
 int main()
 {
+	test_binary_add_f32();
+
 	// experiment
-	auto ta = crt_random_tensor<int32, CUDA>({ 5, 300 }, 11);
+	/*auto ta = crt_random_tensor<int32, CUDA>({ 5, 300 }, 11);
 	auto tb = crt_random_tensor<int32, CUDA>({ 5, 300 }, 18);
 
 	auto tc = tensor_add(ta, tb);
 
 	std::cout << represent_tensor(ta.copy_to_host()) << std::endl;
 	std::cout << represent_tensor(tb.copy_to_host()) << std::endl;
-	std::cout << represent_tensor(tc.copy_to_host()) << std::endl;
-
-	/*auto tensor = crt_random_tensor<float16, CPU>({ 3, 4 });
-	auto cuda_tensor = tensor.copy_to_cuda();
-
-	auto cpu_tensor = cuda_tensor.copy_to_host();
-
-	std::cout << represent_tensor(cpu_tensor, 5);*/
+	std::cout << represent_tensor(tc.copy_to_host()) << std::endl;*/
 
 	return 0;
 }
