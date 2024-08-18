@@ -215,6 +215,10 @@ struct KernelParameters
 	dim3 block_size;
 };
 
+/*
+  Prints the device properties of the cuda device.
+*/
+std::string print_cuda_device_props();
 
 /* Miscallenous */
 

@@ -68,6 +68,46 @@ std::string represent_array(const int dim, const DimArray& arr)
 }
 
 
+std::string print_cuda_device_props()
+{
+	std::stringstream ss;
+	ss << "--- CUDA device info --- \n";
+
+	int num_devices = 0;
+	cudaGetDeviceCount(&num_devices);
+
+	cudaDeviceProp device_props;
+	cudaGetDeviceProperties(&device_props, 0);
+
+	ss << "  Device selection \n";
+	ss << "    Num devices:                 " << num_devices << "\n";
+	ss << "    Device id:                   " << 0 << "\n";  // for now, assume only one device
+	ss << "    Device name:                 " << device_props.name << "\n";
+	ss << "    integrated:                  " << device_props.integrated << "\n";
+	ss << "\n";
+
+	ss << "  Memory info \n";
+	ss << "    sharedMemPerMultiprocessor:  " << device_props.sharedMemPerMultiprocessor << "\n";
+	ss << "    sharedMemPerBlock:           " << device_props.sharedMemPerBlock << "\n";
+	ss << "    memoryBusWidth:              " << device_props.memoryBusWidth << "\n";
+	ss << "    totalGlobalMem:              " << device_props.totalGlobalMem << "\n";
+	ss << "\n";
+
+	ss << "  Kernel launch info \n";
+	ss << "    maxGridSize.x:               " << device_props.maxGridSize[0] << "\n";
+	ss << "    maxGridSize.y:               " << device_props.maxGridSize[1] << "\n";
+	ss << "    maxGridSize.z:               " << device_props.maxGridSize[2] << "\n";
+	ss << "    maxBlocksPerMultiProcessor:  " << device_props.maxBlocksPerMultiProcessor << "\n";
+	ss << "    maxThreadsPerBlock:          " << device_props.maxThreadsPerBlock << "\n";
+	ss << "    regsPerMultiprocessor:       " << device_props.regsPerMultiprocessor << "\n";
+	ss << "    regsPerBlock:                " << device_props.regsPerBlock << "\n";
+	ss << "    concurrentKernels:           " << device_props.concurrentKernels << "\n";
+	ss << "    asyncEngineCount:            " << device_props.asyncEngineCount << "\n";
+
+	return ss.str();
+}
+
+
 int GlobalUUIDGenerator::next_id = 0;
 
 int GlobalUUIDGenerator::generate_id()
