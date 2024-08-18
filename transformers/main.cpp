@@ -18,7 +18,6 @@ int main()
 	std::cout << represent_tensor(tb.copy_to_host()) << std::endl;
 	std::cout << represent_tensor(tc.copy_to_host()) << std::endl;
 
-
 	/*auto tensor = crt_random_tensor<float16, CPU>({ 3, 4 });
 	auto cuda_tensor = tensor.copy_to_cuda();
 

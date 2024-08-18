@@ -4,7 +4,8 @@
 #include "binary_ops.cuh"
 
 #include "tensor.hpp"
-#include <cassert>
+#include "core_concepts.hpp"
+
 
 template<NotHalfFloatType dtype>
 Tensor<dtype, CPU> tensor_add(const Tensor<dtype, CPU>& lhs, const Tensor<dtype, CPU>& rhs)
@@ -33,21 +34,17 @@ Tensor<dtype, CUDA> tensor_add(const Tensor<dtype, CUDA>& lhs, const Tensor<dtyp
 	assert((elementwise_compatible(lhs, rhs)==true));
 
 	int length = lhs.size();
-	dtype* lhs_data = lhs.buffer();
-	dtype* rhs_data = rhs.buffer();
+	auto kpms = calc_kernel_prms_pointwise(lhs);
 
 	Tensor<dtype, CUDA> res(lhs.dim, lhs.shape, lhs.stride);
-	dtype* res_data = res.buffer();
-
-	auto kpms = calc_kernel_prms_pointwise(lhs);
 
 	if constexpr (std::is_same_v<dtype, float32>)
 	{
-		tensor_add_f32(kpms.grid_size, kpms.block_size, length, lhs_data, rhs_data, res_data);
+		tensor_add_f32(kpms, lhs, rhs, res);
 	}
 	else if constexpr (std::is_same_v<dtype, int32>)
 	{
-		tensor_add_i32(kpms.grid_size, kpms.block_size, length, lhs_data, rhs_data, res_data);
+		tensor_add_i32(kpms, lhs, rhs, res);
 	}
 	else
 	{

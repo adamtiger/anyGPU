@@ -1,10 +1,20 @@
 #ifndef __BINARY_OPS_CUH__
 #define __BINARY_OPS_CUH__
 
-#include "cuda_runtime.h"
+#include "tensor.hpp"
 
-void tensor_add_f32(const dim3 gs, const dim3 bs, const int length, const float* dlhs, const float* drhs, float* dout);
-void tensor_add_i32(const dim3 gs, const dim3 bs, const int length, const int* dlhs, const int* drhs, int* dout);
+void tensor_add_f32(
+	const KernelParameters& kpms, 
+	const Tensor<float32, CUDA>& lhs, 
+	const Tensor<float32, CUDA>& rhs, 
+	const Tensor<float32, CUDA>& out);
+
+
+void tensor_add_i32(
+	const KernelParameters& kpms,
+	const Tensor<int32, CUDA>& lhs,
+	const Tensor<int32, CUDA>& rhs,
+	const Tensor<int32, CUDA>& out);
 
 
 #endif  // __BINARY_OPS_CUH__

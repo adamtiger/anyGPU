@@ -1,8 +1,6 @@
 #ifndef __CORE__
 #define __CORE__
 
-#include <type_traits>
-#include <concepts>
 #include <vector>
 #include <array>
 #include <iostream>
@@ -64,28 +62,6 @@ using float16 = half;
 using float32 = float;
 
 /*
-  Concepts to group the data types.
-*/
-
-template<typename T>
-concept ArithmeticType = (std::floating_point<T> || std::integral<T>);
-
-template<typename T>
-concept FloatingPointType = std::floating_point<T>;
-
-template<typename T>
-concept IntegerType = std::integral<T>;
-
-template<typename T>
-concept HalfFloatType = (std::floating_point<T> && sizeof(T) == 2);
-
-template<typename T>
-concept PreciseFloatType = (std::floating_point<T> && sizeof(T) > 2);
-
-template<typename T>
-concept NotHalfFloatType = (std::integral<T> || (std::floating_point<T> && sizeof(T) > 2));
-
-/*
   Returns the bitsize of the data type
 */
 template<typename T> static int get_bitsize()
@@ -120,9 +96,9 @@ template<typename T> static DataType get_datatype_enum()
 	{
 		return DataType::INT16;
 	}
-	else if constexpr (std::is_same_v<T, int8>)
+	else
 	{
-		static_assert(std::is_same_v<T, int8>);
+		static_assert(std::is_same_v<T, int8>, "unknown data type");
 		return DataType::INT8;
 	}
 }
