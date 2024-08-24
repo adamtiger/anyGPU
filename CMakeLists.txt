@@ -60,6 +60,7 @@ set(OPS_DIR ${ANYGPU_ROOT}/ops)
 set (OPS_SRCS
     ${OPS_DIR}/binary_ops.cu
 	${OPS_DIR}/mm_ops.cu
+	${OPS_DIR}/transp_ops.cu
 )
 
 set (OPS_HEADERS
@@ -67,6 +68,8 @@ set (OPS_HEADERS
     ${OPS_DIR}/binary_ops.hpp
     ${OPS_DIR}/mm_ops.cuh
     ${OPS_DIR}/mm_ops.hpp
+	${OPS_DIR}/transp_ops.cuh
+	${OPS_DIR}/transp_ops.hpp
 )
 
 source_group("ops" FILES ${OPS_HEADERS} ${OPS_SRCS})

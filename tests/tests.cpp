@@ -2,6 +2,7 @@
 
 #include "binary_ops.hpp"
 #include "mm_ops.hpp"
+#include "transp_ops.hpp"
 
 void test_binary_add_f32()
 {
@@ -162,4 +163,35 @@ void test_mm_f32()
 	}
 
 	std::cout << "TestCase [test_mm_f32]: " << (eq ? "PASSED" : "FAILED") << "\n";
+}
+
+
+void test_transp_f32()
+{
+	// cuda based calculation
+	auto dta = crt_random_tensor<float32, CUDA>({ 40, 30 }, 11);
+	auto dtc = tensor_transp(dta);
+
+	// cpu based calculation (expected result)
+	auto hta = dta.copy_to_host();
+	auto htc = tensor_transp(hta);
+
+	// compare
+	auto htc_from_cuda = dtc.copy_to_host();
+
+	bool eq = elementwise_compatible(htc, htc_from_cuda);  // checks the sizes
+	if (eq)
+	{
+		float32* expected = htc.buffer();
+		float32* actual = htc_from_cuda.buffer();
+
+		int length = htc.size();
+
+		for (int ix = 0; ix < length; ++ix)
+		{
+			eq = eq && std::abs(expected[ix] - actual[ix]) < 0.001f;
+		}
+	}
+
+	std::cout << "TestCase [test_transp_f32]: " << (eq ? "PASSED" : "FAILED") << "\n";
 }
