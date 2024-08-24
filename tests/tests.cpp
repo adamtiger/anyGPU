@@ -128,7 +128,7 @@ void test_binary_mul_i32()
 		}
 	}
 
-	std::cout << "TestCase [test_binary_add_i32]: " << (eq ? "PASSED" : "FAILED") << "\n";
+	std::cout << "TestCase [test_binary_mul_i32]: " << (eq ? "PASSED" : "FAILED") << "\n";
 }
 
 
