@@ -18,4 +18,7 @@ void test_transp_f32();
 
 void test_softmax_f32();
 
+
+void test_sdp_fwd_f32();
+
 #endif  // __TESTS__

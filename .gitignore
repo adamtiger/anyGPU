@@ -8,3 +8,9 @@ build/**
 *.ptx
 *.cubin
 *.fatbin
+
+# Python related
+**/__pycache__/*
+
+# Others
+artifacts/**

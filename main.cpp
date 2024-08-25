@@ -19,14 +19,16 @@ int main()
 
 	test_softmax_f32();*/
 
+	test_sdp_fwd_f32();
+
 	// experiment
-	auto qw = crt_random_tensor<float32, CPU>({ 16, 64 }, 11);
-	auto kw = crt_random_tensor<float32, CPU>({ 16, 64 }, 15);
-	auto vw = crt_random_tensor<float32, CPU>({ 16, 64 }, 18);
+	/*auto qw = crt_random_tensor<float32, CUDA>({ 16, 64 }, 11);
+	auto kw = crt_random_tensor<float32, CUDA>({ 16, 64 }, 15);
+	auto vw = crt_random_tensor<float32, CUDA>({ 16, 64 }, 18);
 
-	auto y = single_head_attention_fwd<float32, CPU, NONE, FULL>(qw, kw, vw);
+	auto y = single_head_attention_fwd<float32, CUDA, NONE, FULL>(qw, kw, vw);
 
-	std::cout << represent_tensor(y, 15) << std::endl;
+	std::cout << represent_tensor(y.copy_to_host(), 15) << std::endl;*/
 
 	return 0;
 }

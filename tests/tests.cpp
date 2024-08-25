@@ -1,9 +1,8 @@
 #include "tests.hpp"
 
-#include "binary_ops.hpp"
-#include "mm_ops.hpp"
-#include "transp_ops.hpp"
-#include "softmax_ops.hpp"
+#include "ops.hpp"
+#include "attention.hpp"
+
 
 void test_binary_add_f32()
 {
@@ -231,4 +230,44 @@ void test_softmax_f32()
 	}
 
 	std::cout << "TestCase [test_softmax_f32]: " << (eq ? "PASSED" : "FAILED") << "\n";
+}
+
+
+void test_sdp_fwd_f32()
+{
+	// cuda based calculation
+	auto dqw = crt_random_tensor<float32, CUDA>({ 14, 64 }, 11);
+	auto dkw = crt_random_tensor<float32, CUDA>({ 14, 64 }, 18);
+	auto dvw = crt_random_tensor<float32, CUDA>({ 14, 64 }, 15);
+	auto dy = single_head_attention_fwd<float32, CUDA, NONE, FULL>(dqw, dkw, dvw);
+
+	// cpu based calculation (expected result)
+	auto hqw = dqw.copy_to_host();
+	auto hkw = dkw.copy_to_host();
+	auto hvw = dvw.copy_to_host();
+	auto hy = single_head_attention_fwd<float32, CPU, NONE, FULL>(hqw, hkw, hvw);
+
+	// compare
+	auto hy_from_cuda = dy.copy_to_host();
+
+	bool eq = elementwise_compatible(hy, hy_from_cuda);  // checks the sizes
+	if (eq)
+	{
+		float32* expected = hy.buffer();
+		float32* actual = hy_from_cuda.buffer();
+
+		int length = hy.size();
+
+		for (int ix = 0; ix < length; ++ix)
+		{
+			eq = eq && std::abs(expected[ix] - actual[ix]) < 0.001f;
+
+			if (!eq)
+			{
+				std::cout << expected[ix] << " " << actual[ix] << "\n";
+			}
+		}
+	}
+
+	std::cout << "TestCase [test_sdp_fwd_f32]: " << (eq ? "PASSED" : "FAILED") << "\n";
 }
