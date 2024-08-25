@@ -436,6 +436,48 @@ static Tensor<dtype, device> crt_pattern_tensor(const std::vector<int>& shape)
 	return tensor;
 }
 
+
+/**
+  Tensor reader from .dat files.
+*/
+static Tensor<float32, CPU> load_tensor(const std::string& file_path)
+{
+	std::ifstream tensor_file(file_path, std::ios::binary);
+
+	// read the dimension
+	int dim;
+	tensor_file.read(reinterpret_cast<char*>(&dim), sizeof(int32));
+
+	// read the shape
+	std::vector<int> shape(dim);
+	for (int ix = 0; ix < dim; ++ix)
+	{
+		int axis_size;
+		tensor_file.read(reinterpret_cast<char*>(&axis_size), sizeof(int32));
+		shape[ix] = axis_size;
+	}
+
+	// read the dtype (it has to be float32)
+	int dtype;
+	tensor_file.read(reinterpret_cast<char*>(&dtype), sizeof(int32));
+	assert(dtype == 5);
+	
+	// read the data
+	int num_elements = calc_default_size(shape);
+	std::vector<float32> tensor_data(num_elements);
+	tensor_file.read(reinterpret_cast<char*>(tensor_data.data()), sizeof(float32) * num_elements);
+
+	if (tensor_file)
+	{
+		std::cout << "Tensor data was read successfully." << std::endl;
+	}
+
+
+	Tensor<float32, CPU> tensor(shape, tensor_data);
+	return tensor;
+}
+
+
 /**
   Comparators for tensors.
 */
@@ -447,7 +489,7 @@ static Tensor<dtype, device> crt_pattern_tensor(const std::vector<int>& shape)
   the element offsets will be the same in both tensors.
 */
 template<typename dtype, Device device>
-bool elementwise_compatible(const Tensor<dtype, device>& lhs, const Tensor<dtype, device>& rhs)
+static bool elementwise_compatible(const Tensor<dtype, device>& lhs, const Tensor<dtype, device>& rhs)
 {
 	bool cp = true;
 	cp = cp && (lhs.dim == rhs.dim);
@@ -460,7 +502,7 @@ bool elementwise_compatible(const Tensor<dtype, device>& lhs, const Tensor<dtype
   Decides if two tensors can be matrix multiplied by each other.
 */
 template<typename dtype, Device device>
-bool matmul_compatible(const Tensor<dtype, device>& lhs, const Tensor<dtype, device>& rhs)
+static bool matmul_compatible(const Tensor<dtype, device>& lhs, const Tensor<dtype, device>& rhs)
 {
 	bool cp = true;
 	cp = cp && (lhs.dim == 2);
@@ -474,7 +516,7 @@ bool matmul_compatible(const Tensor<dtype, device>& lhs, const Tensor<dtype, dev
   elementwise (pointwise) operations.
 */
 template<typename dtype, Device device>
-KernelParameters calc_kernel_prms_pointwise(const Tensor<dtype, device>& tensor)
+static KernelParameters calc_kernel_prms_pointwise(const Tensor<dtype, device>& tensor)
 {
 	int num_operations = tensor.size();
 	unsigned int threads_per_block = 32 * 8;
