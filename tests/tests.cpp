@@ -1,5 +1,6 @@
 #include "tests.hpp"
 
+#include "tensor.hpp"
 #include "ops.hpp"
 #include "attention.hpp"
 

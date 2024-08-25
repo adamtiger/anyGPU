@@ -442,7 +442,7 @@ static Tensor<dtype, device> crt_pattern_tensor(const std::vector<int>& shape)
 */
 static Tensor<float32, CPU> load_tensor(const std::string& file_path)
 {
-	std::ifstream tensor_file(file_path, std::ios::binary);
+	std::ifstream tensor_file(file_path, std::ios::binary);  // TODO: check file open success
 
 	// read the dimension
 	int dim;
@@ -469,9 +469,9 @@ static Tensor<float32, CPU> load_tensor(const std::string& file_path)
 
 	if (tensor_file)
 	{
-		std::cout << "Tensor data was read successfully." << std::endl;
+		// TODO: add logger, and provide customizable feedback
+		//std::cout << "Tensor data was read successfully." << std::endl;
 	}
-
 
 	Tensor<float32, CPU> tensor(shape, tensor_data);
 	return tensor;

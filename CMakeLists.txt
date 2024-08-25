@@ -45,10 +45,12 @@ set(TEST_DIR ${ANYGPU_ROOT}/tests)
 
 set (TEST_SRCS
     ${TEST_DIR}/tests.cpp
+    ${TEST_DIR}/ext_torch_tests.cpp
 )
 
 set (TEST_HEADERS
     ${TEST_DIR}/tests.hpp
+    ${TEST_DIR}/ext_torch_tests.hpp
 )
 
 source_group("tests" FILES ${TEST_HEADERS} ${TEST_SRCS})
