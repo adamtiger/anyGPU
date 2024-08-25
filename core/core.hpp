@@ -39,19 +39,20 @@ enum DataType
 	INT32,
 	BFLOAT16,
 	FLOAT16,
-	FLOAT32
+	FLOAT32,
+	FLOAT64
 };
 
 
 /* Data type related */
 
 static int bitsize_of_datatypes[] = {
-	4, 8, 16, 32, 16, 16, 32
+	4, 8, 16, 32, 16, 16, 32, 64
 };
 
 // int4 is 0.5 bytes long, from alignment perspective it is handled like 1
 static int bytesize_of_datatypes[] = {
-	1, 1, 2, 4, 2, 2, 4
+	1, 1, 2, 4, 2, 2, 4, 8
 };
 
 using int8 = char;
@@ -60,6 +61,7 @@ using int32 = signed int;
 using bfloat16 = nv_bfloat16;
 using float16 = half;
 using float32 = float;
+using float64 = double;
 
 /*
   Returns the bitsize of the data type
@@ -79,6 +81,10 @@ template<typename T> static DataType get_datatype_enum()
 	if constexpr (std::is_same_v<T, float32>)
 	{
 		return DataType::FLOAT32;
+	}
+	else if constexpr (std::is_same_v<T, float64>)
+	{
+		return DataType::FLOAT64;
 	}
 	else if constexpr (std::is_same_v<T, float16>)
 	{
@@ -255,6 +261,11 @@ int calc_default_size(const int dim, const DimArray& shape);
   Calculates the default stride from the given shape.
 */
 std::vector<int> calc_default_stride(const std::vector<int>& shape);
+
+/*
+  Calculates the default stride from the given shape.
+*/
+DimArray calc_default_stride(const int dim, const DimArray& shape);
 
 /*
   Transforms int vector to array.

@@ -3,6 +3,9 @@
 
 #include <optional>
 #include "tensor.hpp"
+#include "core_concepts.hpp"
+
+#include "sdp.hpp"
 
 /*
 *  This is the api header for the attention
@@ -49,21 +52,103 @@ enum ScoreFuncKind
 *  Top-level attention implementations.
 */
 
+
+/*
+*  Forward single head attention implementations.
+*  The different type of transformers can be
+*  specified with the template parameters.
+*/
 template<
-	DataType dtype, 
-	TransformerKind trf_kind,
+	FloatingPointType dtype, 
+	Device device,
 	MaskKind mask_kind,
 	ScoreFuncKind sc_fn_kind>
-static void attention_fwd(
-	Tensor<dtype>& y,
-	const Tensor<dtype>& x, 
-	const Tensor<dtype>& qw, 
-	const Tensor<dtype>& kw, 
-	const Tensor<dtype>& vw,
-	const std::optional<Tensor<dtype>>& ow = std::nullopt)
+static Tensor<dtype, device> single_head_attention_fwd(
+	const Tensor<dtype, device>& qw,
+	const Tensor<dtype, device>& kw,
+	const Tensor<dtype, device>& vw) 
 {
+	Tensor<dtype, device> y;
+	return y;
+};
 
+/* cpu implementations */
+
+template<>
+static Tensor<float32, CPU> single_head_attention_fwd<float32, CPU, NONE, FULL>(
+	const Tensor<float32, CPU>& qw,
+	const Tensor<float32, CPU>& kw,
+	const Tensor<float32, CPU>& vw)
+{
+	return sdp_attention_fwd_cpu_precise_float(qw, kw, vw);
 }
+
+template<>
+static Tensor<float64, CPU> single_head_attention_fwd<float64, CPU, NONE, FULL>(
+	const Tensor<float64, CPU>& qw,
+	const Tensor<float64, CPU>& kw,
+	const Tensor<float64, CPU>& vw)
+{
+	return sdp_attention_fwd_cpu_precise_float(qw, kw, vw);
+}
+
+/* not implemented cases for cpu (floats under 4 bytes) */
+
+template<>
+static Tensor<float16, CPU> single_head_attention_fwd<float16, CPU, NONE, FULL>(
+	const Tensor<float16, CPU>& qw,
+	const Tensor<float16, CPU>& kw,
+	const Tensor<float16, CPU>& vw) = delete;
+
+template<>
+static Tensor<float16, CPU> single_head_attention_fwd<float16, CPU, NONE, SOFT_CAPPING>(
+	const Tensor<float16, CPU>& qw,
+	const Tensor<float16, CPU>& kw,
+	const Tensor<float16, CPU>& vw) = delete;
+
+template<>
+static Tensor<float64, CPU> single_head_attention_fwd<float64, CPU, CAUSAL, FULL>(
+	const Tensor<float64, CPU>& qw,
+	const Tensor<float64, CPU>& kw,
+	const Tensor<float64, CPU>& vw) = delete;
+
+template<>
+static Tensor<float64, CPU> single_head_attention_fwd<float64, CPU, CAUSAL, SOFT_CAPPING>(
+	const Tensor<float64, CPU>& qw,
+	const Tensor<float64, CPU>& kw,
+	const Tensor<float64, CPU>& vw) = delete;
+
+template<>
+static Tensor<bfloat16, CPU> single_head_attention_fwd<bfloat16, CPU, NONE, FULL>(
+	const Tensor<bfloat16, CPU>& qw,
+	const Tensor<bfloat16, CPU>& kw,
+	const Tensor<bfloat16, CPU>& vw) = delete;
+
+template<>
+static Tensor<bfloat16, CPU> single_head_attention_fwd<bfloat16, CPU, NONE, SOFT_CAPPING>(
+	const Tensor<bfloat16, CPU>& qw,
+	const Tensor<bfloat16, CPU>& kw,
+	const Tensor<bfloat16, CPU>& vw) = delete;
+
+template<>
+static Tensor<bfloat16, CPU> single_head_attention_fwd<bfloat16, CPU, CAUSAL, FULL>(
+	const Tensor<bfloat16, CPU>& qw,
+	const Tensor<bfloat16, CPU>& kw,
+	const Tensor<bfloat16, CPU>& vw) = delete;
+
+template<>
+static Tensor<bfloat16, CPU> single_head_attention_fwd<bfloat16, CPU, CAUSAL, SOFT_CAPPING>(
+	const Tensor<bfloat16, CPU>& qw,
+	const Tensor<bfloat16, CPU>& kw,
+	const Tensor<bfloat16, CPU>& vw) = delete;
+
+
+/* cuda implementations */
+
+
+
+/* not implemented cases for gpus (yet) */
+
 
 
 #endif  // __ATTENTION__

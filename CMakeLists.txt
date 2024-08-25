@@ -73,6 +73,7 @@ set (OPS_HEADERS
 	${OPS_DIR}/transp_ops.hpp
     ${OPS_DIR}/softmax_ops.cuh
     ${OPS_DIR}/softmax_ops.hpp
+    ${OPS_DIR}/ops.hpp
 )
 
 source_group("ops" FILES ${OPS_HEADERS} ${OPS_SRCS})
@@ -87,6 +88,7 @@ set (TRF_SRCS
 
 set (TRF_HEADERS
     ${TRF_DIR}/attention.hpp
+    ${TRF_DIR}/sdp.hpp
 )
 
 source_group("transformers" FILES ${TRF_HEADERS} ${TRF_SRCS})

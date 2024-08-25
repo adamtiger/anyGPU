@@ -15,21 +15,21 @@
 */
 
 template<typename T>
-concept ArithmeticType = (std::floating_point<T> || std::integral<T>);
+concept FloatingPointType = std::floating_point<T> || std::is_same_v<T, float16> || std::is_same_v<T, bfloat16>;
 
 template<typename T>
-concept FloatingPointType = std::floating_point<T>;
+concept ArithmeticType = (FloatingPointType<T> || std::integral<T>);
 
 template<typename T>
 concept IntegerType = std::integral<T>;
 
 template<typename T>
-concept HalfFloatType = (std::floating_point<T> && sizeof(T) == 2);
+concept HalfFloatType = (FloatingPointType<T> && sizeof(T) == 2);
 
 template<typename T>
-concept PreciseFloatType = (std::floating_point<T> && sizeof(T) > 2);
+concept PreciseFloatType = (FloatingPointType<T> && sizeof(T) > 2);
 
 template<typename T>
-concept NotHalfFloatType = (std::integral<T> || (std::floating_point<T> && sizeof(T) > 2));
+concept NotHalfFloatType = (std::integral<T> || (FloatingPointType<T> && sizeof(T) > 2));
 
 #endif  // __CORE_CONCEPTS__

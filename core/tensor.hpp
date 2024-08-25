@@ -26,6 +26,7 @@ struct MemoryBuffer
 	explicit MemoryBuffer();
 	explicit MemoryBuffer(const int capacity);
 	explicit MemoryBuffer(const int data_bit_size, const std::vector<int>& shape);
+	explicit MemoryBuffer(const int data_bit_size, const int dim, const Shape& shape);
 	~MemoryBuffer();
 };
 
@@ -59,6 +60,25 @@ MemoryBuffer<device>::MemoryBuffer(const int data_bit_size, const std::vector<in
 	id = GlobalUUIDGenerator::generate_id();
 
 	int bitsize = calc_default_size(shape) * data_bit_size;
+	capacity = (bitsize >> 3);
+	capacity += ((bitsize & 0x00000007) == 0 ? 0 : 1);
+
+	if constexpr (device == Device::CPU)
+	{
+		buffer = new char[capacity];
+	}
+	else if constexpr (device == Device::CUDA)
+	{
+		cudaMalloc(&buffer, capacity);
+	}
+}
+
+template<Device device>
+MemoryBuffer<device>::MemoryBuffer(const int data_bit_size, const int dim, const Shape& shape)
+{
+	id = GlobalUUIDGenerator::generate_id();
+
+	int bitsize = calc_default_size(dim, shape) * data_bit_size;
 	capacity = (bitsize >> 3);
 	capacity += ((bitsize & 0x00000007) == 0 ? 0 : 1);
 
@@ -188,6 +208,11 @@ struct Tensor
 	*  Creates a tensor with default strides and alignment (1 tensor element).
 	*/
 	explicit Tensor(const std::vector<int>& shape);
+	
+	/*
+	*  Creates a tensor with default stride and alignment (1 tensor element).
+	*/
+	explicit Tensor(const int dim, const Shape& shape);
 
 	/*
 	*  Creates a tensor with default alignment (1 tensor element).
@@ -219,6 +244,22 @@ Tensor<dtype, device>::Tensor(const std::vector<int>& shape)
 	auto stride = calc_default_stride(shape);
 	this->shape = cvt_vector2array(shape);
 	this->stride = cvt_vector2array(stride);
+}
+
+template<typename dtype, Device device>
+Tensor<dtype, device>::Tensor(const int dim, const Shape& shape)
+{
+	id = GlobalUUIDGenerator::generate_id();
+	this->dim = dim;
+
+	alignment = 1;
+	offset = 0;
+
+	mem_buffer = std::make_shared<MemoryBuffer<device>>(get_bitsize<dtype>(), dim, shape);
+
+	// calculating default stride
+	this->stride = calc_default_stride(dim, shape);
+	this->shape = shape;
 }
 
 template<typename dtype, Device device>

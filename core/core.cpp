@@ -19,7 +19,8 @@ std::string represent_datatype(const DataType dtype)
 	    "INT32",
 	    "BFLOAT16",
 	    "FLOAT16",
-	    "FLOAT32"
+	    "FLOAT32",
+		"FLOAT64"
 	};
 
 	assert((int)dtype < 6);
@@ -142,6 +143,17 @@ std::vector<int> calc_default_stride(const std::vector<int>& shape)
 {
 	int dim = calc_dim(shape);
 	std::vector<int> stride(dim);
+	stride[dim - 1] = 1;
+	for (int dix = dim - 2; dix >= 0; --dix)
+	{
+		stride[dix] = stride[dix + 1] * shape[dix + 1];
+	}
+	return stride;
+}
+
+DimArray calc_default_stride(const int dim, const DimArray& shape)
+{
+	DimArray stride = {};
 	stride[dim - 1] = 1;
 	for (int dix = dim - 2; dix >= 0; --dix)
 	{
