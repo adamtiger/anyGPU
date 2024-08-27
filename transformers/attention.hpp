@@ -107,16 +107,16 @@ static Tensor<float16, CPU> single_head_attention_fwd<float16, CPU, NONE, SOFT_C
 	const Tensor<float16, CPU>& vw) = delete;
 
 template<>
-static Tensor<float64, CPU> single_head_attention_fwd<float64, CPU, CAUSAL, FULL>(
-	const Tensor<float64, CPU>& qw,
-	const Tensor<float64, CPU>& kw,
-	const Tensor<float64, CPU>& vw) = delete;
+static Tensor<float16, CPU> single_head_attention_fwd<float16, CPU, CAUSAL, FULL>(
+	const Tensor<float16, CPU>& qw,
+	const Tensor<float16, CPU>& kw,
+	const Tensor<float16, CPU>& vw) = delete;
 
 template<>
-static Tensor<float64, CPU> single_head_attention_fwd<float64, CPU, CAUSAL, SOFT_CAPPING>(
-	const Tensor<float64, CPU>& qw,
-	const Tensor<float64, CPU>& kw,
-	const Tensor<float64, CPU>& vw) = delete;
+static Tensor<float16, CPU> single_head_attention_fwd<float16, CPU, CAUSAL, SOFT_CAPPING>(
+	const Tensor<float16, CPU>& qw,
+	const Tensor<float16, CPU>& kw,
+	const Tensor<float16, CPU>& vw) = delete;
 
 template<>
 static Tensor<bfloat16, CPU> single_head_attention_fwd<bfloat16, CPU, NONE, FULL>(
@@ -154,8 +154,107 @@ static Tensor<float32, CUDA> single_head_attention_fwd<float32, CUDA, NONE, FULL
 }
 
 
-/* not implemented cases for gpus (yet) */
 
 
+
+/*
+*  Backward single head attention implementations.
+*  The different type of transformers can be
+*  specified with the template parameters.
+*/
+template<
+	FloatingPointType dtype,
+	Device device,
+	MaskKind mask_kind,
+	ScoreFuncKind sc_fn_kind>
+static SDPGradient<dtype, device> single_head_attention_bwd(
+	const Tensor<dtype, device>& qw,
+	const Tensor<dtype, device>& kw,
+	const Tensor<dtype, device>& vw)
+{
+	SDPGradient<dtype, device> grads;
+	return grads;
+};
+
+/* cpu implementations */
+
+template<>
+static SDPGradient<float32, CPU> single_head_attention_bwd<float32, CPU, NONE, FULL>(
+	const Tensor<float32, CPU>& qw,
+	const Tensor<float32, CPU>& kw,
+	const Tensor<float32, CPU>& vw)
+{
+	return sdp_attention_bwd_cpu_precise_float(qw, kw, vw);
+}
+
+template<>
+static SDPGradient<float64, CPU> single_head_attention_bwd<float64, CPU, NONE, FULL>(
+	const Tensor<float64, CPU>& qw,
+	const Tensor<float64, CPU>& kw,
+	const Tensor<float64, CPU>& vw)
+{
+	return sdp_attention_bwd_cpu_precise_float(qw, kw, vw);
+}
+
+/* not implemented cases for cpu (floats under 4 bytes) */
+
+template<>
+static SDPGradient<float16, CPU> single_head_attention_bwd<float16, CPU, NONE, FULL>(
+	const Tensor<float16, CPU>& qw,
+	const Tensor<float16, CPU>& kw,
+	const Tensor<float16, CPU>& vw) = delete;
+
+template<>
+static SDPGradient<float16, CPU> single_head_attention_bwd<float16, CPU, NONE, SOFT_CAPPING>(
+	const Tensor<float16, CPU>& qw,
+	const Tensor<float16, CPU>& kw,
+	const Tensor<float16, CPU>& vw) = delete;
+
+template<>
+static SDPGradient<float16, CPU> single_head_attention_bwd<float16, CPU, CAUSAL, FULL>(
+	const Tensor<float16, CPU>& qw,
+	const Tensor<float16, CPU>& kw,
+	const Tensor<float16, CPU>& vw) = delete;
+
+template<>
+static SDPGradient<float16, CPU> single_head_attention_bwd<float16, CPU, CAUSAL, SOFT_CAPPING>(
+	const Tensor<float16, CPU>& qw,
+	const Tensor<float16, CPU>& kw,
+	const Tensor<float16, CPU>& vw) = delete;
+
+template<>
+static SDPGradient<bfloat16, CPU> single_head_attention_bwd<bfloat16, CPU, NONE, FULL>(
+	const Tensor<bfloat16, CPU>& qw,
+	const Tensor<bfloat16, CPU>& kw,
+	const Tensor<bfloat16, CPU>& vw) = delete;
+
+template<>
+static SDPGradient<bfloat16, CPU> single_head_attention_bwd<bfloat16, CPU, NONE, SOFT_CAPPING>(
+	const Tensor<bfloat16, CPU>& qw,
+	const Tensor<bfloat16, CPU>& kw,
+	const Tensor<bfloat16, CPU>& vw) = delete;
+
+template<>
+static SDPGradient<bfloat16, CPU> single_head_attention_bwd<bfloat16, CPU, CAUSAL, FULL>(
+	const Tensor<bfloat16, CPU>& qw,
+	const Tensor<bfloat16, CPU>& kw,
+	const Tensor<bfloat16, CPU>& vw) = delete;
+
+template<>
+static SDPGradient<bfloat16, CPU> single_head_attention_bwd<bfloat16, CPU, CAUSAL, SOFT_CAPPING>(
+	const Tensor<bfloat16, CPU>& qw,
+	const Tensor<bfloat16, CPU>& kw,
+	const Tensor<bfloat16, CPU>& vw) = delete;
+
+
+/* cuda implementations */
+template<>
+static SDPGradient<float32, CUDA> single_head_attention_bwd<float32, CUDA, NONE, FULL>(
+	const Tensor<float32, CUDA>& qw,
+	const Tensor<float32, CUDA>& kw,
+	const Tensor<float32, CUDA>& vw)
+{
+	return sdp_attention_bwd_cuda_basic(qw, kw, vw);
+}
 
 #endif  // __ATTENTION__

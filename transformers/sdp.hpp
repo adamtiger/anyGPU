@@ -7,6 +7,8 @@
 #include "core_concepts.hpp"
 
 
+/* forward implementation */
+
 template<PreciseFloatType dtype>
 Tensor<dtype, CPU> sdp_attention_fwd_cpu_precise_float(
 	const Tensor<dtype, CPU>& qw,
@@ -40,5 +42,41 @@ Tensor<dtype, CUDA> sdp_attention_fwd_cuda_basic(
 	return y;
 }
 
+
+
+/*
+   Returning sdp gradients is by a dedicated structure.
+   This is slower but does not require outputs on the argument.
+*/
+template<typename dtype, Device device>
+struct SDPGradient
+{
+	Tensor<dtype, device> grad_q;
+	Tensor<dtype, device> grad_k;
+	Tensor<dtype, device> grad_v;
+};
+
+/* backward implementation */
+
+template<PreciseFloatType dtype>
+SDPGradient<dtype, CPU> sdp_attention_bwd_cpu_precise_float(
+	const Tensor<dtype, CPU>& qw,
+	const Tensor<dtype, CPU>& kw,
+	const Tensor<dtype, CPU>& vw)
+{
+	SDPGradient<dtype, CPU> grads;
+	return grads;
+}
+
+
+template<FloatingPointType dtype>
+SDPGradient<dtype, CUDA> sdp_attention_bwd_cuda_basic(
+	const Tensor<dtype, CUDA>& qw,
+	const Tensor<dtype, CUDA>& kw,
+	const Tensor<dtype, CUDA>& vw)
+{
+	SDPGradient<dtype, CUDA> grads;
+	return grads;
+}
 
 #endif  // __SDP__

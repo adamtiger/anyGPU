@@ -41,6 +41,7 @@ template<Device device>
 MemoryBuffer<device>::MemoryBuffer(const int capacity) : capacity(capacity)
 {
 	id = GlobalUUIDGenerator::generate_id();
+	buffer = nullptr;
 
 	if constexpr (device == Device::CPU)
 	{
@@ -62,6 +63,8 @@ MemoryBuffer<device>::MemoryBuffer(const int data_bit_size, const std::vector<in
 	int bitsize = calc_default_size(shape) * data_bit_size;
 	capacity = (bitsize >> 3);
 	capacity += ((bitsize & 0x00000007) == 0 ? 0 : 1);
+
+	buffer = nullptr;
 
 	if constexpr (device == Device::CPU)
 	{
