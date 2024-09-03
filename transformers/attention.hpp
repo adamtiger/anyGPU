@@ -170,7 +170,8 @@ template<
 static SDPGradient<dtype, device> single_head_attention_bwd(
 	const Tensor<dtype, device>& qw,
 	const Tensor<dtype, device>& kw,
-	const Tensor<dtype, device>& vw)
+	const Tensor<dtype, device>& vw,
+	const Tensor<dtype, device>& grad_y)
 {
 	SDPGradient<dtype, device> grads;
 	return grads;
@@ -182,18 +183,20 @@ template<>
 static SDPGradient<float32, CPU> single_head_attention_bwd<float32, CPU, NONE, FULL>(
 	const Tensor<float32, CPU>& qw,
 	const Tensor<float32, CPU>& kw,
-	const Tensor<float32, CPU>& vw)
+	const Tensor<float32, CPU>& vw,
+	const Tensor<float32, CPU>& grad_y)
 {
-	return sdp_attention_bwd_cpu_precise_float(qw, kw, vw);
+	return sdp_attention_bwd_cpu_precise_float(qw, kw, vw, grad_y);
 }
 
 template<>
 static SDPGradient<float64, CPU> single_head_attention_bwd<float64, CPU, NONE, FULL>(
 	const Tensor<float64, CPU>& qw,
 	const Tensor<float64, CPU>& kw,
-	const Tensor<float64, CPU>& vw)
+	const Tensor<float64, CPU>& vw,
+	const Tensor<float64, CPU>& grad_y)
 {
-	return sdp_attention_bwd_cpu_precise_float(qw, kw, vw);
+	return sdp_attention_bwd_cpu_precise_float(qw, kw, vw, grad_y);
 }
 
 /* not implemented cases for cpu (floats under 4 bytes) */
@@ -202,49 +205,57 @@ template<>
 static SDPGradient<float16, CPU> single_head_attention_bwd<float16, CPU, NONE, FULL>(
 	const Tensor<float16, CPU>& qw,
 	const Tensor<float16, CPU>& kw,
-	const Tensor<float16, CPU>& vw) = delete;
+	const Tensor<float16, CPU>& vw,
+	const Tensor<float16, CPU>& grad_y) = delete;
 
 template<>
 static SDPGradient<float16, CPU> single_head_attention_bwd<float16, CPU, NONE, SOFT_CAPPING>(
 	const Tensor<float16, CPU>& qw,
 	const Tensor<float16, CPU>& kw,
-	const Tensor<float16, CPU>& vw) = delete;
+	const Tensor<float16, CPU>& vw,
+	const Tensor<float16, CPU>& grad_y) = delete;
 
 template<>
 static SDPGradient<float16, CPU> single_head_attention_bwd<float16, CPU, CAUSAL, FULL>(
 	const Tensor<float16, CPU>& qw,
 	const Tensor<float16, CPU>& kw,
-	const Tensor<float16, CPU>& vw) = delete;
+	const Tensor<float16, CPU>& vw,
+	const Tensor<float16, CPU>& grad_y) = delete;
 
 template<>
 static SDPGradient<float16, CPU> single_head_attention_bwd<float16, CPU, CAUSAL, SOFT_CAPPING>(
 	const Tensor<float16, CPU>& qw,
 	const Tensor<float16, CPU>& kw,
-	const Tensor<float16, CPU>& vw) = delete;
+	const Tensor<float16, CPU>& vw,
+	const Tensor<float16, CPU>& grad_y) = delete;
 
 template<>
 static SDPGradient<bfloat16, CPU> single_head_attention_bwd<bfloat16, CPU, NONE, FULL>(
 	const Tensor<bfloat16, CPU>& qw,
 	const Tensor<bfloat16, CPU>& kw,
-	const Tensor<bfloat16, CPU>& vw) = delete;
+	const Tensor<bfloat16, CPU>& vw,
+	const Tensor<bfloat16, CPU>& grad_y) = delete;
 
 template<>
 static SDPGradient<bfloat16, CPU> single_head_attention_bwd<bfloat16, CPU, NONE, SOFT_CAPPING>(
 	const Tensor<bfloat16, CPU>& qw,
 	const Tensor<bfloat16, CPU>& kw,
-	const Tensor<bfloat16, CPU>& vw) = delete;
+	const Tensor<bfloat16, CPU>& vw,
+	const Tensor<bfloat16, CPU>& grad_y) = delete;
 
 template<>
 static SDPGradient<bfloat16, CPU> single_head_attention_bwd<bfloat16, CPU, CAUSAL, FULL>(
 	const Tensor<bfloat16, CPU>& qw,
 	const Tensor<bfloat16, CPU>& kw,
-	const Tensor<bfloat16, CPU>& vw) = delete;
+	const Tensor<bfloat16, CPU>& vw,
+	const Tensor<bfloat16, CPU>& grad_y) = delete;
 
 template<>
 static SDPGradient<bfloat16, CPU> single_head_attention_bwd<bfloat16, CPU, CAUSAL, SOFT_CAPPING>(
 	const Tensor<bfloat16, CPU>& qw,
 	const Tensor<bfloat16, CPU>& kw,
-	const Tensor<bfloat16, CPU>& vw) = delete;
+	const Tensor<bfloat16, CPU>& vw,
+	const Tensor<bfloat16, CPU>& grad_y) = delete;
 
 
 /* cuda implementations */
@@ -252,9 +263,10 @@ template<>
 static SDPGradient<float32, CUDA> single_head_attention_bwd<float32, CUDA, NONE, FULL>(
 	const Tensor<float32, CUDA>& qw,
 	const Tensor<float32, CUDA>& kw,
-	const Tensor<float32, CUDA>& vw)
+	const Tensor<float32, CUDA>& vw,
+	const Tensor<float32, CUDA>& grad_y)
 {
-	return sdp_attention_bwd_cuda_basic(qw, kw, vw);
+	return sdp_attention_bwd_cuda_basic(qw, kw, vw, grad_y);
 }
 
 #endif  // __ATTENTION__

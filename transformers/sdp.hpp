@@ -62,7 +62,8 @@ template<PreciseFloatType dtype>
 SDPGradient<dtype, CPU> sdp_attention_bwd_cpu_precise_float(
 	const Tensor<dtype, CPU>& qw,
 	const Tensor<dtype, CPU>& kw,
-	const Tensor<dtype, CPU>& vw)
+	const Tensor<dtype, CPU>& vw,
+	const Tensor<dtype, CPU>& grad_y)
 {
 	SDPGradient<dtype, CPU> grads;
 	return grads;
@@ -73,7 +74,8 @@ template<FloatingPointType dtype>
 SDPGradient<dtype, CUDA> sdp_attention_bwd_cuda_basic(
 	const Tensor<dtype, CUDA>& qw,
 	const Tensor<dtype, CUDA>& kw,
-	const Tensor<dtype, CUDA>& vw)
+	const Tensor<dtype, CUDA>& vw,
+	const Tensor<dtype, CUDA>& grad_y)
 {
 	SDPGradient<dtype, CUDA> grads;
 	return grads;

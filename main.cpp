@@ -23,6 +23,8 @@ int main()
 
 	external_test_sdp_fwd_f32();
 
+	//external_test_sdp_bwd_f32();
+
 	// experiment
 	/*auto qw = crt_random_tensor<float32, CUDA>({ 16, 64 }, 11);
 	auto kw = crt_random_tensor<float32, CUDA>({ 16, 64 }, 15);

@@ -56,19 +56,20 @@ void external_test_sdp_bwd_f32()
 	auto hk = load_tensor((path / "k.dat").string());
 	auto hv = load_tensor((path / "v.dat").string());
 
+	auto h_grad_y = load_tensor((path / "grad_y.dat").string());
 	auto h_grad_q = load_tensor((path / "grad_q.dat").string());
 	auto h_grad_k = load_tensor((path / "grad_k.dat").string());
 	auto h_grad_v = load_tensor((path / "grad_v.dat").string());
 
 	// cuda based calculation
+	auto d_grad_y = h_grad_y.copy_to_cuda();
 	auto dq = hq.copy_to_cuda();
 	auto dk = hk.copy_to_cuda();
 	auto dv = hv.copy_to_cuda();
 
-	SDPGradient grads = single_head_attention_bwd<float32, CUDA, NONE, FULL>(dq, dk, dv);
+	SDPGradient grads = single_head_attention_bwd<float32, CUDA, NONE, FULL>(dq, dk, dv, d_grad_y);
 
 	// compare
-
 	auto cmp = [&](const Tensor<float32, CPU>& expected, const Tensor<float32, CPU>& actual)
 	{
 		bool eq = elementwise_compatible(expected, actual);  // checks the sizes

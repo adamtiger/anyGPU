@@ -73,7 +73,8 @@ def generate_sdp_bwd_nomask_noscore(path: str, test_name: str, N: int, d: int):
     y = F.scaled_dot_product_attention(q, k, v)
 
     # calculate the gradients
-    y.backward(torch.ones(tensor_size, dtype=torch.float32))
+    grad_y = torch.ones(tensor_size, dtype=torch.float32)
+    y.backward(grad_y)
 
     grad_q = q.grad
     grad_k = k.grad
@@ -87,6 +88,7 @@ def generate_sdp_bwd_nomask_noscore(path: str, test_name: str, N: int, d: int):
     q = q.squeeze()
     k = k.squeeze()
     v = v.squeeze()
+    grad_y = grad_y.squeeze()
     
     grad_q = grad_q.squeeze()
     grad_k = grad_k.squeeze()
@@ -96,6 +98,7 @@ def generate_sdp_bwd_nomask_noscore(path: str, test_name: str, N: int, d: int):
     save_tensor(q, pjoin(test_fld_name, "q.dat"))
     save_tensor(k, pjoin(test_fld_name, "k.dat"))
     save_tensor(v, pjoin(test_fld_name, "v.dat"))
+    save_tensor(grad_y, pjoin(test_fld_name, "grad_y.dat"))
 
     save_tensor(grad_q, pjoin(test_fld_name, "grad_q.dat"))
     save_tensor(grad_k, pjoin(test_fld_name, "grad_k.dat"))

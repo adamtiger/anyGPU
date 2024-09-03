@@ -7,7 +7,7 @@
 #include "core_concepts.hpp"
 
 /*
-*  Calculates the sofmtax for a tensor on CPU.
+*  Calculates the softmax for a tensor on CPU.
 *  The reduced dimension is always the last one.
 *  The input is assumed to be 2 dimensional.
 *  (Otherwise it is recommended to use a reshape.)
@@ -100,6 +100,71 @@ Tensor<dtype, CUDA> tensor_softmax(const Tensor<dtype, CUDA>& x)
 	{
 		static_assert(std::is_same_v<dtype, int32>, "Unsupported data type");
 		//tensor_add_i32(kpms, lhs, rhs, res);
+	}
+
+	return y;
+}
+
+
+
+
+
+/*
+*  Calculates the derivative of the softmax for a tensor on CPU.
+*  The reduced dimension is always the last one.
+*  The input is assumed to be 2 dimensional.
+*/
+template<PreciseFloatType dtype>
+Tensor<dtype, CPU> tensor_softmax_bwd(const Tensor<dtype, CPU>& x, const Tensor<dtype, CPU>& grad_y)
+{
+	assert(x->dim == 2);
+	assert(grad_y->dim == 2);
+
+	int m = x.shape[0];
+	int n = x.shape[1];
+
+	dtype* x_data = x.buffer();
+	dtype* gy_data = grad_y.buffer();
+
+	std::vector<int> y_shape({ m, n });
+	Tensor<dtype, CPU> y(y_shape);
+	dtype* y_data = y.buffer();
+
+	// reference implementation
+	// reliable (but slow)
+
+	int x_stride_r = x.stride[0];
+	int x_stride_c = x.stride[1];
+
+	int gy_stride_r = grad_y.stride[0];
+	int gy_stride_c = grad_y.stride[1];
+
+	int y_stride_r = y.stride[0];
+	int y_stride_c = y.stride[1];
+
+	for (int i = 0; i < m; ++i)
+	{
+		// calculate the j axis and cache the results
+		dtype y_delta = (dtype)0;
+		for (int j = 0; j < n; ++j)
+		{
+			int y_offs = y_stride_r * i + y_stride_c * j;
+			int gy_offs = gy_stride_r * i + gy_stride_c * j;
+			int x_offs = x_stride_r * i + x_stride_c * j;
+
+			dtype temp = gy_data[gy_offs] * x[x_offs];
+			y_data[y_offs] = temp;
+			y_delta += temp;
+		}
+
+		// calculate the final derivative
+		for (int l = 0; l < n; ++l)
+		{
+			int y_offs = y_stride_r * i + y_stride_c * l;
+			int x_offs = x_stride_r * i + x_stride_c * l;
+
+			y_data[y_offs] -= y_delta * x[x_offs];
+		}
 	}
 
 	return y;
