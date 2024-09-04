@@ -107,3 +107,46 @@ void external_test_sdp_bwd_f32()
 
 	std::cout << "TestCase [external_test_sdp_bwd_f32]: " << (eq ? "PASSED" : "FAILED") << "\n";
 }
+
+
+void external_test_softmax_bwd_f32()
+{
+	auto path = artifact_folder_path / "softmax_bwd_f32_16_64";
+
+	// read tensors from files
+	auto hx = load_tensor((path / "x.dat").string());
+
+	auto h_grad_y = load_tensor((path / "grad_y.dat").string());
+	auto h_grad_x = load_tensor((path / "grad_x.dat").string());
+
+	auto grad_x = tensor_softmax_bwd(hx, h_grad_y);
+
+	// compare
+	auto cmp = [&](const Tensor<float32, CPU>& expected, const Tensor<float32, CPU>& actual)
+		{
+			bool eq = elementwise_compatible(expected, actual);  // checks the sizes
+			if (eq)
+			{
+				float32* ex = expected.buffer();
+				float32* ac = actual.buffer();
+
+				int length = expected.size();
+
+				for (int ix = 0; ix < length; ++ix)
+				{
+					eq = eq && std::abs(ex[ix] - ac[ix]) < 0.001f;
+
+					if (!eq)
+					{
+						std::cout << ex[ix] << " " << ac[ix] << "\n";
+					}
+				}
+			}
+
+			return eq;
+		};
+
+	bool eq = cmp(h_grad_x, grad_x);
+
+	std::cout << "TestCase [external_test_softmax_bwd_f32]: " << (eq ? "PASSED" : "FAILED") << "\n";
+}

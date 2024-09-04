@@ -66,6 +66,24 @@ SDPGradient<dtype, CPU> sdp_attention_bwd_cpu_precise_float(
 	const Tensor<dtype, CPU>& grad_y)
 {
 	SDPGradient<dtype, CPU> grads;
+
+	// forward recompute to calculate the softmax result
+	int d = qw.shape[1];  // qw shape: (N, d)
+	dtype alpha = static_cast<dtype>(1.f / sqrtf(static_cast<float32>(d)));
+	auto kw_tr = tensor_transp(kw);
+	auto qk = tensor_mm(qw, kw_tr);
+	auto nqk = tensor_mul(qk, alpha);
+	auto r3 = tensor_softmax(nqk);
+
+	// calculate the backward steps
+	grads.grad_v = tensor_mm(tensor_transp(r3), grad_y);
+	auto dr3 = tensor_mm(grad_y, tensor_transp(vw));
+	auto dr2 = tensor_softmax_bwd(r3, dr3);
+	auto dr1 = tensor_mul(dr2, alpha);
+	grads.grad_q = tensor_mm(dr1, kw);
+	auto dr0 = tensor_mm(tensor_transp(qw), dr1);
+	grads.grad_k = tensor_transp(dr0);
+
 	return grads;
 }
 

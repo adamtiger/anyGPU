@@ -109,7 +109,52 @@ def generate_sdp_bwd_nomask_noscore(path: str, test_name: str, N: int, d: int):
     print(f"grad_q: {grad_q[0, 0:10]}")
 
 
+def generate_softmax_bwd(path: str, test_name: str, N: int, d: int):
+    """
+        Softmax with reducing in the last axis.
+
+        path: The path to a folder where the test case folder will be stored. 
+        test_name: The name of the folder.
+        N: Number of embeddings.
+        d: Embedding size.
+    """
+
+    # generate random q, k and v
+    tensor_size = (1, 1, N, d)
+    x = torch.randn(tensor_size, dtype=torch.float32, requires_grad=True)
+    
+    # calculate the attention output
+    y = F.softmax(x, dim=-1)
+
+    # calculate the gradients
+    grad_y = torch.ones(tensor_size, dtype=torch.float32)
+    y.backward(grad_y)
+
+    grad_x = x.grad
+
+    # create test folders
+    test_fld_name = pjoin(path, test_name)
+    os.mkdir(test_fld_name)
+
+    # remove first 2 dimensions (they are placeholders)
+    x = x.squeeze()
+    grad_y = grad_y.squeeze()
+    
+    grad_x = grad_x.squeeze()
+
+    # save tensors
+    save_tensor(x, pjoin(test_fld_name, "x.dat"))
+    save_tensor(grad_y, pjoin(test_fld_name, "grad_y.dat"))
+
+    save_tensor(grad_x, pjoin(test_fld_name, "grad_x.dat"))
+
+    # print sample
+    print(f"x: {x[0, 0:10]}")
+    print(f"grad_x: {grad_x[0, 0:10]}")
+
+
 if __name__ == '__main__':
     path = r"C:\Data\AI\projects\anyGPU\artifacts"
     generate_sdp_fwd_nomask_noscore(path, "sdp_fwd_nomask_noscore_f32_16_64", 16, 64)
     generate_sdp_bwd_nomask_noscore(path, "sdp_bwd_nomask_noscore_f32_16_64", 16, 64)
+    generate_softmax_bwd(path, "softmax_bwd_f32_16_64", 16, 64)

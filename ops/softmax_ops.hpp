@@ -111,8 +111,9 @@ Tensor<dtype, CUDA> tensor_softmax(const Tensor<dtype, CUDA>& x)
 
 /*
 *  Calculates the derivative of the softmax for a tensor on CPU.
-*  The reduced dimension is always the last one.
 *  The input is assumed to be 2 dimensional.
+*  param x - the already calculated softmax value of the input during the forward pass
+*  param grad_y - the derivative according to the output
 */
 template<PreciseFloatType dtype>
 Tensor<dtype, CPU> tensor_softmax_bwd(const Tensor<dtype, CPU>& x, const Tensor<dtype, CPU>& grad_y)
