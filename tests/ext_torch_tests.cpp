@@ -149,5 +149,5 @@ void external_test_cpu_softmax_bwd_f32()
 
 	bool eq = cmp(h_grad_x, grad_x);
 
-	std::cout << "TestCase [external_test_softmax_bwd_f32]: " << (eq ? "PASSED" : "FAILED") << "\n";
+	std::cout << "TestCase [external_test_cpu_softmax_bwd_f32]: " << (eq ? "PASSED" : "FAILED") << "\n";
 }

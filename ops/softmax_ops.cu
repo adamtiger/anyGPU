@@ -91,7 +91,7 @@ __global__ void tensor_softmax_kernel_f32(const int m, const int n, const float3
 
 void tensor_softmax_f32(
 	const Tensor<float32, CUDA>& x,
-	const Tensor<float32, CUDA>& y)
+	Tensor<float32, CUDA>& y)
 {
 	int m = x.shape[0];
 	int n = x.shape[1];
@@ -108,3 +108,80 @@ void tensor_softmax_f32(
 	tensor_softmax_kernel_f32<<<gs, bs>>>(m, n, dx, dy);
 }
 
+
+
+
+__global__ void tensor_softmax_bwd_kernel_f32(
+	const int m, const int n, 
+	const float32* dx, 
+	const float32* d_grad_y, 
+	float32* d_grad_x)
+{
+	int tx = threadIdx.x;
+	int ty = blockDim.y * blockIdx.y + threadIdx.y;
+
+	if (ty < m)
+	{
+		// number of warp width region to reduce
+		int num_segments = n / WARP_SIZE + (n % WARP_SIZE > 0 ? 1 : 0);
+
+		int base_offset = ty * n;
+
+		// calculate the grad_y * x (elementwise)
+		float32 reduced = 0.f;
+		for (int s = 0; s < num_segments; ++s)
+		{
+			int col_index = s * WARP_SIZE + tx;
+
+			if (col_index < n)
+			{
+				int offset = base_offset + col_index;
+
+				float32 temp = d_grad_y[offset] * dx[offset];
+				reduced += temp;
+				d_grad_x[offset] = temp;
+			}			
+		}
+
+		// calculate the reduction over the warp
+		for (int i = 16; i >= 1; i /= 2)
+		{
+			reduced += __shfl_xor_sync(0xffffffff, reduced, i, 32);
+		}
+
+		// calculate the gradient
+		for (int s = 0; s < num_segments; ++s)
+		{
+			int col_index = s * WARP_SIZE + tx;
+
+			if (col_index < n)
+			{
+				int offset = base_offset + col_index;
+
+				d_grad_x[offset] -= dx[offset] * reduced;
+			}
+		}
+	}
+}
+
+
+void tensor_softmax_bwd_f32(
+	const Tensor<float32, CUDA>& x,
+	const Tensor<float32, CUDA>& grad_y,
+	Tensor<float32, CUDA>& grad_x)
+{
+	int m = x.shape[0];
+	int n = x.shape[1];
+
+	float32* dx = x.buffer();
+	float32* gy_data = grad_y.buffer();
+	float32* gx_data = grad_x.buffer();
+
+	dim3 bs = { WARP_SIZE, 4, 1 };
+
+	unsigned int gsx = 1;  // horizontal
+	unsigned int gsy = m / bs.y + ((m % bs.y > 0) ? 1 : 0);  // vertical
+	dim3 gs = { gsx, gsy, 1 };
+
+	tensor_softmax_bwd_kernel_f32<<<gs, bs>>>(m, n, dx, gy_data, gx_data);
+}

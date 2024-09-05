@@ -19,11 +19,13 @@ int main()
 
 	test_softmax_f32();
 
-	test_sdp_fwd_f32(); */
+	test_sdp_fwd_f32();*/ 
+
+	test_softmax_bwd_f32();
 
 	//external_test_sdp_fwd_f32();
 
-	external_test_cpu_softmax_bwd_f32();
+	// external_test_cpu_softmax_bwd_f32();
 
 	// experiment
 	/*auto qw = crt_random_tensor<float32, CUDA>({ 16, 64 }, 11);

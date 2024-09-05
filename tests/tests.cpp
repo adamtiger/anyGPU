@@ -234,6 +234,44 @@ void test_softmax_f32()
 }
 
 
+void test_softmax_bwd_f32()
+{
+	// cuda based calculation
+	auto dtx = crt_random_tensor<float32, CUDA>({ 16, 64 }, 11);
+	auto dtgy = crt_random_tensor<float32, CUDA>({ 16, 64 }, 14);  // gradient
+	auto dtc = tensor_softmax_bwd(dtx, dtgy);
+
+	// cpu based calculation (expected result)
+	auto htx = dtx.copy_to_host();
+	auto htgy = dtgy.copy_to_host();
+	auto htc = tensor_softmax_bwd(htx, htgy);
+
+	// compare
+	auto htc_from_cuda = dtc.copy_to_host();
+
+	bool eq = elementwise_compatible(htc, htc_from_cuda);  // checks the sizes
+	if (eq)
+	{
+		float32* expected = htc.buffer();
+		float32* actual = htc_from_cuda.buffer();
+
+		int length = htc.size();
+
+		for (int ix = 0; ix < length; ++ix)
+		{
+			eq = eq && std::abs(expected[ix] - actual[ix]) < 0.001f;
+
+			if (!eq)
+			{
+				std::cout << expected[ix] << " " << actual[ix] << "\n";
+			}
+		}
+	}
+
+	std::cout << "TestCase [test_softmax_bwd_f32]: " << (eq ? "PASSED" : "FAILED") << "\n";
+}
+
+
 void test_sdp_fwd_f32()
 {
 	// cuda based calculation

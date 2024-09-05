@@ -171,4 +171,29 @@ Tensor<dtype, CPU> tensor_softmax_bwd(const Tensor<dtype, CPU>& x, const Tensor<
 	return y;
 }
 
+
+template<typename dtype>
+Tensor<dtype, CUDA> tensor_softmax_bwd(const Tensor<dtype, CUDA>& x, const Tensor<dtype, CUDA>& grad_y)
+{
+	assert(x->dim == 2);
+
+	int m = x.shape[0];
+	int n = x.shape[1];
+	std::vector<int> grad_x_shape({ m, n });
+	Tensor<dtype, CUDA> grad_x(grad_x_shape);
+
+	if constexpr (std::is_same_v<dtype, float32>)
+	{
+		tensor_softmax_bwd_f32(x, grad_y, grad_x);
+	}
+	else
+	{
+		static_assert(std::is_same_v<dtype, int32>, "Unsupported data type");
+		//tensor_add_i32(kpms, lhs, rhs, res);
+	}
+
+	return grad_x;
+}
+
+
 #endif  // __SOFTMAX_OPS__
