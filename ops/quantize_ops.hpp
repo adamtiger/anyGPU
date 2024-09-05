@@ -98,4 +98,61 @@ Tensor<trg_dtype, CPU> tensor_dequantize_linear(const Tensor<src_dtype, CPU>& x,
 	return y;
 }
 
+
+/*
+*  Quantized matrix multiplication.
+*  Calculates the matmul on the low precision tensors,
+*  and calculates the quantized output.
+*/
+template<IntegerType lp_dtype, PreciseFloatType hp_dtype>
+Tensor<lp_dtype, CPU> tensor_qmm(
+	const Tensor<lp_dtype, CPU>& a,
+	const Tensor<lp_dtype, CPU>& b,
+	const hp_dtype sa, const lp_dtype zpa,
+	const hp_dtype sb, const lp_dtype zpb, 
+	const hp_dtype sy, const lp_dtype zpy)
+{
+	assert(matmul_compatible(a, b));
+
+	int m = a.shape[0];
+	int n = b.shape[1];
+	int k = a.shape[1];
+
+	// access the data arrays
+	std::vector<int> y_shape({ m, n });
+	Tensor<lp_dtype, CPU> y(y_shape);
+    lp_dtype* y_data = y.buffer();
+	lp_dtype* a_data = a.buffer();
+	lp_dtype* b_data = b.buffer();
+
+	// reference implementation
+	// reliable (but slow)
+	int32 lowest = static_cast<int32>(std::numeric_limits<lp_dtype>::lowest());
+	int32 highest = static_cast<int32>(std::numeric_limits<lp_dtype>::max());
+
+	hp_dtype s = (sa * sb) / sy;
+	hp_dtype zpy_hp = static_cast<hp_dtype>(zpy);
+	int32 zpa_i32 = static_cast<int32>(zpa);
+	int32 zpb_i32 = static_cast<int32>(zpb);
+
+	for (int i = 0; i < m; ++i)
+	{
+		for (int j = 0; j < n; ++j)
+		{
+			int32 accumulator = 0;
+			for (int c = 0; c < k; ++c)
+			{
+				accumulator += ((int32)(a_data[i * k + c]) - zpa) * ((int32)(b_data[c * n + k]) - zpb);
+			}
+
+			int32 qx = static_cast<int32>(round(static_cast<hp_dtype>(accumulator) * s + zpy_hp));
+			qx = std::min(std::max(qx, lowest), highest);
+
+			y_data[i * n + j] = qx;
+		}
+	}
+
+	return y;
+}
+
 #endif  // __QUANTIZE_OPS__
