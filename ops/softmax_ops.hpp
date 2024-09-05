@@ -153,7 +153,7 @@ Tensor<dtype, CPU> tensor_softmax_bwd(const Tensor<dtype, CPU>& x, const Tensor<
 			int gy_offs = gy_stride_r * i + gy_stride_c * j;
 			int x_offs = x_stride_r * i + x_stride_c * j;
 
-			dtype temp = gy_data[gy_offs] * x[x_offs];
+			dtype temp = gy_data[gy_offs] * x_data[x_offs];
 			y_data[y_offs] = temp;
 			y_delta += temp;
 		}
@@ -164,7 +164,7 @@ Tensor<dtype, CPU> tensor_softmax_bwd(const Tensor<dtype, CPU>& x, const Tensor<
 			int y_offs = y_stride_r * i + y_stride_c * l;
 			int x_offs = x_stride_r * i + x_stride_c * l;
 
-			y_data[y_offs] -= y_delta * x[x_offs];
+			y_data[y_offs] -= y_delta * x_data[x_offs];
 		}
 	}
 

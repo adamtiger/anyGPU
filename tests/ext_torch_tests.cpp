@@ -109,7 +109,7 @@ void external_test_sdp_bwd_f32()
 }
 
 
-void external_test_softmax_bwd_f32()
+void external_test_cpu_softmax_bwd_f32()
 {
 	auto path = artifact_folder_path / "softmax_bwd_f32_16_64";
 
@@ -119,32 +119,33 @@ void external_test_softmax_bwd_f32()
 	auto h_grad_y = load_tensor((path / "grad_y.dat").string());
 	auto h_grad_x = load_tensor((path / "grad_x.dat").string());
 
-	auto grad_x = tensor_softmax_bwd(hx, h_grad_y);
+	auto hy = tensor_softmax(hx);
+	auto grad_x = tensor_softmax_bwd(hy, h_grad_y);
 
 	// compare
 	auto cmp = [&](const Tensor<float32, CPU>& expected, const Tensor<float32, CPU>& actual)
+	{
+		bool eq = elementwise_compatible(expected, actual);  // checks the sizes
+		if (eq)
 		{
-			bool eq = elementwise_compatible(expected, actual);  // checks the sizes
-			if (eq)
+			float32* ex = expected.buffer();
+			float32* ac = actual.buffer();
+
+			int length = expected.size();
+
+			for (int ix = 0; ix < length; ++ix)
 			{
-				float32* ex = expected.buffer();
-				float32* ac = actual.buffer();
+				eq = eq && std::abs(ex[ix] - ac[ix]) < 0.001f;
 
-				int length = expected.size();
-
-				for (int ix = 0; ix < length; ++ix)
+				if (!eq)
 				{
-					eq = eq && std::abs(ex[ix] - ac[ix]) < 0.001f;
-
-					if (!eq)
-					{
-						std::cout << ex[ix] << " " << ac[ix] << "\n";
-					}
+					std::cout << ex[ix] << " " << ac[ix] << "\n";
 				}
 			}
+		}
 
-			return eq;
-		};
+		return eq;
+	};
 
 	bool eq = cmp(h_grad_x, grad_x);
 
