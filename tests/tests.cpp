@@ -310,3 +310,59 @@ void test_sdp_fwd_f32()
 
 	std::cout << "TestCase [test_sdp_fwd_f32]: " << (eq ? "PASSED" : "FAILED") << "\n";
 }
+
+
+void test_sdp_bwd_f32()
+{
+	// cuda based calculation
+	auto dqw = crt_random_tensor<float32, CUDA>({ 14, 64 }, 11);
+	auto dkw = crt_random_tensor<float32, CUDA>({ 14, 64 }, 18);
+	auto dvw = crt_random_tensor<float32, CUDA>({ 14, 64 }, 15);
+	auto dgy = crt_random_tensor<float32, CUDA>({ 14, 64 }, 10);
+	SDPGradient dgrads = single_head_attention_bwd<float32, CUDA, NONE, FULL>(dqw, dkw, dvw, dgy);
+
+	// cpu based calculation (expected result)
+	auto hqw = dqw.copy_to_host();
+	auto hkw = dkw.copy_to_host();
+	auto hvw = dvw.copy_to_host();
+	auto hgy = dgy.copy_to_host();
+	SDPGradient hgrads = single_head_attention_bwd<float32, CPU, NONE, FULL>(hqw, hkw, hvw, hgy);
+
+	// compare
+	auto cmp = [&](const Tensor<float32, CPU>& expected, const Tensor<float32, CPU>& actual)
+	{
+		bool eq = elementwise_compatible(expected, actual);  // checks the sizes
+		if (eq)
+		{
+			float32* ex = expected.buffer();
+			float32* ac = actual.buffer();
+
+			int length = expected.size();
+
+			for (int ix = 0; ix < length; ++ix)
+			{
+				eq = eq && std::abs(ex[ix] - ac[ix]) < 0.001f;
+
+				if (!eq)
+				{
+					std::cout << ex[ix] << " " << ac[ix] << "\n";
+				}
+			}
+		}
+
+		return eq;
+	};
+
+	bool eq = true;
+
+	auto h_grad_q_from_cuda = dgrads.grad_q.copy_to_host();
+	eq = eq && cmp(hgrads.grad_q, h_grad_q_from_cuda);
+
+	auto h_grad_k_from_cuda = dgrads.grad_k.copy_to_host();
+	eq = eq && cmp(hgrads.grad_k, h_grad_k_from_cuda);
+
+	auto h_grad_v_from_cuda = dgrads.grad_v.copy_to_host();
+	eq = eq && cmp(hgrads.grad_v, h_grad_v_from_cuda);
+
+	std::cout << "TestCase [test_sdp_bwd_f32]: " << (eq ? "PASSED" : "FAILED") << "\n";
+}

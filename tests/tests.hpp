@@ -21,5 +21,6 @@ void test_softmax_bwd_f32();
 
 
 void test_sdp_fwd_f32();
+void test_sdp_bwd_f32();
 
 #endif  // __TESTS__
