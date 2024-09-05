@@ -48,12 +48,12 @@ enum DataType
 /* Data type related */
 
 static int bitsize_of_datatypes[] = {
-	4, 8, 16, 32, 16, 16, 32, 64
+	8, 16, 32, 16, 16, 32, 64
 };
 
 // int4 is 0.5 bytes long, from alignment perspective it is handled like 1
 static int bytesize_of_datatypes[] = {
-	1, 1, 2, 4, 2, 2, 4, 8
+	1, 2, 4, 2, 2, 4, 8
 };
 
 using int8 = char;
