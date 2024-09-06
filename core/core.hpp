@@ -222,6 +222,9 @@ struct KernelParameters
 	dim3 block_size;
 };
 
+// Calculates the number of required blocks for a specific number of elements
+unsigned int calc_req_num_blocks(unsigned int num_elements, unsigned int block_size);
+
 /*
   Prints the device properties of the cuda device.
 */

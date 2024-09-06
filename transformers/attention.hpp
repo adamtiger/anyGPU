@@ -302,7 +302,7 @@ static Tensor<lp_dtype, device> quantized_single_head_attention_fwd(
 	const hp_dtype s3, const lp_dtype zp3,
 	const hp_dtype sy, const lp_dtype zpy)
 {
-	Tensor<dtype, device> y;
+	Tensor<lp_dtype, device> y;
 	return y;
 };
 

@@ -398,7 +398,7 @@ void test_quant_lin_f32_i8()
 
 			if (!eq)
 			{
-				std::cout << expected[ix] << " " << actual[ix] << "\n";
+				std::cout << (int32)expected[ix] << " " << (int32)actual[ix] << "\n";
 			}
 		}
 	}

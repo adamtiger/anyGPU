@@ -69,6 +69,14 @@ std::string represent_array(const int dim, const DimArray& arr)
 }
 
 
+unsigned int calc_req_num_blocks(unsigned int num_elements, unsigned int block_size)
+{
+	unsigned int temp = num_elements / block_size;
+	temp += (num_elements % block_size > 0 ? 1 : 0);
+	return temp;
+}
+
+
 std::string print_cuda_device_props()
 {
 	std::stringstream ss;

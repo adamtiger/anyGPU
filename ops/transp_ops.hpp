@@ -59,6 +59,10 @@ Tensor<dtype, CUDA> tensor_transp(const Tensor<dtype, CUDA>& x)
 	{
 		tensor_transp_f32(x, y);
 	}
+	else if constexpr (std::is_same_v<dtype, int8>)
+	{
+		tensor_transp_i8(x, y);
+	}
 	else
 	{
 		static_assert(std::is_same_v<dtype, int32>, "Unsupported data type");

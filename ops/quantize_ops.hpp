@@ -24,8 +24,8 @@ static Tensor<trg_dtype, CPU> tensor_quantize_linear(const Tensor<src_dtype, CPU
 	// reliable (but slow)
 
 	int32 bias_i32 = static_cast<int32>(bias);
-	int32 lowest = static_cast<int32>(std::numeric_limits<trg_dtype>::lowest());
-	int32 highest = static_cast<int32>(std::numeric_limits<trg_dtype>::max());
+	constexpr int32 lowest = static_cast<int32>(std::numeric_limits<trg_dtype>::lowest());
+	constexpr int32 highest = static_cast<int32>(std::numeric_limits<trg_dtype>::max());
 
 	int n = x.size();
 	for (int ix = 0; ix < n; ++ix)
@@ -37,7 +37,7 @@ static Tensor<trg_dtype, CPU> tensor_quantize_linear(const Tensor<src_dtype, CPU
 		qx = std::min(std::max(qx, lowest), highest);
 
 		// saving result
-		y_data[ix] = qx;
+		y_data[ix] = (int8)qx;
 	}
 
 	return y;
@@ -139,8 +139,8 @@ static Tensor<lp_dtype, CPU> tensor_qmm(
 
 	// reference implementation
 	// reliable (but slow)
-	int32 lowest = static_cast<int32>(std::numeric_limits<lp_dtype>::lowest());
-	int32 highest = static_cast<int32>(std::numeric_limits<lp_dtype>::max());
+	constexpr int32 lowest = static_cast<int32>(std::numeric_limits<lp_dtype>::lowest());
+	constexpr int32 highest = static_cast<int32>(std::numeric_limits<lp_dtype>::max());
 
 	hp_dtype s = (sa * sb) / sy;
 	hp_dtype zpy_hp = static_cast<hp_dtype>(zpy);
