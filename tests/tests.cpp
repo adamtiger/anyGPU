@@ -450,7 +450,7 @@ void test_qmm_i8_f32()
 {
 	// cuda based calculation
 	auto dta = crt_random_tensor<int8, CUDA>({ 40, 30 }, 12);
-	auto dtb = crt_random_tensor<int8, CUDA>({ 30, 50 }, 19);
+	auto dtb = crt_random_tensor<int8, CUDA>({ 30, 50 }, 29);
 
 	float32 sa = 1.8f;
 	int8 zpa = 56;

@@ -98,7 +98,7 @@ __global__ void tensor_qmm_cuda_i8_f32_kernel(
 			accumulator += ((int16)da[offs_a] - (int16)zpa) * ((int16)db[offs_b] - (int16)zpb);
 		}
 
-		int32 qx = (int32)lrintf((float32)accumulator * s) + (int32)zpy;
+		int32 qx = (int32)lroundf((float32)accumulator * s) + (int32)zpy;
 		qx = min(max(qx, INT8_LOWEST), INT8_HIGHEST);
 		dy[ty * n + tx] = (int8)qx;
 	}
