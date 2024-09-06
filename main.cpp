@@ -30,6 +30,7 @@ int main()
 	//external_test_cpu_softmax_bwd_f32();
 
 	test_quant_lin_f32_i8();
+	test_dequant_lin_i8_f32();
 
 	// experiment
 	/*auto qw = crt_random_tensor<float32, CUDA>({ 16, 64 }, 11);
