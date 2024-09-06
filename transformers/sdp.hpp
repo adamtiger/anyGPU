@@ -56,10 +56,11 @@ struct SDPGradient
 	Tensor<dtype, device> grad_v;
 };
 
+
 /* backward implementation */
 
 template<PreciseFloatType dtype>
-SDPGradient<dtype, CPU> sdp_attention_bwd_cpu_precise_float(
+static SDPGradient<dtype, CPU> sdp_attention_bwd_cpu_precise_float(
 	const Tensor<dtype, CPU>& qw,
 	const Tensor<dtype, CPU>& kw,
 	const Tensor<dtype, CPU>& vw,
@@ -89,7 +90,7 @@ SDPGradient<dtype, CPU> sdp_attention_bwd_cpu_precise_float(
 
 
 template<FloatingPointType dtype>
-SDPGradient<dtype, CUDA> sdp_attention_bwd_cuda_basic(
+static SDPGradient<dtype, CUDA> sdp_attention_bwd_cuda_basic(
 	const Tensor<dtype, CUDA>& qw,
 	const Tensor<dtype, CUDA>& kw,
 	const Tensor<dtype, CUDA>& vw,
@@ -115,6 +116,60 @@ SDPGradient<dtype, CUDA> sdp_attention_bwd_cuda_basic(
 	grads.grad_k = tensor_transp(dr0);
 
 	return grads;
+}
+
+
+/* qunatized forward implementation */
+
+template<PreciseFloatType dtype>
+static Tensor<int8, CPU> quant_sdp_attention_fwd_cpu_precise_i8(
+	const Tensor<int8, CPU>& qw,
+	const Tensor<int8, CPU>& kw,
+	const Tensor<int8, CPU>& vw,
+	const dtype sq, const int8 zpq,
+	const dtype sk, const int8 zpk,
+	const dtype sv, const int8 zpv,
+	const dtype s1, const int8 zp1,
+	const dtype s2, const int8 zp2,
+	const dtype s3, const int8 zp3,
+	const dtype sy, const int8 zpy)
+{
+	int d = qw.shape[1];  // qw shape: (N, d)
+	dtype alpha = static_cast<dtype>(1.f / sqrtf(static_cast<float32>(d)));
+	auto kw_tr = tensor_transp(kw);
+	auto qk = tensor_qmm(qw, kw_tr, sq, zpq, sk, zpk, s1, zp1);
+	auto deq_qk = tensor_dequantize_linear(qk, s2, zp2);
+	auto nqk = tensor_mul(deq_qk, alpha);
+	auto score = tensor_softmax(nqk);
+	auto q_score = tensor_quantize_linear(score, s3, zp3);
+	auto y = tensor_qmm(q_score, vw, s3, zp3, sv, zpv, sy, zpy);
+	return y;
+}
+
+
+
+static Tensor<int8, CUDA> quant_sdp_attention_fwd_cuda_basic_f32_i8(
+	const Tensor<int8, CUDA>& qw,
+	const Tensor<int8, CUDA>& kw,
+	const Tensor<int8, CUDA>& vw,
+	const float32 sq, const int8 zpq,
+	const float32 sk, const int8 zpk,
+	const float32 sv, const int8 zpv,
+	const float32 s1, const int8 zp1,
+	const float32 s2, const int8 zp2,
+	const float32 s3, const int8 zp3,
+	const float32 sy, const int8 zpy)
+{
+	int d = qw.shape[1];  // qw shape: (N, d)
+	float32 alpha = 1.f / sqrtf(static_cast<float32>(d));
+	auto kw_tr = tensor_transp(kw);
+	auto qk = tensor_qmm(qw, kw_tr, sq, zpq, sk, zpk, s1, zp1);
+	auto deq_qk = tensor_dequantize_linear(qk, s2, zp2);
+	auto nqk = tensor_mul(deq_qk, alpha);
+	auto score = tensor_softmax(nqk);
+	auto q_score = tensor_quantize_linear(score, s3, zp3);
+	auto y = tensor_qmm(q_score, vw, s3, zp3, sv, zpv, sy, zpy);
+	return y;
 }
 
 #endif  // __SDP__

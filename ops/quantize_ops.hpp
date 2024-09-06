@@ -13,7 +13,7 @@
 *  This is a per-tensor quantization.
 */
 template<PreciseFloatType src_dtype, IntegerType trg_dtype>
-Tensor<trg_dtype, CPU> tensor_quantize_linear(const Tensor<src_dtype, CPU>& x, const src_dtype scale, const trg_dtype bias)
+static Tensor<trg_dtype, CPU> tensor_quantize_linear(const Tensor<src_dtype, CPU>& x, const src_dtype scale, const trg_dtype bias)
 {
 	// access the data arrays
 	Tensor<trg_dtype, CPU> y(x.dim, x.shape);
@@ -44,24 +44,18 @@ Tensor<trg_dtype, CPU> tensor_quantize_linear(const Tensor<src_dtype, CPU>& x, c
 }
 
 
-template<typename dtype>
-Tensor<dtype, CUDA> tensor_quantize_linear(const Tensor<dtype, CUDA>& x)
+template<FloatingPointType src_dtype, IntegerType trg_dtype>
+static Tensor<trg_dtype, CUDA> tensor_quantize_linear(const Tensor<src_dtype, CUDA>& x, const src_dtype scale, const trg_dtype bias)
 {
-	assert(x->dim == 2);
+	Tensor<trg_dtype, CUDA> y(x.dim, x.shape);
 
-	int m = x.shape[0];
-	int n = x.shape[1];
-	std::vector<int> y_shape({ m, n });
-	Tensor<dtype, CUDA> y(y_shape);
-
-	if constexpr (std::is_same_v<dtype, float32>)
+	if constexpr (std::is_same_v<src_dtype, float32> && std::is_same_v<trg_dtype, int8>)
 	{
-		tensor_softmax_f32(x, y);
+		tensor_quantize_linear_cuda_f32_i8(x, scale, bias, y);
 	}
 	else
 	{
-		static_assert(std::is_same_v<dtype, int32>, "Unsupported data type");
-		//tensor_add_i32(kpms, lhs, rhs, res);
+		static_assert(std::is_same_v<src_dtype, float32> && std::is_same_v<trg_dtype, int8>, "Unsupported data types");
 	}
 
 	return y;
@@ -99,13 +93,31 @@ Tensor<trg_dtype, CPU> tensor_dequantize_linear(const Tensor<src_dtype, CPU>& x,
 }
 
 
+template<IntegerType src_dtype, FloatingPointType trg_dtype>
+static Tensor<trg_dtype, CUDA> tensor_dequantize_linear(const Tensor<src_dtype, CUDA>& x, const trg_dtype scale, const src_dtype bias)
+{
+	Tensor<trg_dtype, CUDA> y(x.dim, x.shape);
+
+	if constexpr (std::is_same_v<src_dtype, int8> && std::is_same_v<trg_dtype, float32>)
+	{
+		tensor_dequantize_linear_cuda_i8_f32(x, scale, bias, y);
+	}
+	else
+	{
+		static_assert(std::is_same_v<src_dtype, int8> && std::is_same_v<trg_dtype, float32>, "Unsupported data types");
+	}
+
+	return y;
+}
+
+
 /*
-*  Quantized matrix multiplication.
-*  Calculates the matmul on the low precision tensors,
-*  and calculates the quantized output.
+   Quantized matrix multiplication.
+   Calculates the matmul on the low precision tensors,
+   and calculates the quantized output.
 */
 template<IntegerType lp_dtype, PreciseFloatType hp_dtype>
-Tensor<lp_dtype, CPU> tensor_qmm(
+static Tensor<lp_dtype, CPU> tensor_qmm(
 	const Tensor<lp_dtype, CPU>& a,
 	const Tensor<lp_dtype, CPU>& b,
 	const hp_dtype sa, const lp_dtype zpa,
@@ -150,6 +162,37 @@ Tensor<lp_dtype, CPU> tensor_qmm(
 
 			y_data[i * n + j] = qx;
 		}
+	}
+
+	return y;
+}
+
+
+template<IntegerType lp_dtype, FloatingPointType hp_dtype>
+static Tensor<lp_dtype, CUDA> tensor_qmm(
+	const Tensor<lp_dtype, CUDA>& a,
+	const Tensor<lp_dtype, CUDA>& b,
+	const hp_dtype sa, const lp_dtype zpa,
+	const hp_dtype sb, const lp_dtype zpb,
+	const hp_dtype sy, const lp_dtype zpy)
+{
+	assert(matmul_compatible(a, b));
+
+	int m = a.shape[0];
+	int n = b.shape[1];
+	int k = a.shape[1];
+
+	// access the data arrays
+	std::vector<int> y_shape({ m, n });
+	Tensor<lp_dtype, CUDA> y(y_shape);
+
+	if constexpr (std::is_same_v<lp_dtype, int8> && std::is_same_v<hp_dtype, float32>)
+	{
+		tensor_qmm_cuda_i8_f32(a, b, sa, zpa, sb, zpb, sy, zpy, y);
+	}
+	else
+	{
+		static_assert(std::is_same_v<lp_dtype, int8> && std::is_same_v<hp_dtype, float32>, "Unsupported data types");
 	}
 
 	return y;
