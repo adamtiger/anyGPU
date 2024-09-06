@@ -295,7 +295,7 @@ static Tensor<lp_dtype, device> quantized_single_head_attention_fwd(
 	const Tensor<lp_dtype, device>& kw,
 	const Tensor<lp_dtype, device>& vw,
 	const hp_dtype sq, const lp_dtype zpq,
-	const hp_dtype sk, const lp_dtype zpk, 
+	const hp_dtype sk, const lp_dtype zpk,
 	const hp_dtype sv, const lp_dtype zpv,
 	const hp_dtype s1, const lp_dtype zp1,
 	const hp_dtype s2, const lp_dtype zp2,

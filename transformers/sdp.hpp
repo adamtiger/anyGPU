@@ -147,7 +147,6 @@ static Tensor<int8, CPU> quant_sdp_attention_fwd_cpu_precise_i8(
 }
 
 
-
 static Tensor<int8, CUDA> quant_sdp_attention_fwd_cuda_basic_f32_i8(
 	const Tensor<int8, CUDA>& qw,
 	const Tensor<int8, CUDA>& kw,

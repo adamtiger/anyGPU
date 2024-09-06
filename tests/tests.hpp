@@ -22,6 +22,7 @@ void test_softmax_bwd_f32();
 
 void test_sdp_fwd_f32();
 void test_sdp_bwd_f32();
+void test_quant_sdp_fwd_f32_i8();
 
 
 void test_quant_lin_f32_i8();

@@ -368,6 +368,78 @@ void test_sdp_bwd_f32()
 }
 
 
+void test_quant_sdp_fwd_f32_i8()
+{
+	// cuda based calculation
+	auto dqw = crt_random_tensor<int8, CUDA>({ 21, 64 }, 11);
+	auto dkw = crt_random_tensor<int8, CUDA>({ 21, 64 }, 28);
+	auto dvw = crt_random_tensor<int8, CUDA>({ 21, 64 }, 45);
+
+	float32 sq = 2.1f;
+	int8 zpq = 16;
+
+	float32 sk = 1.1f;
+	int8 zpk = 24;
+
+	float32 sv = 1.7f;
+	int8 zpv = -5;
+
+	float32 s1 = 2.3f;
+	int8 zp1 = 17;
+
+	float32 s2 = 1.5f;
+	int8 zp2 = 22;
+
+	float32 s3 = 1.4f;
+	int8 zp3 = 5;
+
+	float32 sy = 1.3f;
+	int8 zpy = 3;
+
+	auto dy = quantized_single_head_attention_fwd<float32, int8, CUDA, NONE, FULL>(
+		dqw, dkw, dvw,
+		sq, zpq, sk, zpk, sv, zpv,
+		s1, zp1, s2, zp2, s3, zp3,
+		sy, zpy
+	);
+
+	// cpu based calculation (expected result)
+	auto hqw = dqw.copy_to_host();
+	auto hkw = dkw.copy_to_host();
+	auto hvw = dvw.copy_to_host();
+	auto hy = quantized_single_head_attention_fwd<float32, int8, CPU, NONE, FULL>(
+		hqw, hkw, hvw,
+		sq, zpq, sk, zpk, sv, zpv,
+		s1, zp1, s2, zp2, s3, zp3,
+		sy, zpy
+	);
+
+	// compare
+	auto hy_from_cuda = dy.copy_to_host();
+
+	bool eq = elementwise_compatible(hy, hy_from_cuda);  // checks the sizes
+	if (eq)
+	{
+		int8* expected = hy.buffer();
+		int8* actual = hy_from_cuda.buffer();
+
+		int length = hy.size();
+
+		for (int ix = 0; ix < length; ++ix)
+		{
+			eq = eq && (expected[ix] == actual[ix]);
+
+			if (!eq)
+			{
+				std::cout << (int32)expected[ix] << " " << (int32)actual[ix] << "\n";
+			}
+		}
+	}
+
+	std::cout << "TestCase [test_quant_sdp_fwd_f32_i8]: " << (eq ? "PASSED" : "FAILED") << "\n";
+}
+
+
 void test_quant_lin_f32_i8()
 {
 	// cuda based calculation

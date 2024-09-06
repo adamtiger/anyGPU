@@ -33,6 +33,8 @@ int main()
 	test_dequant_lin_i8_f32();
 	test_qmm_i8_f32();
 
+	test_quant_sdp_fwd_f32_i8();
+
 	// experiment
 	/*auto qw = crt_random_tensor<float32, CUDA>({ 16, 64 }, 11);
 	auto kw = crt_random_tensor<float32, CUDA>({ 16, 64 }, 15);
