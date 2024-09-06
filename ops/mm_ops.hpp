@@ -10,7 +10,7 @@
 template<NotHalfFloatType dtype>
 Tensor<dtype, CPU> tensor_mm(const Tensor<dtype, CPU>& lhs, const Tensor<dtype, CPU>& rhs)
 {
-	assert(matmul_compatible(lhs, rhs));
+	ACASSERT(matmul_compatible(lhs, rhs) == true, "matrix multiplication requires compatible matrices");
 
 	int m = lhs.shape[0];
 	int n = rhs.shape[1];
@@ -50,7 +50,7 @@ Tensor<dtype, CPU> tensor_mm(const Tensor<dtype, CPU>& lhs, const Tensor<dtype, 
 template<typename dtype>
 Tensor<dtype, CUDA> tensor_mm(const Tensor<dtype, CUDA>& lhs, const Tensor<dtype, CUDA>& rhs)
 {
-	assert(matmul_compatible(lhs, rhs));
+	ACASSERT(matmul_compatible(lhs, rhs) == true, "matrix multiplication requires compatible matrices");
 
 	int m = lhs.shape[0];
 	int n = rhs.shape[1];

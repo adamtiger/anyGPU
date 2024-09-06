@@ -15,7 +15,7 @@
 template<PreciseFloatType dtype>
 Tensor<dtype, CPU> tensor_softmax(const Tensor<dtype, CPU>& x)
 {
-	assert(x->dim == 2);
+	ACASSERT(x.dim == 2, "softmax expects 2 dimensional tensors");
 
 	int m = x.shape[0];
 	int n = x.shape[1];
@@ -85,7 +85,7 @@ Tensor<dtype, CPU> tensor_softmax(const Tensor<dtype, CPU>& x)
 template<typename dtype>
 Tensor<dtype, CUDA> tensor_softmax(const Tensor<dtype, CUDA>& x)
 {
-	assert(x->dim == 2);
+	ACASSERT(x.dim == 2, "softmax expects 2 dimensional tensors");
 
 	int m = x.shape[0];
 	int n = x.shape[1];
@@ -118,8 +118,8 @@ Tensor<dtype, CUDA> tensor_softmax(const Tensor<dtype, CUDA>& x)
 template<PreciseFloatType dtype>
 Tensor<dtype, CPU> tensor_softmax_bwd(const Tensor<dtype, CPU>& x, const Tensor<dtype, CPU>& grad_y)
 {
-	assert(x->dim == 2);
-	assert(grad_y->dim == 2);
+	ACASSERT(x.dim == 2, "softmax bwd expects 2 dimensional x tensor");
+	ACASSERT(grad_y.dim == 2, "softmax bwd expects 2 dimensional grad y tensor");
 
 	int m = x.shape[0];
 	int n = x.shape[1];
@@ -175,7 +175,8 @@ Tensor<dtype, CPU> tensor_softmax_bwd(const Tensor<dtype, CPU>& x, const Tensor<
 template<typename dtype>
 Tensor<dtype, CUDA> tensor_softmax_bwd(const Tensor<dtype, CUDA>& x, const Tensor<dtype, CUDA>& grad_y)
 {
-	assert(x->dim == 2);
+	ACASSERT(x.dim == 2, "softmax bwd expects 2 dimensional x tensor");
+	ACASSERT(grad_y.dim == 2, "softmax bwd expects 2 dimensional grad y tensor");
 
 	int m = x.shape[0];
 	int n = x.shape[1];

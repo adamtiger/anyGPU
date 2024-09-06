@@ -11,7 +11,7 @@
 template<NotHalfFloatType dtype>
 Tensor<dtype, CPU> tensor_add(const Tensor<dtype, CPU>& lhs, const Tensor<dtype, CPU>& rhs)
 {
-	assert(elementwise_compatible(lhs, rhs));
+	ACASSERT(elementwise_compatible(lhs, rhs) == true, "tensors are not elementwise compatible");
 
 	int length = lhs.size();
 	dtype* lhs_data = lhs.buffer();
@@ -32,7 +32,7 @@ Tensor<dtype, CPU> tensor_add(const Tensor<dtype, CPU>& lhs, const Tensor<dtype,
 template<typename dtype>
 Tensor<dtype, CUDA> tensor_add(const Tensor<dtype, CUDA>& lhs, const Tensor<dtype, CUDA>& rhs)
 {
-	assert((elementwise_compatible(lhs, rhs)==true));
+	ACASSERT(elementwise_compatible(lhs, rhs) == true, "tensors are not elementwise compatible");
 
 	int length = lhs.size();
 	auto kpms = calc_kernel_prms_pointwise(lhs);

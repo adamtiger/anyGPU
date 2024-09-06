@@ -282,4 +282,67 @@ DimArray cvt_vector2array(const std::vector<int>& v);
 */
 int calc_dim(const std::vector<int>& v);
 
+
+/* logger, assert */
+
+enum class LogLevel
+{
+	LEVEL_INFO,
+	LEVEL_WARNING,
+	LEVEL_ERROR
+};
+
+static void log_message(LogLevel llevel, const std::string& msg)
+{
+	// static handlers
+	static const std::string log_prefix_table[] =
+	{
+		"\033[33m[INFO    ",
+		"\033[36m[WARNING ",
+		"\033[91m[ERROR   "
+	};
+
+	std::stringstream ss;
+	ss << log_prefix_table[int(llevel)] << "] ";
+	ss << msg;
+
+	// write to screen
+	std::cout << ss.str() << "\033[m" << std::endl;
+}
+
+static void log_info(const char* cmsg)
+{
+	std::string msg(cmsg);
+	log_message(LogLevel::LEVEL_INFO, msg);
+}
+
+static void log_warning(const char* cmsg)
+{
+	std::string msg(cmsg);
+	log_message(LogLevel::LEVEL_WARNING, msg);
+}
+
+static void log_error(const char* cmsg)
+{
+	std::string msg(cmsg);
+	log_message(LogLevel::LEVEL_ERROR, msg);
+}
+
+#ifdef AC_WITH_ASSERT
+#define ACASSERT( expression, msg )         \
+    do {                                    \
+        bool cond = (expression);           \
+	    if ((expression)) {}                \
+		else                                \
+		{                                   \
+			std::cout << __FILE__ << " " << __LINE__ << '\n';  \
+			log_error(msg);                 \
+		    exit(1);                        \
+		}                                   \
+	} while(0)
+#else
+#define ACASSERT( expression, msg ) ((void)0)
+#endif
+
+
 #endif  // __CORE__

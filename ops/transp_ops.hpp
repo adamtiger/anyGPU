@@ -10,7 +10,7 @@
 template<NotHalfFloatType dtype>
 Tensor<dtype, CPU> tensor_transp(const Tensor<dtype, CPU>& x)
 {
-	assert(x->dim == 2);
+	ACASSERT(x.dim == 2, "transpose expects 2 dimensional tensors");
 
 	int m = x.shape[0];
 	int n = x.shape[1];
@@ -48,7 +48,7 @@ Tensor<dtype, CPU> tensor_transp(const Tensor<dtype, CPU>& x)
 template<typename dtype>
 Tensor<dtype, CUDA> tensor_transp(const Tensor<dtype, CUDA>& x)
 {
-	assert(x->dim == 2);
+	ACASSERT(x.dim == 2, "transpose expects 2 dimensional tensors");
 
 	int m = x.shape[0];
 	int n = x.shape[1];

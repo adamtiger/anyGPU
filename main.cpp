@@ -10,16 +10,16 @@ int main()
 	test_binary_add_i32();
 
 	test_binary_mul_f32();
-	test_binary_mul_i32();
+	test_binary_mul_i32();*/
 
 
 	test_mm_f32();
 
-	test_transp_f32();
+	//test_transp_f32();
 
-	test_softmax_f32();
+	//test_softmax_f32();
 
-	test_sdp_fwd_f32();*/ 
+	//test_sdp_fwd_f32();
 
 	// test_sdp_bwd_f32();
 
@@ -29,11 +29,11 @@ int main()
 
 	//external_test_cpu_softmax_bwd_f32();
 
-	test_quant_lin_f32_i8();
+	/*test_quant_lin_f32_i8();
 	test_dequant_lin_i8_f32();
 	test_qmm_i8_f32();
 
-	test_quant_sdp_fwd_f32_i8();
+	test_quant_sdp_fwd_f32_i8();*/
 
 	// experiment
 	/*auto qw = crt_random_tensor<float32, CUDA>({ 16, 64 }, 11);

@@ -5,6 +5,7 @@ message("Start generating!")
 
 option(BUILD_WITH_CUDA "Whether NVIDIA CUDA based modules built" ON)
 option(BUILD_WITH_SYCL "Whether SYCL based modules built" ON)
+option(BUILD_WITH_ASSERT "Whether to assert when needed" ON)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
@@ -16,6 +17,10 @@ if (BUILD_WITH_CUDA)
     message("Compile with cuda")
 endif()
 
+IF (BUILD_WITH_ASSERT)
+    add_compile_definitions(AC_WITH_ASSERT)
+	message("Compile with asserts")
+ENDIF(BUILD_WITH_ASSERT)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
