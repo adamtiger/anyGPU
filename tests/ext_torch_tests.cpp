@@ -19,7 +19,7 @@ void external_test_sdp_fwd_f32()
 	auto dq = hq.copy_to_cuda();
 	auto dk = hk.copy_to_cuda();
 	auto dv = hv.copy_to_cuda();
-	auto dy = single_head_attention_fwd<float32, CUDA, NONE, FULL>(dq, dk, dv);
+	auto dy = single_head_attention_fwd(dq, dk, dv);
 
 	// compare
 	auto hy_from_cuda = dy.copy_to_host();
@@ -67,7 +67,7 @@ void external_test_sdp_bwd_f32()
 	auto dk = hk.copy_to_cuda();
 	auto dv = hv.copy_to_cuda();
 
-	SDPGradient grads = single_head_attention_bwd<float32, CUDA, NONE, FULL>(dq, dk, dv, d_grad_y);
+	SDPGradient grads = single_head_attention_bwd(dq, dk, dv, d_grad_y);
 
 	// compare
 	auto cmp = [&](const Tensor<float32, CPU>& expected, const Tensor<float32, CPU>& actual)

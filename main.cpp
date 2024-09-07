@@ -19,9 +19,9 @@ int main()
 
 	//test_softmax_f32();
 
-	//test_sdp_fwd_f32();
+	test_sdp_fwd_f32();
 
-	// test_sdp_bwd_f32();
+	test_sdp_bwd_f32();
 
 	test_softmax_bwd_f32();
 

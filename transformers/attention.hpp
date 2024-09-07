@@ -58,11 +58,7 @@ enum ScoreFuncKind
 *  The different type of transformers can be
 *  specified with the template parameters.
 */
-template<
-	FloatingPointType dtype, 
-	Device device,
-	MaskKind mask_kind,
-	ScoreFuncKind sc_fn_kind>
+template<FloatingPointType dtype, Device device>
 static Tensor<dtype, device> single_head_attention_fwd(
 	const Tensor<dtype, device>& qw,
 	const Tensor<dtype, device>& kw,
@@ -75,7 +71,7 @@ static Tensor<dtype, device> single_head_attention_fwd(
 /* cpu implementations */
 
 template<>
-static Tensor<float32, CPU> single_head_attention_fwd<float32, CPU, NONE, FULL>(
+static Tensor<float32, CPU> single_head_attention_fwd<float32, CPU>(
 	const Tensor<float32, CPU>& qw,
 	const Tensor<float32, CPU>& kw,
 	const Tensor<float32, CPU>& vw)
@@ -84,7 +80,7 @@ static Tensor<float32, CPU> single_head_attention_fwd<float32, CPU, NONE, FULL>(
 }
 
 template<>
-static Tensor<float64, CPU> single_head_attention_fwd<float64, CPU, NONE, FULL>(
+static Tensor<float64, CPU> single_head_attention_fwd<float64, CPU>(
 	const Tensor<float64, CPU>& qw,
 	const Tensor<float64, CPU>& kw,
 	const Tensor<float64, CPU>& vw)
@@ -95,57 +91,20 @@ static Tensor<float64, CPU> single_head_attention_fwd<float64, CPU, NONE, FULL>(
 /* not implemented cases for cpu (floats under 4 bytes) */
 
 template<>
-static Tensor<float16, CPU> single_head_attention_fwd<float16, CPU, NONE, FULL>(
+static Tensor<float16, CPU> single_head_attention_fwd<float16, CPU>(
 	const Tensor<float16, CPU>& qw,
 	const Tensor<float16, CPU>& kw,
 	const Tensor<float16, CPU>& vw) = delete;
 
 template<>
-static Tensor<float16, CPU> single_head_attention_fwd<float16, CPU, NONE, SOFT_CAPPING>(
-	const Tensor<float16, CPU>& qw,
-	const Tensor<float16, CPU>& kw,
-	const Tensor<float16, CPU>& vw) = delete;
-
-template<>
-static Tensor<float16, CPU> single_head_attention_fwd<float16, CPU, CAUSAL, FULL>(
-	const Tensor<float16, CPU>& qw,
-	const Tensor<float16, CPU>& kw,
-	const Tensor<float16, CPU>& vw) = delete;
-
-template<>
-static Tensor<float16, CPU> single_head_attention_fwd<float16, CPU, CAUSAL, SOFT_CAPPING>(
-	const Tensor<float16, CPU>& qw,
-	const Tensor<float16, CPU>& kw,
-	const Tensor<float16, CPU>& vw) = delete;
-
-template<>
-static Tensor<bfloat16, CPU> single_head_attention_fwd<bfloat16, CPU, NONE, FULL>(
+static Tensor<bfloat16, CPU> single_head_attention_fwd<bfloat16, CPU>(
 	const Tensor<bfloat16, CPU>& qw,
 	const Tensor<bfloat16, CPU>& kw,
 	const Tensor<bfloat16, CPU>& vw) = delete;
-
-template<>
-static Tensor<bfloat16, CPU> single_head_attention_fwd<bfloat16, CPU, NONE, SOFT_CAPPING>(
-	const Tensor<bfloat16, CPU>& qw,
-	const Tensor<bfloat16, CPU>& kw,
-	const Tensor<bfloat16, CPU>& vw) = delete;
-
-template<>
-static Tensor<bfloat16, CPU> single_head_attention_fwd<bfloat16, CPU, CAUSAL, FULL>(
-	const Tensor<bfloat16, CPU>& qw,
-	const Tensor<bfloat16, CPU>& kw,
-	const Tensor<bfloat16, CPU>& vw) = delete;
-
-template<>
-static Tensor<bfloat16, CPU> single_head_attention_fwd<bfloat16, CPU, CAUSAL, SOFT_CAPPING>(
-	const Tensor<bfloat16, CPU>& qw,
-	const Tensor<bfloat16, CPU>& kw,
-	const Tensor<bfloat16, CPU>& vw) = delete;
-
 
 /* cuda implementations */
 template<>
-static Tensor<float32, CUDA> single_head_attention_fwd<float32, CUDA, NONE, FULL>(
+static Tensor<float32, CUDA> single_head_attention_fwd<float32, CUDA>(
 	const Tensor<float32, CUDA>& qw,
 	const Tensor<float32, CUDA>& kw,
 	const Tensor<float32, CUDA>& vw)
@@ -162,11 +121,7 @@ static Tensor<float32, CUDA> single_head_attention_fwd<float32, CUDA, NONE, FULL
 *  The different type of transformers can be
 *  specified with the template parameters.
 */
-template<
-	FloatingPointType dtype,
-	Device device,
-	MaskKind mask_kind,
-	ScoreFuncKind sc_fn_kind>
+template<FloatingPointType dtype, Device device>
 static SDPGradient<dtype, device> single_head_attention_bwd(
 	const Tensor<dtype, device>& qw,
 	const Tensor<dtype, device>& kw,
@@ -180,7 +135,7 @@ static SDPGradient<dtype, device> single_head_attention_bwd(
 /* cpu implementations */
 
 template<>
-static SDPGradient<float32, CPU> single_head_attention_bwd<float32, CPU, NONE, FULL>(
+static SDPGradient<float32, CPU> single_head_attention_bwd<float32, CPU>(
 	const Tensor<float32, CPU>& qw,
 	const Tensor<float32, CPU>& kw,
 	const Tensor<float32, CPU>& vw,
@@ -190,7 +145,7 @@ static SDPGradient<float32, CPU> single_head_attention_bwd<float32, CPU, NONE, F
 }
 
 template<>
-static SDPGradient<float64, CPU> single_head_attention_bwd<float64, CPU, NONE, FULL>(
+static SDPGradient<float64, CPU> single_head_attention_bwd<float64, CPU>(
 	const Tensor<float64, CPU>& qw,
 	const Tensor<float64, CPU>& kw,
 	const Tensor<float64, CPU>& vw,
@@ -202,65 +157,22 @@ static SDPGradient<float64, CPU> single_head_attention_bwd<float64, CPU, NONE, F
 /* not implemented cases for cpu (floats under 4 bytes) */
 
 template<>
-static SDPGradient<float16, CPU> single_head_attention_bwd<float16, CPU, NONE, FULL>(
+static SDPGradient<float16, CPU> single_head_attention_bwd<float16, CPU>(
 	const Tensor<float16, CPU>& qw,
 	const Tensor<float16, CPU>& kw,
 	const Tensor<float16, CPU>& vw,
 	const Tensor<float16, CPU>& grad_y) = delete;
 
 template<>
-static SDPGradient<float16, CPU> single_head_attention_bwd<float16, CPU, NONE, SOFT_CAPPING>(
-	const Tensor<float16, CPU>& qw,
-	const Tensor<float16, CPU>& kw,
-	const Tensor<float16, CPU>& vw,
-	const Tensor<float16, CPU>& grad_y) = delete;
-
-template<>
-static SDPGradient<float16, CPU> single_head_attention_bwd<float16, CPU, CAUSAL, FULL>(
-	const Tensor<float16, CPU>& qw,
-	const Tensor<float16, CPU>& kw,
-	const Tensor<float16, CPU>& vw,
-	const Tensor<float16, CPU>& grad_y) = delete;
-
-template<>
-static SDPGradient<float16, CPU> single_head_attention_bwd<float16, CPU, CAUSAL, SOFT_CAPPING>(
-	const Tensor<float16, CPU>& qw,
-	const Tensor<float16, CPU>& kw,
-	const Tensor<float16, CPU>& vw,
-	const Tensor<float16, CPU>& grad_y) = delete;
-
-template<>
-static SDPGradient<bfloat16, CPU> single_head_attention_bwd<bfloat16, CPU, NONE, FULL>(
+static SDPGradient<bfloat16, CPU> single_head_attention_bwd<bfloat16, CPU>(
 	const Tensor<bfloat16, CPU>& qw,
 	const Tensor<bfloat16, CPU>& kw,
 	const Tensor<bfloat16, CPU>& vw,
 	const Tensor<bfloat16, CPU>& grad_y) = delete;
-
-template<>
-static SDPGradient<bfloat16, CPU> single_head_attention_bwd<bfloat16, CPU, NONE, SOFT_CAPPING>(
-	const Tensor<bfloat16, CPU>& qw,
-	const Tensor<bfloat16, CPU>& kw,
-	const Tensor<bfloat16, CPU>& vw,
-	const Tensor<bfloat16, CPU>& grad_y) = delete;
-
-template<>
-static SDPGradient<bfloat16, CPU> single_head_attention_bwd<bfloat16, CPU, CAUSAL, FULL>(
-	const Tensor<bfloat16, CPU>& qw,
-	const Tensor<bfloat16, CPU>& kw,
-	const Tensor<bfloat16, CPU>& vw,
-	const Tensor<bfloat16, CPU>& grad_y) = delete;
-
-template<>
-static SDPGradient<bfloat16, CPU> single_head_attention_bwd<bfloat16, CPU, CAUSAL, SOFT_CAPPING>(
-	const Tensor<bfloat16, CPU>& qw,
-	const Tensor<bfloat16, CPU>& kw,
-	const Tensor<bfloat16, CPU>& vw,
-	const Tensor<bfloat16, CPU>& grad_y) = delete;
-
 
 /* cuda implementations */
 template<>
-static SDPGradient<float32, CUDA> single_head_attention_bwd<float32, CUDA, NONE, FULL>(
+static SDPGradient<float32, CUDA> single_head_attention_bwd<float32, CUDA>(
 	const Tensor<float32, CUDA>& qw,
 	const Tensor<float32, CUDA>& kw,
 	const Tensor<float32, CUDA>& vw,
@@ -287,9 +199,7 @@ static SDPGradient<float32, CUDA> single_head_attention_bwd<float32, CUDA, NONE,
 template<
 	FloatingPointType hp_dtype,
 	IntegerType lp_dtype,
-	Device device,
-	MaskKind mask_kind,
-	ScoreFuncKind sc_fn_kind>
+	Device device>
 static Tensor<lp_dtype, device> quantized_single_head_attention_fwd(
 	const Tensor<lp_dtype, device>& qw,
 	const Tensor<lp_dtype, device>& kw,
@@ -309,7 +219,7 @@ static Tensor<lp_dtype, device> quantized_single_head_attention_fwd(
 /* cpu implementations */
 
 template<>
-static Tensor<int8, CPU> quantized_single_head_attention_fwd<float32, int8, CPU, NONE, FULL>(
+static Tensor<int8, CPU> quantized_single_head_attention_fwd<float32, int8, CPU>(
 	const Tensor<int8, CPU>& qw,
 	const Tensor<int8, CPU>& kw,
 	const Tensor<int8, CPU>& vw,
@@ -334,7 +244,7 @@ static Tensor<int8, CPU> quantized_single_head_attention_fwd<float32, int8, CPU,
 }
 
 template<>
-static Tensor<int8, CPU> quantized_single_head_attention_fwd<float64, int8, CPU, NONE, FULL>(
+static Tensor<int8, CPU> quantized_single_head_attention_fwd<float64, int8, CPU>(
 	const Tensor<int8, CPU>& qw,
 	const Tensor<int8, CPU>& kw,
 	const Tensor<int8, CPU>& vw,
@@ -361,7 +271,7 @@ static Tensor<int8, CPU> quantized_single_head_attention_fwd<float64, int8, CPU,
 /* not implemented cases for cpu (floats under 4 bytes) */
 
 template<>
-static Tensor<int8, CPU> quantized_single_head_attention_fwd<float16, int8, CPU, NONE, FULL>(
+static Tensor<int8, CPU> quantized_single_head_attention_fwd<float16, int8, CPU>(
 	const Tensor<int8, CPU>& qw,
 	const Tensor<int8, CPU>& kw,
 	const Tensor<int8, CPU>& vw,
@@ -374,46 +284,7 @@ static Tensor<int8, CPU> quantized_single_head_attention_fwd<float16, int8, CPU,
 	const float16 sy, const int8 zpy) = delete;
 
 template<>
-static Tensor<int8, CPU> quantized_single_head_attention_fwd<float16, int8, CPU, NONE, SOFT_CAPPING>(
-	const Tensor<int8, CPU>& qw,
-	const Tensor<int8, CPU>& kw,
-	const Tensor<int8, CPU>& vw,
-	const float16 sq, const int8 zpq,
-	const float16 sk, const int8 zpk,
-	const float16 sv, const int8 zpv,
-	const float16 s1, const int8 zp1,
-	const float16 s2, const int8 zp2,
-	const float16 s3, const int8 zp3,
-	const float16 sy, const int8 zpy) = delete;
-
-template<>
-static Tensor<int8, CPU> quantized_single_head_attention_fwd<float16, int8, CPU, CAUSAL, FULL>(
-	const Tensor<int8, CPU>& qw,
-	const Tensor<int8, CPU>& kw,
-	const Tensor<int8, CPU>& vw,
-	const float16 sq, const int8 zpq,
-	const float16 sk, const int8 zpk,
-	const float16 sv, const int8 zpv,
-	const float16 s1, const int8 zp1,
-	const float16 s2, const int8 zp2,
-	const float16 s3, const int8 zp3,
-	const float16 sy, const int8 zpy) = delete;
-
-template<>
-static Tensor<int8, CPU> quantized_single_head_attention_fwd<float16, int8, CPU, CAUSAL, SOFT_CAPPING>(
-	const Tensor<int8, CPU>& qw,
-	const Tensor<int8, CPU>& kw,
-	const Tensor<int8, CPU>& vw,
-	const float16 sq, const int8 zpq,
-	const float16 sk, const int8 zpk,
-	const float16 sv, const int8 zpv,
-	const float16 s1, const int8 zp1,
-	const float16 s2, const int8 zp2,
-	const float16 s3, const int8 zp3,
-	const float16 sy, const int8 zpy) = delete;
-
-template<>
-static Tensor<int8, CPU> quantized_single_head_attention_fwd<bfloat16, int8, CPU, NONE, FULL>(
+static Tensor<int8, CPU> quantized_single_head_attention_fwd<bfloat16, int8, CPU>(
 	const Tensor<int8, CPU>& qw,
 	const Tensor<int8, CPU>& kw,
 	const Tensor<int8, CPU>& vw,
@@ -424,50 +295,10 @@ static Tensor<int8, CPU> quantized_single_head_attention_fwd<bfloat16, int8, CPU
 	const bfloat16 s2, const int8 zp2,
 	const bfloat16 s3, const int8 zp3,
 	const bfloat16 sy, const int8 zpy) = delete;
-
-template<>
-static Tensor<int8, CPU> quantized_single_head_attention_fwd<bfloat16, int8, CPU, NONE, SOFT_CAPPING>(
-	const Tensor<int8, CPU>& qw,
-	const Tensor<int8, CPU>& kw,
-	const Tensor<int8, CPU>& vw,
-	const bfloat16 sq, const int8 zpq,
-	const bfloat16 sk, const int8 zpk,
-	const bfloat16 sv, const int8 zpv,
-	const bfloat16 s1, const int8 zp1,
-	const bfloat16 s2, const int8 zp2,
-	const bfloat16 s3, const int8 zp3,
-	const bfloat16 sy, const int8 zpy) = delete;
-
-template<>
-static Tensor<int8, CPU> quantized_single_head_attention_fwd<bfloat16, int8, CPU, CAUSAL, FULL>(
-	const Tensor<int8, CPU>& qw,
-	const Tensor<int8, CPU>& kw,
-	const Tensor<int8, CPU>& vw,
-	const bfloat16 sq, const int8 zpq,
-	const bfloat16 sk, const int8 zpk,
-	const bfloat16 sv, const int8 zpv,
-	const bfloat16 s1, const int8 zp1,
-	const bfloat16 s2, const int8 zp2,
-	const bfloat16 s3, const int8 zp3,
-	const bfloat16 sy, const int8 zpy) = delete;
-
-template<>
-static Tensor<int8, CPU> quantized_single_head_attention_fwd<bfloat16, int8, CPU, CAUSAL, SOFT_CAPPING>(
-	const Tensor<int8, CPU>& qw,
-	const Tensor<int8, CPU>& kw,
-	const Tensor<int8, CPU>& vw,
-	const bfloat16 sq, const int8 zpq,
-	const bfloat16 sk, const int8 zpk,
-	const bfloat16 sv, const int8 zpv,
-	const bfloat16 s1, const int8 zp1,
-	const bfloat16 s2, const int8 zp2,
-	const bfloat16 s3, const int8 zp3,
-	const bfloat16 sy, const int8 zpy) = delete;
-
 
 /* cuda implementations */
 template<>
-static Tensor<int8, CUDA> quantized_single_head_attention_fwd<float32, int8, CUDA, NONE, FULL>(
+static Tensor<int8, CUDA> quantized_single_head_attention_fwd<float32, int8, CUDA>(
 	const Tensor<int8, CUDA>& qw,
 	const Tensor<int8, CUDA>& kw,
 	const Tensor<int8, CUDA>& vw,

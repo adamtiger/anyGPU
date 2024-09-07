@@ -278,13 +278,13 @@ void test_sdp_fwd_f32()
 	auto dqw = crt_random_tensor<float32, CUDA>({ 14, 64 }, 11);
 	auto dkw = crt_random_tensor<float32, CUDA>({ 14, 64 }, 18);
 	auto dvw = crt_random_tensor<float32, CUDA>({ 14, 64 }, 15);
-	auto dy = single_head_attention_fwd<float32, CUDA, NONE, FULL>(dqw, dkw, dvw);
+	auto dy = single_head_attention_fwd(dqw, dkw, dvw);
 
 	// cpu based calculation (expected result)
 	auto hqw = dqw.copy_to_host();
 	auto hkw = dkw.copy_to_host();
 	auto hvw = dvw.copy_to_host();
-	auto hy = single_head_attention_fwd<float32, CPU, NONE, FULL>(hqw, hkw, hvw);
+	auto hy = single_head_attention_fwd(hqw, hkw, hvw);
 
 	// compare
 	auto hy_from_cuda = dy.copy_to_host();
@@ -319,14 +319,14 @@ void test_sdp_bwd_f32()
 	auto dkw = crt_random_tensor<float32, CUDA>({ 14, 64 }, 18);
 	auto dvw = crt_random_tensor<float32, CUDA>({ 14, 64 }, 15);
 	auto dgy = crt_random_tensor<float32, CUDA>({ 14, 64 }, 10);
-	SDPGradient dgrads = single_head_attention_bwd<float32, CUDA, NONE, FULL>(dqw, dkw, dvw, dgy);
+	SDPGradient dgrads = single_head_attention_bwd(dqw, dkw, dvw, dgy);
 
 	// cpu based calculation (expected result)
 	auto hqw = dqw.copy_to_host();
 	auto hkw = dkw.copy_to_host();
 	auto hvw = dvw.copy_to_host();
 	auto hgy = dgy.copy_to_host();
-	SDPGradient hgrads = single_head_attention_bwd<float32, CPU, NONE, FULL>(hqw, hkw, hvw, hgy);
+	SDPGradient hgrads = single_head_attention_bwd(hqw, hkw, hvw, hgy);
 
 	// compare
 	auto cmp = [&](const Tensor<float32, CPU>& expected, const Tensor<float32, CPU>& actual)
@@ -396,7 +396,7 @@ void test_quant_sdp_fwd_f32_i8()
 	float32 sy = 1.3f;
 	int8 zpy = 3;
 
-	auto dy = quantized_single_head_attention_fwd<float32, int8, CUDA, NONE, FULL>(
+	auto dy = quantized_single_head_attention_fwd(
 		dqw, dkw, dvw,
 		sq, zpq, sk, zpk, sv, zpv,
 		s1, zp1, s2, zp2, s3, zp3,
@@ -407,7 +407,7 @@ void test_quant_sdp_fwd_f32_i8()
 	auto hqw = dqw.copy_to_host();
 	auto hkw = dkw.copy_to_host();
 	auto hvw = dvw.copy_to_host();
-	auto hy = quantized_single_head_attention_fwd<float32, int8, CPU, NONE, FULL>(
+	auto hy = quantized_single_head_attention_fwd(
 		hqw, hkw, hvw,
 		sq, zpq, sk, zpk, sv, zpv,
 		s1, zp1, s2, zp2, s3, zp3,
