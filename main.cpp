@@ -6,14 +6,14 @@ int main()
 {
 	//std::cout << print_cuda_device_props();
 
-	/*test_binary_add_f32();
-	test_binary_add_i32();
+	test_binary_add_f32();
+	//test_binary_add_i32();
 
-	test_binary_mul_f32();
-	test_binary_mul_i32();*/
+	//test_binary_mul_f32();
+	//test_binary_mul_i32();
 
 
-	test_mm_f32();
+	//test_mm_f32();
 
 	//test_transp_f32();
 

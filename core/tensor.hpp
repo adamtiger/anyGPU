@@ -395,7 +395,11 @@ static std::string represent_tensor(const Tensor<dtype, CPU>& tensor, const int 
 	return ss.str();
 }
 
-// random tensor creator
+/**
+  Creates a tensor filled with random numbers.
+  The values are sampled from a uniform distribution
+  from the range (0, 10).
+*/
 template<typename dtype, Device device>
 static Tensor<dtype, device> crt_random_tensor(const std::vector<int>& shape, const int seed=10)
 {
@@ -435,7 +439,25 @@ static Tensor<dtype, device> crt_pattern_tensor(const std::vector<int>& shape)
 	auto dtype_hdata = cvt_int_vector_to_any<dtype>(host_data);
 
 	Tensor<dtype, device> tensor(shape, dtype_hdata);
+	return tensor;
+}
 
+/**
+  Creates a tensor filled with ones.
+*/
+template<typename dtype, Device device>
+static Tensor<dtype, device> crt_ones_tensor(const std::vector<int>& shape)
+{
+	int length = calc_default_size(shape);
+	std::vector<int> host_data(length);
+	for (int ix = 0; ix < length; ++ix)
+	{
+		host_data[ix] = 1;
+	}
+
+	auto dtype_hdata = cvt_int_vector_to_any<dtype>(host_data);
+
+	Tensor<dtype, device> tensor(shape, dtype_hdata);
 	return tensor;
 }
 

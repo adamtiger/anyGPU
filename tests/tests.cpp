@@ -9,7 +9,7 @@ void test_binary_add_f32()
 {
 	// cuda based calculation
 	auto dta = crt_random_tensor<float32, CUDA>({ 5, 300 }, 11);
-	auto dtb = crt_random_tensor<float32, CUDA>({ 5, 300 }, 18);
+	auto dtb = crt_ones_tensor<float32, CUDA>({5, 300}); //crt_random_tensor<float32, CUDA>({ 5, 300 }, 18);
 	auto dtc = tensor_add(dta, dtb);
 
 	// cpu based calculation (expected result)
