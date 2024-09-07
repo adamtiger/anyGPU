@@ -245,6 +245,21 @@ private:
 };
 
 
+constexpr unsigned int BYTE_EXP = 3;
+constexpr unsigned int BYTE_SIZE = 8;
+
+constexpr unsigned int ALIGNMENT_EXP = 8;
+constexpr unsigned int ALIGNMENT_SIZE = 256;
+
+/*
+  Data type for 256 bytes aligned allocation.
+*/
+struct alignas(ALIGNMENT_SIZE) AlignedType
+{
+	char data[ALIGNMENT_SIZE];
+};
+
+
 // helper functions for tensor size calculations
 
 /*

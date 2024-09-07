@@ -45,7 +45,10 @@ MemoryBuffer<device>::MemoryBuffer(const int capacity) : capacity(capacity)
 
 	if constexpr (device == Device::CPU)
 	{
-		buffer = new char[capacity];
+		int n_align = (capacity >> ALIGNMENT_EXP);
+		n_align += ((capacity & (ALIGNMENT_SIZE - 1)) == 0 ? 0 : 1);
+		auto* temp = new AlignedType[n_align];
+		buffer = reinterpret_cast<char*>(temp);
 		memset(buffer, 0, capacity);
 	}
 	else if constexpr (device == Device::CUDA)
@@ -61,18 +64,23 @@ MemoryBuffer<device>::MemoryBuffer(const int data_bit_size, const std::vector<in
 	id = GlobalUUIDGenerator::generate_id();
 
 	int bitsize = calc_default_size(shape) * data_bit_size;
-	capacity = (bitsize >> 3);
-	capacity += ((bitsize & 0x00000007) == 0 ? 0 : 1);
+	capacity = (bitsize >> BYTE_EXP);
+	capacity += ((bitsize & (BYTE_SIZE - 1)) == 0 ? 0 : 1);
 
 	buffer = nullptr;
 
 	if constexpr (device == Device::CPU)
 	{
-		buffer = new char[capacity];
+		int n_align = (capacity >> ALIGNMENT_EXP);
+		n_align += ((capacity & (ALIGNMENT_SIZE - 1)) == 0 ? 0 : 1);
+		auto* temp = new AlignedType[n_align];
+		buffer = reinterpret_cast<char*>(temp);
+		memset(buffer, 0, capacity);
 	}
 	else if constexpr (device == Device::CUDA)
 	{
 		cudaMalloc(&buffer, capacity);
+		cudaMemset(buffer, 0, capacity);
 	}
 }
 
@@ -82,16 +90,21 @@ MemoryBuffer<device>::MemoryBuffer(const int data_bit_size, const int dim, const
 	id = GlobalUUIDGenerator::generate_id();
 
 	int bitsize = calc_default_size(dim, shape) * data_bit_size;
-	capacity = (bitsize >> 3);
-	capacity += ((bitsize & 0x00000007) == 0 ? 0 : 1);
+	capacity = (bitsize >> BYTE_EXP);
+	capacity += ((bitsize & (BYTE_SIZE - 1)) == 0 ? 0 : 1);
 
 	if constexpr (device == Device::CPU)
 	{
-		buffer = new char[capacity];
+		int n_align = (capacity >> ALIGNMENT_EXP);
+		n_align += ((capacity & (ALIGNMENT_SIZE - 1)) == 0 ? 0 : 1);
+		auto* temp = new AlignedType[n_align];
+		buffer = reinterpret_cast<char*>(temp);
+		memset(buffer, 0, capacity);
 	}
 	else if constexpr (device == Device::CUDA)
 	{
 		cudaMalloc(&buffer, capacity);
+		cudaMemset(buffer, 0, capacity);
 	}
 }
 
@@ -103,7 +116,7 @@ MemoryBuffer<device>::~MemoryBuffer()
 
 	if constexpr (device == Device::CPU)
 	{
-		delete[] buffer;
+		delete[] reinterpret_cast<AlignedType*>(buffer);
 	}
 	else if constexpr (device == Device::CUDA)
 	{
