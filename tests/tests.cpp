@@ -1,4 +1,5 @@
 #include "tests.hpp"
+#include "test_tools.hpp"
 
 #include "tensor.hpp"
 #include "ops.hpp"
@@ -20,19 +21,8 @@ void test_binary_add_f32()
 	// compare
 	auto htc_from_cuda = dtc.copy_to_host();
 
-	bool eq = elementwise_compatible(htc, htc_from_cuda);  // checks the sizes
-	if (eq)
-	{
-		float32* expected = htc.buffer();
-		float32* actual = htc_from_cuda.buffer();
-
-		int length = htc.size();
-
-		for (int ix = 0; ix < length; ++ix)
-		{
-			eq = eq && std::abs(expected[ix] - actual[ix]) < 0.001f;
-		}
-	}
+	bool eq = elementwise_compatible(htc_from_cuda, htc);  // checks the sizes
+	eq = eq && compare_data_buffers(htc_from_cuda, htc);
 
 	std::cout << "TestCase [test_binary_add_f32]: " << (eq ? "PASSED" : "FAILED") << "\n";
 }
@@ -52,19 +42,8 @@ void test_binary_add_i32()
 	// compare
 	auto htc_from_cuda = dtc.copy_to_host();
 
-	bool eq = elementwise_compatible(htc, htc_from_cuda);  // checks the sizes
-	if (eq)
-	{
-		int32* expected = htc.buffer();
-		int32* actual = htc_from_cuda.buffer();
-
-		int length = htc.size();
-
-		for (int ix = 0; ix < length; ++ix)
-		{
-			eq = eq && (expected[ix] == actual[ix]);
-		}
-	}
+	bool eq = elementwise_compatible(htc_from_cuda, htc);  // checks the sizes
+	eq = eq && compare_data_buffers(htc_from_cuda, htc);
 
 	std::cout << "TestCase [test_binary_add_i32]: " << (eq ? "PASSED" : "FAILED") << "\n";
 }
@@ -84,19 +63,8 @@ void test_binary_mul_f32()
 	// compare
 	auto htc_from_cuda = dtc.copy_to_host();
 
-	bool eq = elementwise_compatible(htc, htc_from_cuda);  // checks the sizes
-	if (eq)
-	{
-		float32* expected = htc.buffer();
-		float32* actual = htc_from_cuda.buffer();
-
-		int length = htc.size();
-
-		for (int ix = 0; ix < length; ++ix)
-		{
-			eq = eq && std::abs(expected[ix] - actual[ix]) < 0.001f;
-		}
-	}
+	bool eq = elementwise_compatible(htc_from_cuda, htc);  // checks the sizes
+	eq = eq && compare_data_buffers(htc_from_cuda, htc);
 
 	std::cout << "TestCase [test_binary_mul_f32]: " << (eq ? "PASSED" : "FAILED") << "\n";
 }
@@ -116,19 +84,8 @@ void test_binary_mul_i32()
 	// compare
 	auto htc_from_cuda = dtc.copy_to_host();
 
-	bool eq = elementwise_compatible(htc, htc_from_cuda);  // checks the sizes
-	if (eq)
-	{
-		int32* expected = htc.buffer();
-		int32* actual = htc_from_cuda.buffer();
-
-		int length = htc.size();
-
-		for (int ix = 0; ix < length; ++ix)
-		{
-			eq = eq && (expected[ix] == actual[ix]);
-		}
-	}
+	bool eq = elementwise_compatible(htc_from_cuda, htc);  // checks the sizes
+	eq = eq && compare_data_buffers(htc_from_cuda, htc);
 
 	std::cout << "TestCase [test_binary_mul_i32]: " << (eq ? "PASSED" : "FAILED") << "\n";
 }
@@ -149,19 +106,8 @@ void test_mm_f32()
 	// compare
 	auto htc_from_cuda = dtc.copy_to_host();
 
-	bool eq = elementwise_compatible(htc, htc_from_cuda);  // checks the sizes
-	if (eq)
-	{
-		float32* expected = htc.buffer();
-		float32* actual = htc_from_cuda.buffer();
-
-		int length = htc.size();
-
-		for (int ix = 0; ix < length; ++ix)
-		{
-			eq = eq && std::abs(expected[ix] - actual[ix]) < 0.001f;
-		}
-	}
+	bool eq = elementwise_compatible(htc_from_cuda, htc);  // checks the sizes
+	eq = eq && compare_data_buffers(htc_from_cuda, htc);
 
 	std::cout << "TestCase [test_mm_f32]: " << (eq ? "PASSED" : "FAILED") << "\n";
 }
@@ -180,19 +126,8 @@ void test_transp_f32()
 	// compare
 	auto htc_from_cuda = dtc.copy_to_host();
 
-	bool eq = elementwise_compatible(htc, htc_from_cuda);  // checks the sizes
-	if (eq)
-	{
-		float32* expected = htc.buffer();
-		float32* actual = htc_from_cuda.buffer();
-
-		int length = htc.size();
-
-		for (int ix = 0; ix < length; ++ix)
-		{
-			eq = eq && std::abs(expected[ix] - actual[ix]) < 0.001f;
-		}
-	}
+	bool eq = elementwise_compatible(htc_from_cuda, htc);  // checks the sizes
+	eq = eq && compare_data_buffers(htc_from_cuda, htc);
 
 	std::cout << "TestCase [test_transp_f32]: " << (eq ? "PASSED" : "FAILED") << "\n";
 }
@@ -211,24 +146,8 @@ void test_softmax_f32()
 	// compare
 	auto htc_from_cuda = dtc.copy_to_host();
 
-	bool eq = elementwise_compatible(htc, htc_from_cuda);  // checks the sizes
-	if (eq)
-	{
-		float32* expected = htc.buffer();
-		float32* actual = htc_from_cuda.buffer();
-
-		int length = htc.size();
-
-		for (int ix = 0; ix < length; ++ix)
-		{
-			eq = eq && std::abs(expected[ix] - actual[ix]) < 0.001f;
-
-			if (!eq)
-			{
-				std::cout << expected[ix] << " " << actual[ix] << "\n";
-			}
-		}
-	}
+	bool eq = elementwise_compatible(htc_from_cuda, htc);  // checks the sizes
+	eq = eq && compare_data_buffers(htc_from_cuda, htc);
 
 	std::cout << "TestCase [test_softmax_f32]: " << (eq ? "PASSED" : "FAILED") << "\n";
 }
@@ -249,24 +168,8 @@ void test_softmax_bwd_f32()
 	// compare
 	auto htc_from_cuda = dtc.copy_to_host();
 
-	bool eq = elementwise_compatible(htc, htc_from_cuda);  // checks the sizes
-	if (eq)
-	{
-		float32* expected = htc.buffer();
-		float32* actual = htc_from_cuda.buffer();
-
-		int length = htc.size();
-
-		for (int ix = 0; ix < length; ++ix)
-		{
-			eq = eq && std::abs(expected[ix] - actual[ix]) < 0.001f;
-
-			if (!eq)
-			{
-				std::cout << expected[ix] << " " << actual[ix] << "\n";
-			}
-		}
-	}
+	bool eq = elementwise_compatible(htc_from_cuda, htc);  // checks the sizes
+	eq = eq && compare_data_buffers(htc_from_cuda, htc);
 
 	std::cout << "TestCase [test_softmax_bwd_f32]: " << (eq ? "PASSED" : "FAILED") << "\n";
 }
@@ -289,24 +192,8 @@ void test_sdp_fwd_f32()
 	// compare
 	auto hy_from_cuda = dy.copy_to_host();
 
-	bool eq = elementwise_compatible(hy, hy_from_cuda);  // checks the sizes
-	if (eq)
-	{
-		float32* expected = hy.buffer();
-		float32* actual = hy_from_cuda.buffer();
-
-		int length = hy.size();
-
-		for (int ix = 0; ix < length; ++ix)
-		{
-			eq = eq && std::abs(expected[ix] - actual[ix]) < 0.001f;
-
-			if (!eq)
-			{
-				std::cout << expected[ix] << " " << actual[ix] << "\n";
-			}
-		}
-	}
+	bool eq = elementwise_compatible(hy_from_cuda, hy);  // checks the sizes
+	eq = eq && compare_data_buffers(hy_from_cuda, hy);
 
 	std::cout << "TestCase [test_sdp_fwd_f32]: " << (eq ? "PASSED" : "FAILED") << "\n";
 }
@@ -331,25 +218,8 @@ void test_sdp_bwd_f32()
 	// compare
 	auto cmp = [&](const Tensor<float32, CPU>& expected, const Tensor<float32, CPU>& actual)
 	{
-		bool eq = elementwise_compatible(expected, actual);  // checks the sizes
-		if (eq)
-		{
-			float32* ex = expected.buffer();
-			float32* ac = actual.buffer();
-
-			int length = expected.size();
-
-			for (int ix = 0; ix < length; ++ix)
-			{
-				eq = eq && std::abs(ex[ix] - ac[ix]) < 0.001f;
-
-				if (!eq)
-				{
-					std::cout << ex[ix] << " " << ac[ix] << "\n";
-				}
-			}
-		}
-
+		bool eq = elementwise_compatible(actual, expected);  // checks the sizes
+		eq = eq && compare_data_buffers(actual, expected);
 		return eq;
 	};
 
@@ -417,24 +287,8 @@ void test_quant_sdp_fwd_f32_i8()
 	// compare
 	auto hy_from_cuda = dy.copy_to_host();
 
-	bool eq = elementwise_compatible(hy, hy_from_cuda);  // checks the sizes
-	if (eq)
-	{
-		int8* expected = hy.buffer();
-		int8* actual = hy_from_cuda.buffer();
-
-		int length = hy.size();
-
-		for (int ix = 0; ix < length; ++ix)
-		{
-			eq = eq && (expected[ix] == actual[ix]);
-
-			if (!eq)
-			{
-				std::cout << (int32)expected[ix] << " " << (int32)actual[ix] << "\n";
-			}
-		}
-	}
+	bool eq = elementwise_compatible(hy_from_cuda, hy);  // checks the sizes
+	eq = eq && compare_data_buffers(hy_from_cuda, hy);
 
 	std::cout << "TestCase [test_quant_sdp_fwd_f32_i8]: " << (eq ? "PASSED" : "FAILED") << "\n";
 }
@@ -456,24 +310,8 @@ void test_quant_lin_f32_i8()
 	// compare
 	auto hy_from_cuda = dy.copy_to_host();
 
-	bool eq = elementwise_compatible(hy, hy_from_cuda);  // checks the sizes
-	if (eq)
-	{
-		int8* expected = hy.buffer();
-		int8* actual = hy_from_cuda.buffer();
-
-		int length = hy.size();
-
-		for (int ix = 0; ix < length; ++ix)
-		{
-			eq = eq && (expected[ix] == actual[ix]);
-
-			if (!eq)
-			{
-				std::cout << (int32)expected[ix] << " " << (int32)actual[ix] << "\n";
-			}
-		}
-	}
+	bool eq = elementwise_compatible(hy_from_cuda, hy);  // checks the sizes
+	eq = eq && compare_data_buffers(hy_from_cuda, hy);
 
 	std::cout << "TestCase [test_quant_lin_f32_i8]: " << (eq ? "PASSED" : "FAILED") << "\n";
 }
@@ -495,24 +333,8 @@ void test_dequant_lin_i8_f32()
 	// compare
 	auto hy_from_cuda = dy.copy_to_host();
 
-	bool eq = elementwise_compatible(hy, hy_from_cuda);  // checks the sizes
-	if (eq)
-	{
-		float32* expected = hy.buffer();
-		float32* actual = hy_from_cuda.buffer();
-
-		int length = hy.size();
-
-		for (int ix = 0; ix < length; ++ix)
-		{
-			eq = eq && std::abs(expected[ix] - actual[ix]) < 0.001f;
-
-			if (!eq)
-			{
-				std::cout << expected[ix] << " " << actual[ix] << "\n";
-			}
-		}
-	}
+	bool eq = elementwise_compatible(hy_from_cuda, hy);  // checks the sizes
+	eq = eq && compare_data_buffers(hy_from_cuda, hy);
 
 	std::cout << "TestCase [test_dequant_lin_i8_f32]: " << (eq ? "PASSED" : "FAILED") << "\n";
 }
@@ -549,24 +371,8 @@ void test_qmm_i8_f32()
 	// compare
 	auto htc_from_cuda = dtc.copy_to_host();
 
-	bool eq = elementwise_compatible(htc, htc_from_cuda);  // checks the sizes
-	if (eq)
-	{
-		int8* expected = htc.buffer();
-		int8* actual = htc_from_cuda.buffer();
-
-		int length = htc.size();
-
-		for (int ix = 0; ix < length; ++ix)
-		{
-			eq = eq && (expected[ix] == actual[ix]);
-
-			if (!eq)
-			{
-				std::cout << expected[ix] << " " << actual[ix] << "\n";
-			}
-		}
-	}
+	bool eq = elementwise_compatible(htc_from_cuda, htc);  // checks the sizes
+	eq = eq && compare_data_buffers(htc_from_cuda, htc);
 
 	std::cout << "TestCase [test_qmm_i8_f32]: " << (eq ? "PASSED" : "FAILED") << "\n";
 }

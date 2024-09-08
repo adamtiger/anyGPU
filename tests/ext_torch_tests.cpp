@@ -1,4 +1,5 @@
 #include "ext_torch_tests.hpp"
+#include "test_tools.hpp"
 #include "tensor.hpp"
 #include "attention.hpp"
 #include <filesystem>
@@ -24,24 +25,8 @@ void external_test_sdp_fwd_f32()
 	// compare
 	auto hy_from_cuda = dy.copy_to_host();
 
-	bool eq = elementwise_compatible(hy, hy_from_cuda);  // checks the sizes
-	if (eq)
-	{
-		float32* expected = hy.buffer();
-		float32* actual = hy_from_cuda.buffer();
-
-		int length = hy.size();
-
-		for (int ix = 0; ix < length; ++ix)
-		{
-			eq = eq && std::abs(expected[ix] - actual[ix]) < 0.001f;
-
-			if (!eq)
-			{
-				std::cout << expected[ix] << " " << actual[ix] << "\n";
-			}
-		}
-	}
+	bool eq = elementwise_compatible(hy_from_cuda, hy);  // checks the sizes
+	eq = eq && compare_data_buffers(hy_from_cuda, hy);
 
 	std::cout << "TestCase [external_test_sdp_fwd_f32]: " << (eq ? "PASSED" : "FAILED") << "\n";
 }
@@ -72,25 +57,8 @@ void external_test_sdp_bwd_f32()
 	// compare
 	auto cmp = [&](const Tensor<float32, CPU>& expected, const Tensor<float32, CPU>& actual)
 	{
-		bool eq = elementwise_compatible(expected, actual);  // checks the sizes
-		if (eq)
-		{
-			float32* ex = expected.buffer();
-			float32* ac = actual.buffer();
-
-			int length = expected.size();
-
-			for (int ix = 0; ix < length; ++ix)
-			{
-				eq = eq && std::abs(ex[ix] - ac[ix]) < 0.001f;
-
-				if (!eq)
-				{
-					std::cout << ex[ix] << " " << ac[ix] << "\n";
-				}
-			}
-		}
-
+		bool eq = elementwise_compatible(actual, expected);  // checks the sizes
+		eq = eq && compare_data_buffers(actual, expected);
 		return eq;
 	};
 
@@ -126,24 +94,7 @@ void external_test_cpu_softmax_bwd_f32()
 	auto cmp = [&](const Tensor<float32, CPU>& expected, const Tensor<float32, CPU>& actual)
 	{
 		bool eq = elementwise_compatible(expected, actual);  // checks the sizes
-		if (eq)
-		{
-			float32* ex = expected.buffer();
-			float32* ac = actual.buffer();
-
-			int length = expected.size();
-
-			for (int ix = 0; ix < length; ++ix)
-			{
-				eq = eq && std::abs(ex[ix] - ac[ix]) < 0.001f;
-
-				if (!eq)
-				{
-					std::cout << ex[ix] << " " << ac[ix] << "\n";
-				}
-			}
-		}
-
+		eq = eq && compare_data_buffers(actual, expected);
 		return eq;
 	};
 

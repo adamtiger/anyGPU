@@ -54,6 +54,7 @@ set (TEST_SRCS
 )
 
 set (TEST_HEADERS
+    ${TEST_DIR}/test_tools.hpp
     ${TEST_DIR}/tests.hpp
     ${TEST_DIR}/ext_torch_tests.hpp
 )
