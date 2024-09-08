@@ -12,6 +12,7 @@
 #include <cuda_runtime.h>
 #include <cuda_fp16.h>
 #include <cuda_bf16.h>
+#include <cuda_fp8.h>
 
 
 /* Shape related */
@@ -41,19 +42,21 @@ enum DataType
 	BFLOAT16,
 	FLOAT16,
 	FLOAT32,
-	FLOAT64
+	FLOAT64,
+	FP8E4M3,
+	FP8E5M2
 };
 
 
 /* Data type related */
 
 static int bitsize_of_datatypes[] = {
-	8, 16, 32, 16, 16, 32, 64
+	8, 16, 32, 16, 16, 32, 64, 8, 8
 };
 
 // int4 is 0.5 bytes long, from alignment perspective it is handled like 1
 static int bytesize_of_datatypes[] = {
-	1, 2, 4, 2, 2, 4, 8
+	1, 2, 4, 2, 2, 4, 8, 1, 1
 };
 
 using int8 = char;
@@ -63,6 +66,8 @@ using bfloat16 = nv_bfloat16;
 using float16 = half;
 using float32 = float;
 using float64 = double;
+using fp8e4m3 = __nv_fp8_e4m3;
+using fp8e5m2 = __nv_fp8_e5m2;
 
 /*
   Returns the bitsize of the data type
@@ -94,6 +99,14 @@ template<typename T> static DataType get_datatype_enum()
 	else if constexpr (std::is_same_v<T, bfloat16>)
 	{
 		return DataType::BFLOAT16;
+	}
+	else if constexpr (std::is_same_v<T, fp8e4m3>)
+	{
+		return DataType::FP8E4M3;
+	}
+	else if constexpr (std::is_same_v<T, fp8e5m2>)
+	{
+		return DataType::FP8E5M2;
 	}
 	else if constexpr (std::is_same_v<T, int32>)
 	{
@@ -189,6 +202,34 @@ static std::vector<bfloat16> cvt_int_vector_to_any(const std::vector<int>& hdata
 	return out_data;
 }
 
+template<>
+static std::vector<fp8e4m3> cvt_int_vector_to_any(const std::vector<int>& hdata)
+{
+	std::vector<fp8e4m3> out_data(hdata.size());
+
+	for (size_t ix = 0; ix < hdata.size(); ++ix)
+	{
+		fp8e4m3 temp(hdata[ix]);
+		out_data[ix] = temp;
+	}
+
+	return out_data;
+}
+
+template<>
+static std::vector<fp8e5m2> cvt_int_vector_to_any(const std::vector<int>& hdata)
+{
+	std::vector<fp8e5m2> out_data(hdata.size());
+
+	for (size_t ix = 0; ix < hdata.size(); ++ix)
+	{
+		fp8e5m2 temp(hdata[ix]);
+		out_data[ix] = temp;
+	}
+
+	return out_data;
+}
+
 /*
   Converting an arbitrary type to float32.
   float32 is a precise enough format to represent
@@ -212,6 +253,17 @@ static float32 cvt_any_to_float32<bfloat16>(const bfloat16 value)
 	return __bfloat162float(value);
 }
 
+template<>
+static float32 cvt_any_to_float32<fp8e4m3>(const fp8e4m3 value)
+{
+	return (float)value;
+}
+
+template<>
+static float32 cvt_any_to_float32<fp8e5m2>(const fp8e5m2 value)
+{
+	return (float)value;
+}
 
 /* Cuda related */
 

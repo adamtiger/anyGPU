@@ -25,4 +25,18 @@ static bfloat16 calculate_alpha(const int d)
 	return alpha;
 }
 
+template<>
+static fp8e4m3 calculate_alpha(const int d)
+{
+	fp8e4m3 alpha(1.f / sqrtf(static_cast<float32>(d)));
+	return alpha;
+}
+
+template<>
+static fp8e5m2 calculate_alpha(const int d)
+{
+	fp8e5m2 alpha(1.f / sqrtf(static_cast<float32>(d)));
+	return alpha;
+}
+
 #endif  // __ATTENTION_TOOLS__

@@ -20,12 +20,14 @@ std::string represent_datatype(const DataType dtype)
 	    "BFLOAT16",
 	    "FLOAT16",
 	    "FLOAT32",
-		"FLOAT64"
+		"FLOAT64",
+		"FP8E4M3",
+		"FP8E5M2"
 	};
 
-	assert((int)dtype < 6);
+	ACASSERT((int)dtype < 9, "Unknown data type");
 
-	return names[(int)dtype];
+	return names[(unsigned int)dtype];
 }
 
 std::ostream& operator<<(std::ostream& os, const DataType dtype)
@@ -42,9 +44,9 @@ std::string represent_device(const Device device)
 		"CUDA"
 	};
 
-	assert((int)device < 2);
+	ACASSERT((int)device < 2, "Unknown device type");
 
-	return names[(int)device];
+	return names[(unsigned int)device];
 }
 
 std::ostream& operator<<(std::ostream& os, const Device device)
