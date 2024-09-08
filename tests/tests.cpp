@@ -113,6 +113,28 @@ void test_mm_f32()
 }
 
 
+void test_mm_f32_640x1280_1280x320()
+{
+	// cuda based calculation
+	auto dta = crt_random_tensor<float32, CUDA>({ 640, 1280 }, 11);
+	auto dtb = crt_random_tensor<float32, CUDA>({ 1280, 320 }, 18);
+	auto dtc = tensor_mm(dta, dtb);
+
+	// cpu based calculation (expected result)
+	auto hta = dta.copy_to_host();
+	auto htb = dtb.copy_to_host();
+	auto htc = tensor_mm(hta, htb);
+
+	// compare
+	auto htc_from_cuda = dtc.copy_to_host();
+
+	bool eq = elementwise_compatible(htc_from_cuda, htc);  // checks the sizes
+	eq = eq && compare_data_buffers(htc_from_cuda, htc);
+
+	std::cout << "TestCase [test_mm_f32_640x1280_1280x320]: " << (eq ? "PASSED" : "FAILED") << "\n";
+}
+
+
 void test_transp_f32()
 {
 	// cuda based calculation

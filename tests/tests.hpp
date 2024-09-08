@@ -11,6 +11,7 @@ void test_binary_mul_i32();
 
 
 void test_mm_f32();
+void test_mm_f32_640x1280_1280x320();
 
 
 void test_transp_f32();

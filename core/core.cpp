@@ -108,7 +108,9 @@ std::string print_cuda_device_props()
 	ss << "    maxGridSize.x:               " << device_props.maxGridSize[0] << "\n";
 	ss << "    maxGridSize.y:               " << device_props.maxGridSize[1] << "\n";
 	ss << "    maxGridSize.z:               " << device_props.maxGridSize[2] << "\n";
+	ss << "    multiProcessorCount:         " << device_props.multiProcessorCount << "\n";
 	ss << "    maxBlocksPerMultiProcessor:  " << device_props.maxBlocksPerMultiProcessor << "\n";
+	ss << "    maxThreadsPerMultiProcessor: " << device_props.maxThreadsPerMultiProcessor << "\n";
 	ss << "    maxThreadsPerBlock:          " << device_props.maxThreadsPerBlock << "\n";
 	ss << "    regsPerMultiprocessor:       " << device_props.regsPerMultiprocessor << "\n";
 	ss << "    regsPerBlock:                " << device_props.regsPerBlock << "\n";

@@ -53,7 +53,11 @@ int main()
 
 	/* performance measurement (cuda) */
 
+	//test_mm_f32_640x1280_1280x320();
+	
 	perf_mm_f32_640x1280_1280x320();
+
+	std::cout << "Finished" << std::endl;
 
 	return 0;
 }
