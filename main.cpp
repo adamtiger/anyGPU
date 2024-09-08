@@ -1,4 +1,5 @@
 #include "tests.hpp"
+#include "performance.hpp"
 
 #include "attention.hpp"
 
@@ -6,7 +7,7 @@ int main()
 {
 	//std::cout << print_cuda_device_props();
 
-	test_binary_add_f32();
+	/*test_binary_add_f32();
 	test_binary_add_i32();
 
 	test_binary_mul_f32();
@@ -33,7 +34,7 @@ int main()
 	test_dequant_lin_i8_f32();
 	test_qmm_i8_f32();
 
-	test_quant_sdp_fwd_f32_i8();
+	test_quant_sdp_fwd_f32_i8();*/
 
 	// experiment
 	/*auto qw = crt_random_tensor<float32, CUDA>({ 16, 64 }, 11);
@@ -49,6 +50,10 @@ int main()
 
 	std::cout << represent_tensor(q, 10) << std::endl;
 	std::cout << represent_tensor(y, 10) << std::endl;*/
+
+	/* performance measurement (cuda) */
+
+	perf_mm_f32_640x1280_1280x320();
 
 	return 0;
 }
