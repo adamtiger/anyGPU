@@ -98,6 +98,7 @@ set (TRF_SRCS
 )
 
 set (TRF_HEADERS
+    ${TRF_DIR}/attention_tools.hpp
     ${TRF_DIR}/attention.hpp
     ${TRF_DIR}/sdp.hpp
 )

@@ -5,6 +5,7 @@
 
 #include "tensor.hpp"
 #include "core_concepts.hpp"
+#include "attention_tools.hpp"
 
 
 /* forward implementation */
@@ -16,7 +17,7 @@ Tensor<dtype, CPU> sdp_attention_fwd_cpu_precise_float(
 	const Tensor<dtype, CPU>& vw)
 {
 	int d = qw.shape[1];  // qw shape: (N, d)
-	dtype alpha = static_cast<dtype>(1.f / sqrtf(static_cast<float32>(d)));
+	dtype alpha = calculate_alpha<dtype>(d);
 	auto kw_tr = tensor_transp(kw);
 	auto qk = tensor_mm(qw, kw_tr);
 	auto nqk = tensor_mul(qk, alpha);
@@ -33,7 +34,7 @@ Tensor<dtype, CUDA> sdp_attention_fwd_cuda_basic(
 	const Tensor<dtype, CUDA>& vw)
 {
 	int d = qw.shape[1];  // qw shape: (N, d)
-	dtype alpha = static_cast<dtype>(1.f / sqrtf(static_cast<float32>(d)));  // TODO: fp16 and bfp16
+	dtype alpha = calculate_alpha<dtype>(d);
 	auto kw_tr = tensor_transp(kw);
 	auto qk = tensor_mm(qw, kw_tr);
 	auto nqk = tensor_mul(qk, alpha);
@@ -70,7 +71,7 @@ static SDPGradient<dtype, CPU> sdp_attention_bwd_cpu_precise_float(
 
 	// forward recompute to calculate the softmax result
 	int d = qw.shape[1];  // qw shape: (N, d)
-	dtype alpha = static_cast<dtype>(1.f / sqrtf(static_cast<float32>(d)));
+	dtype alpha = calculate_alpha<dtype>(d);
 	auto kw_tr = tensor_transp(kw);
 	auto qk = tensor_mm(qw, kw_tr);
 	auto nqk = tensor_mul(qk, alpha);
@@ -100,7 +101,7 @@ static SDPGradient<dtype, CUDA> sdp_attention_bwd_cuda_basic(
 
 	// forward recompute to calculate the softmax result
 	int d = qw.shape[1];  // qw shape: (N, d)
-	dtype alpha = static_cast<dtype>(1.f / sqrtf(static_cast<float32>(d)));
+	dtype alpha = calculate_alpha<dtype>(d);
 	auto kw_tr = tensor_transp(kw);
 	auto qk = tensor_mm(qw, kw_tr);
 	auto nqk = tensor_mul(qk, alpha);
@@ -135,7 +136,7 @@ static Tensor<int8, CPU> quant_sdp_attention_fwd_cpu_precise_i8(
 	const dtype sy, const int8 zpy)
 {
 	int d = qw.shape[1];  // qw shape: (N, d)
-	dtype alpha = static_cast<dtype>(1.f / sqrtf(static_cast<float32>(d)));
+	dtype alpha = calculate_alpha<dtype>(d);
 	auto kw_tr = tensor_transp(kw);
 	auto qk = tensor_qmm(qw, kw_tr, sq, zpq, sk, zpk, s1, zp1);
 	auto deq_qk = tensor_dequantize_linear(qk, s2, zp2);
@@ -160,7 +161,7 @@ static Tensor<int8, CUDA> quant_sdp_attention_fwd_cuda_basic_f32_i8(
 	const float32 sy, const int8 zpy)
 {
 	int d = qw.shape[1];  // qw shape: (N, d)
-	float32 alpha = 1.f / sqrtf(static_cast<float32>(d));
+	float32 alpha = calculate_alpha<float32>(d);
 	auto kw_tr = tensor_transp(kw);
 	auto qk = tensor_qmm(qw, kw_tr, sq, zpq, sk, zpk, s1, zp1);
 	auto deq_qk = tensor_dequantize_linear(qk, s2, zp2);
