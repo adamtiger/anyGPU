@@ -29,4 +29,22 @@ void tensor_mm_f32_opt1(
 	const Tensor<float32, CUDA>& out);
 
 
+/*
+  Opt2 - optimization ideas are:
+	shared memory for saving bandwidth;
+	coalasced read and write;
+	fp16;
+	tensor core instrinsics;
+  Assumed:
+	medium, large matrices (can not fit in shared);
+	size is devidable by 32;
+	fixed tile size and block size (minimal flexibility);
+	specified for rtx3050Ti
+*/
+void tensor_mm_f16_opt2(
+	const Tensor<float16, CUDA>& lhs,
+	const Tensor<float16, CUDA>& rhs,
+	const Tensor<float16, CUDA>& out);
+
+
 #endif  // __MM_OPS_CUH__

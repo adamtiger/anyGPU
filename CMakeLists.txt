@@ -70,6 +70,7 @@ set(OPS_DIR ${ANYGPU_ROOT}/ops)
 set (OPS_SRCS
     ${OPS_DIR}/binary_ops.cu
 	${OPS_DIR}/mm_ops.cu
+	${OPS_DIR}/mm_ops_opt2.cu
 	${OPS_DIR}/transp_ops.cu
     ${OPS_DIR}/softmax_ops.cu
 	${OPS_DIR}/quantize_ops.cu

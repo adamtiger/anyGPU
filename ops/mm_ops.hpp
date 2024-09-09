@@ -61,6 +61,10 @@ Tensor<dtype, CUDA> tensor_mm(const Tensor<dtype, CUDA>& lhs, const Tensor<dtype
 	{
 		tensor_mm_f32_opt1(lhs, rhs, res);
 	}
+	else if constexpr (std::is_same_v<dtype, float16>)
+	{
+		tensor_mm_f16_opt2(lhs, rhs, res);
+	}
 	else
 	{
 		static_assert(std::is_same_v<dtype, int32>, "Unsupported data type");

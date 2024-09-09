@@ -135,6 +135,35 @@ void test_mm_f32_640x1280_1280x320()
 }
 
 
+void test_mm_f16_640x1280_1280x320()
+{
+	// cuda based calculation
+	auto dta = crt_random_tensor<float16, CUDA>({ 640, 1280 }, 11);
+	auto dtb = crt_random_tensor<float16, CUDA>({ 1280, 320 }, 18);
+	auto dtc = tensor_mm(dta, dtb);
+
+	// cpu based calculation (expected result)
+	auto hta_f16 = dta.copy_to_host();
+	auto htb_f16 = dtb.copy_to_host();
+
+	auto hta = cvt_tensor_datatype<float32, float16>(hta_f16);
+	auto htb = cvt_tensor_datatype<float32, float16>(htb_f16);
+	auto htc = tensor_mm(hta, htb);
+
+	// compare
+	auto htc_from_cuda_f16 = dtc.copy_to_host();
+	auto htc_from_cuda = cvt_tensor_datatype<float32, float16>(htc_from_cuda_f16);
+
+	bool eq = elementwise_compatible(htc_from_cuda, htc);  // checks the sizes
+	eq = eq && compare_data_buffers(htc_from_cuda, htc);
+
+	std::cout << represent_tensor(htc_from_cuda, 10) << std::endl;
+	std::cout << represent_tensor(htc, 10) << std::endl;
+
+	std::cout << "TestCase [test_mm_f16_640x1280_1280x320]: " << (eq ? "PASSED" : "FAILED") << "\n";
+}
+
+
 void test_transp_f32()
 {
 	// cuda based calculation

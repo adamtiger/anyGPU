@@ -15,3 +15,10 @@ void perf_mm_f32_640x1280_1280x320()
 	auto dtb = crt_random_tensor<float32, CUDA>({ 1280, 320 }, 75);
 	tensor_mm(dta, dtb);
 }
+
+void perf_mm_f16_640x1280_1280x320()
+{
+	auto dta = crt_random_tensor<float16, CUDA>({ 640, 1280 }, 21);
+	auto dtb = crt_random_tensor<float16, CUDA>({ 1280, 320 }, 75);
+	tensor_mm(dta, dtb);
+}

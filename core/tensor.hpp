@@ -308,6 +308,10 @@ Tensor<dtype, device>::Tensor(const std::vector<int>& shape, const std::vector<d
 	{
 		cudaMemcpy(mem_buffer->buffer, hdata.data(), data_size, cudaMemcpyHostToDevice);
 	}
+	else
+	{
+		static_assert(device == Device::CUDA, "unknown device");
+	}
 }
 
 template<typename dtype, Device device>
@@ -361,6 +365,32 @@ Tensor<dtype, CUDA> Tensor<dtype, device>::copy_to_cuda() const
 
 	return tensor;
 }
+
+// converters
+template<typename trg_dtype, typename src_dtype>
+Tensor<trg_dtype, CPU> cvt_tensor_datatype(const Tensor<src_dtype, CPU>& tensor)
+{
+	Tensor<trg_dtype, CPU> converted(tensor.dim, tensor.shape, tensor.stride);
+
+	const int n = tensor.size();
+	src_dtype* tsr_data = tensor.buffer();
+	trg_dtype* cvt_data = converted.buffer();
+
+	for (int ix = 0; ix < n; ++ix)
+	{
+		if constexpr (std::is_same_v<trg_dtype, float32>)
+		{
+			cvt_data[ix] = cvt_any_to_float32(tsr_data[ix]);
+		}
+		else
+		{
+			static_assert(std::is_same_v<trg_dtype, float32>, "unknown target data type");
+		}
+	}
+
+	return converted;
+}
+
 
 // tensor print, string representations
 
