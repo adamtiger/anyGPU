@@ -45,6 +45,7 @@ void tensor_mm_f32_opt0(
 	dim3 gs = {gsx, gsy, 1};
 
 	tensor_mm_kernel_f32_opt0<<<gs, bs>>>(m, n, k, dlhs, drhs, dout);
+	CUDA_CHECK_LAST_ERROR();
 }
 
 
@@ -160,5 +161,5 @@ void tensor_mm_f32_opt1(
 
 	tensor_mm_kernel_f32_opt1<<<gs, bs>>>(m, n, k, dlhs, drhs, dout);
 	cudaDeviceSynchronize();
-	std::cout << cudaGetLastError() << std::endl;
+	CUDA_CHECK_LAST_ERROR();
 }

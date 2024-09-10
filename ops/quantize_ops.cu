@@ -37,6 +37,7 @@ void tensor_quantize_linear_cuda_f32_i8(
 	dim3 gs = { calc_req_num_blocks(length, bs.x), 1, 1 };
 
 	tensor_quantize_linear_cuda_f32_i8_kernel<<<gs, bs>>>(length, dx, scale, bias, dy);
+	CUDA_CHECK_LAST_ERROR();
 }
 
 
@@ -72,6 +73,7 @@ void tensor_dequantize_linear_cuda_i8_f32(
 	dim3 gs = { calc_req_num_blocks(length, bs.x), 1, 1 };
 
 	tensor_dequantize_linear_cuda_i8_f32_kernel<<<gs, bs>>>(length, dx, scale, bias, dy);
+	CUDA_CHECK_LAST_ERROR();
 }
 
 
@@ -124,4 +126,5 @@ void tensor_qmm_cuda_i8_f32(
 	dim3 gs = { calc_req_num_blocks(n, bs.x), calc_req_num_blocks(m, bs.y), 1 };
 
 	tensor_qmm_cuda_i8_f32_kernel<<<gs, bs>>>(m, n, k, da, db, sa, zpa, sb, zpb, sy, zpy, dy);
+	CUDA_CHECK_LAST_ERROR();
 }

@@ -31,6 +31,7 @@ void tensor_transp_f32(
 	dim3 gs = { gsx, gsy, 1 };
 
 	tensor_transp_kernel_f32<<<gs, bs>>>(m, n, dx, dy);
+	CUDA_CHECK_LAST_ERROR();
 }
 
 
@@ -67,4 +68,5 @@ void tensor_transp_i8(
 	dim3 gs = { gsx, gsy, 1 };
 
 	tensor_transp_kernel_i8<<<gs, bs>>>(m, n, dx, dy);
+	CUDA_CHECK_LAST_ERROR();
 }

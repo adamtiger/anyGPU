@@ -106,6 +106,7 @@ void tensor_softmax_f32(
 	dim3 gs = { gsx, gsy, 1 };
 
 	tensor_softmax_kernel_f32<<<gs, bs>>>(m, n, dx, dy);
+	CUDA_CHECK_LAST_ERROR();
 }
 
 
@@ -184,4 +185,5 @@ void tensor_softmax_bwd_f32(
 	dim3 gs = { gsx, gsy, 1 };
 
 	tensor_softmax_bwd_kernel_f32<<<gs, bs>>>(m, n, dx, gy_data, gx_data);
+	CUDA_CHECK_LAST_ERROR();
 }

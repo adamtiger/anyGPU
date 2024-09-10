@@ -265,22 +265,6 @@ static float32 cvt_any_to_float32<fp8e5m2>(const fp8e5m2 value)
 	return (float)value;
 }
 
-/* Cuda related */
-
-// The size of the grid and block.
-struct KernelParameters
-{
-	dim3 grid_size;
-	dim3 block_size;
-};
-
-// Calculates the number of required blocks for a specific number of elements
-unsigned int calc_req_num_blocks(unsigned int num_elements, unsigned int block_size);
-
-/*
-  Prints the device properties of the cuda device.
-*/
-std::string print_cuda_device_props();
 
 /* Miscallenous */
 
@@ -411,5 +395,57 @@ static void log_error(const char* cmsg)
 #define ACASSERT( expression, msg ) ((void)0)
 #endif
 
+
+/* Cuda related */
+
+// The size of the grid and block.
+struct KernelParameters
+{
+	dim3 grid_size;
+	dim3 block_size;
+};
+
+// Calculates the number of required blocks for a specific number of elements
+unsigned int calc_req_num_blocks(unsigned int num_elements, unsigned int block_size);
+
+/*
+  Prints the device properties of the cuda device.
+*/
+std::string print_cuda_device_props();
+
+/*
+  Cuda error checks.
+*/
+#define CUDA_CHECK( fn )                      \
+    do {                                      \
+        cudaError_t res = (fn);               \
+	    if (res == cudaSuccess) { }           \
+		else                                  \
+		{                                     \
+			std::stringstream ss;             \
+            ss << "code: " << (int)res;       \
+            ss << " file: " << __FILE__;      \
+            ss << " ln: " << __LINE__;        \
+            ss << "\n";                       \
+            log_error(ss.str().c_str());      \
+            exit(1);                          \
+		}                                     \
+	} while (0)
+
+#define CUDA_CHECK_LAST_ERROR( )              \
+    do {                                      \
+        cudaError_t res = cudaGetLastError(); \
+	    if (res == cudaSuccess) { }           \
+		else                                  \
+		{                                     \
+			std::stringstream ss;             \
+            ss << "code: " << (int)res;       \
+            ss << " file: " << __FILE__;      \
+            ss << " ln: " << __LINE__;        \
+            ss << "\n";                       \
+            log_error(ss.str().c_str());      \
+            exit(1);                          \
+		}                                     \
+	} while (0)
 
 #endif  // __CORE__

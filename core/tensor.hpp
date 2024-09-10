@@ -53,8 +53,8 @@ MemoryBuffer<device>::MemoryBuffer(const int capacity) : capacity(capacity)
 	}
 	else if constexpr (device == Device::CUDA)
 	{
-		cudaMalloc(&buffer, capacity);
-		cudaMemset(buffer, 0, capacity);
+		CUDA_CHECK(cudaMalloc(&buffer, capacity));
+		CUDA_CHECK(cudaMemset(buffer, 0, capacity));
 	}
 }
 
@@ -79,8 +79,8 @@ MemoryBuffer<device>::MemoryBuffer(const int data_bit_size, const std::vector<in
 	}
 	else if constexpr (device == Device::CUDA)
 	{
-		cudaMalloc(&buffer, capacity);
-		cudaMemset(buffer, 0, capacity);
+		CUDA_CHECK(cudaMalloc(&buffer, capacity));
+		CUDA_CHECK(cudaMemset(buffer, 0, capacity));
 	}
 }
 
@@ -103,8 +103,8 @@ MemoryBuffer<device>::MemoryBuffer(const int data_bit_size, const int dim, const
 	}
 	else if constexpr (device == Device::CUDA)
 	{
-		cudaMalloc(&buffer, capacity);
-		cudaMemset(buffer, 0, capacity);
+		CUDA_CHECK(cudaMalloc(&buffer, capacity));
+		CUDA_CHECK(cudaMemset(buffer, 0, capacity));
 	}
 }
 
@@ -120,7 +120,7 @@ MemoryBuffer<device>::~MemoryBuffer()
 	}
 	else if constexpr (device == Device::CUDA)
 	{
-		cudaFree(buffer);
+		CUDA_CHECK(cudaFree(buffer));
 	}
 	
 	buffer = nullptr;
@@ -306,7 +306,7 @@ Tensor<dtype, device>::Tensor(const std::vector<int>& shape, const std::vector<d
 	}
 	else if  constexpr (device == Device::CUDA)
 	{
-		cudaMemcpy(mem_buffer->buffer, hdata.data(), data_size, cudaMemcpyHostToDevice);
+		CUDA_CHECK(cudaMemcpy(mem_buffer->buffer, hdata.data(), data_size, cudaMemcpyHostToDevice));
 	}
 	else
 	{
@@ -334,7 +334,7 @@ Tensor<dtype, CPU> Tensor<dtype, device>::copy_to_host() const
 	}
 	else if constexpr (device == CUDA)
 	{
-		cudaMemcpy(trg, src, capacity, cudaMemcpyDeviceToHost);
+		CUDA_CHECK(cudaMemcpy(trg, src, capacity, cudaMemcpyDeviceToHost));
 	}
 
 	return tensor;
@@ -356,11 +356,11 @@ Tensor<dtype, CUDA> Tensor<dtype, device>::copy_to_cuda() const
 	char* src = this->raw_buffer();
 	if constexpr (device == CPU)
 	{
-		cudaMemcpy(trg, src, capacity, cudaMemcpyHostToDevice);
+		CUDA_CHECK(cudaMemcpy(trg, src, capacity, cudaMemcpyHostToDevice));
 	}
 	else if constexpr (device == CUDA)
 	{
-		cudaMemcpy(trg, src, capacity, cudaMemcpyDeviceToDevice);
+		CUDA_CHECK(cudaMemcpy(trg, src, capacity, cudaMemcpyDeviceToDevice));
 	}
 
 	return tensor;

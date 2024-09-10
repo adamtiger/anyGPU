@@ -32,6 +32,7 @@ void tensor_add_f32(
 	float32* dout = out.buffer();
 
 	tensor_add_kernel_f32<<<kpms.grid_size, kpms.block_size>>>(length, dlhs, drhs, dout);
+	CUDA_CHECK_LAST_ERROR();
 }
 
 void tensor_add_i32(
@@ -46,6 +47,7 @@ void tensor_add_i32(
 	int32* dout = out.buffer();
 
 	tensor_add_kernel_i32<<<kpms.grid_size, kpms.block_size>>>(length, dlhs, drhs, dout);
+	CUDA_CHECK_LAST_ERROR();
 }
 
 
@@ -80,6 +82,7 @@ void tensor_mul_f32(
 	float32* dout = out.buffer();
 
 	tensor_mul_kernel_f32<<<kpms.grid_size, kpms.block_size>>>(length, dlhs, rhs, dout);
+	CUDA_CHECK_LAST_ERROR();
 }
 
 void tensor_mul_i32(
@@ -93,4 +96,5 @@ void tensor_mul_i32(
 	int32* dout = out.buffer();
 
 	tensor_mul_kernel_i32<<<kpms.grid_size, kpms.block_size>>>(length, dlhs, rhs, dout);
+	CUDA_CHECK_LAST_ERROR();
 }

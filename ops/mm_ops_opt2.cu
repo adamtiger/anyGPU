@@ -109,4 +109,6 @@ void tensor_mm_f16_opt2(
 	dim3 gs = { gsx, gsy, 1 };
 
 	tensor_mm_kernel_f16_opt2<<<gs, bs>>>(m, n, k, dlhs, drhs, dout);
+	cudaDeviceSynchronize();
+	CUDA_CHECK_LAST_ERROR();
 }
