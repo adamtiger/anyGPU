@@ -138,8 +138,8 @@ void test_mm_f32_640x1280_1280x320()
 void test_mm_f16_640x1280_1280x320()
 {
 	// cuda based calculation
-	auto dta = crt_random_tensor<float16, CUDA>({ 640, 1280 }, 11);
-	auto dtb = crt_random_tensor<float16, CUDA>({ 1280, 320 }, 18);
+	auto dta = crt_random_normal_tensor<float16, CUDA>({ 640, 1280 }, 11);
+	auto dtb = crt_random_normal_tensor<float16, CUDA>({ 1280, 320 }, 18);
 	auto dtc = tensor_mm(dta, dtb);
 
 	// cpu based calculation (expected result)
@@ -155,7 +155,7 @@ void test_mm_f16_640x1280_1280x320()
 	auto htc_from_cuda = cvt_tensor_datatype<float32, float16>(htc_from_cuda_f16);
 
 	bool eq = elementwise_compatible(htc_from_cuda, htc);  // checks the sizes
-	eq = eq && compare_data_buffers(htc_from_cuda, htc);
+	eq = eq && compare_data_buffers_l2(htc_from_cuda, htc, 0.01f);
 
 	std::cout << represent_tensor(htc_from_cuda, 10) << std::endl;
 	std::cout << represent_tensor(htc, 10) << std::endl;

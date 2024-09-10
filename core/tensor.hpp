@@ -463,6 +463,29 @@ static Tensor<dtype, device> crt_random_tensor(const std::vector<int>& shape, co
 	return tensor;
 }
 
+/**
+  Creates a tensor filled with random numbers.
+  The values are sampled from a normal distribution
+  with 0 mean and 1 variance.
+*/
+template<typename dtype, Device device>
+static Tensor<dtype, device> crt_random_normal_tensor(const std::vector<int>& shape, const int seed = 10)
+{
+	std::default_random_engine eng(seed);
+	std::normal_distribution<float32> norm_dist(0.f, 1.f);
+
+	int length = calc_default_size(shape);
+	std::vector<dtype> host_data(length);
+	for (int ix = 0; ix < length; ++ix)
+	{
+		host_data[ix] = (dtype)(norm_dist(eng));
+	}
+
+	Tensor<dtype, device> tensor(shape, host_data);
+
+	return tensor;
+}
+
 /** 
   Tensor creator with a fixed pattern.
   Good for testing the result in other 

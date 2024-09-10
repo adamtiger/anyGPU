@@ -176,18 +176,18 @@ static std::vector<T> cvt_int_vector_to_any(const std::vector<int>& hdata)
 	return out_data;
 }
 
-template<>
-static std::vector<float16> cvt_int_vector_to_any(const std::vector<int>& hdata)
-{
-	std::vector<float16> out_data(hdata.size());
-
-	for (size_t ix = 0; ix < hdata.size(); ++ix)
-	{
-		out_data[ix] = __int2half_rn(hdata[ix]);
-	}
-
-	return out_data;
-}
+//template<>
+//static std::vector<float16> cvt_int_vector_to_any(const std::vector<int>& hdata)
+//{
+//	std::vector<float16> out_data(hdata.size());
+//
+//	for (size_t ix = 0; ix < hdata.size(); ++ix)
+//	{
+//		out_data[ix] = __int2half_rn(hdata[ix]);
+//	}
+//
+//	return out_data;
+//}
 
 template<>
 static std::vector<bfloat16> cvt_int_vector_to_any(const std::vector<int>& hdata)
