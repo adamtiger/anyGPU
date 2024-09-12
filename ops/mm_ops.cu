@@ -155,8 +155,8 @@ void tensor_mm_f32_opt1(
 
 	dim3 bs = { 32, 16, 1 };  // rtx3050 can use up to 3 blocks per sm
 
-	unsigned int gsx = calc_req_num_blocks(n, TS);  // vertical
-	unsigned int gsy = calc_req_num_blocks(m, TS);  // horizontal
+	unsigned int gsx = calc_req_num_blocks(n, TS);  // horizontal
+	unsigned int gsy = calc_req_num_blocks(m, TS);  // vertical
 	dim3 gs = { gsx, gsy, 1 };
 
 	tensor_mm_kernel_f32_opt1<<<gs, bs>>>(m, n, k, dlhs, drhs, dout);

@@ -9,10 +9,16 @@
 #include <sstream>
 #include <cassert>
 
+#ifdef __INTELLISENSE__  // to have intellisense help for wmma, threadIdx etc.
+#define __CUDACC__
+#define __CUDA_ARCH__ 860
+#endif
+
 #include <cuda_runtime.h>
 #include <cuda_fp16.h>
 #include <cuda_bf16.h>
 #include <cuda_fp8.h>
+#include <mma.h>  // for tensor cores
 
 
 /* Shape related */
@@ -383,7 +389,7 @@ static void log_error(const char* cmsg)
 #define ACASSERT( expression, msg )         \
     do {                                    \
         bool cond = (expression);           \
-	    if ((expression)) {}                \
+	    if (cond) {}                \
 		else                                \
 		{                                   \
 			std::cout << __FILE__ << " " << __LINE__ << '\n';  \

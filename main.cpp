@@ -53,7 +53,7 @@ int main()
 
 	/* performance measurement (cuda) */
 
-	test_mm_f16_640x1280_1280x320();
+	test_mm_f32_640x1280_1280x320();
 	
 	//perf_mm_f16_640x1280_1280x320();
 

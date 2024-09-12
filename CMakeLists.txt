@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(AnyGPU)
+set(CMAKE_CUDA_ARCHITECTURES 86)
+
+project(AnyGPU CXX CUDA)
 message("Start generating!")
 
 option(BUILD_WITH_CUDA "Whether NVIDIA CUDA based modules built" ON)
@@ -11,11 +13,11 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-if (BUILD_WITH_CUDA)
-    find_package(CUDA 12.5 REQUIRED)
+IF (BUILD_WITH_CUDA)
+    #find_package(CUDA 12.5 REQUIRED)
 	add_compile_definitions(XG_WITH_CUDA)
     message("Compile with cuda")
-endif()
+ENDIF()
 
 IF (BUILD_WITH_ASSERT)
     add_compile_definitions(AC_WITH_ASSERT)
@@ -131,8 +133,9 @@ set (HEADERS
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
 
-cuda_add_executable(anygpu ${SOURCES} ${HEADERS})
+add_executable(anygpu ${SOURCES} ${HEADERS})
 target_include_directories(anygpu PUBLIC ${TRF_DIR} ${CORE_DIR} ${TEST_DIR} ${OPS_DIR})
+#target_compile_options(anygpu PUBLIC $<$<COMPILE_LANGUAGE:CUDA>:--keep>)
 target_link_options(anygpu PUBLIC "/NODEFAULTLIB:libcmt.lib") 
 
 message("Finished")

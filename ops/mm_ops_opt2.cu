@@ -1,5 +1,6 @@
 #include "mm_ops.cuh"
 
+using namespace nvcuda;
 
 /* opt2 implementation */
 
@@ -59,6 +60,8 @@ __global__ void tensor_mm_kernel_f16_opt2(
 
 		__syncthreads();
 
+		wmma::fragment<wmma::accumulator, 16, 16, 16, float32> frag;
+
 		// calculate matmul for current tile
 		for (int r = 0; r < NR; ++r)
 		{
@@ -70,7 +73,6 @@ __global__ void tensor_mm_kernel_f16_opt2(
 					float16 rhs_val = smem_rhs_store[z][c * WS + threadIdx.x];
 					outputs[r][c] = __hadd(__hmul(lhs_val, rhs_val), outputs[r][c]);
 				}
-
 			}
 		}
 
@@ -104,8 +106,8 @@ void tensor_mm_f16_opt2(
 
 	dim3 bs = { 32, 16, 1 };  // rtx3050 can use up to 3 blocks per sm
 
-	unsigned int gsx = calc_req_num_blocks(n, TS);  // vertical
-	unsigned int gsy = calc_req_num_blocks(m, TS);  // horizontal
+	unsigned int gsx = calc_req_num_blocks(n, TS);  // horizontal
+	unsigned int gsy = calc_req_num_blocks(m, TS);  // vertical
 	dim3 gs = { gsx, gsy, 1 };
 
 	tensor_mm_kernel_f16_opt2<<<gs, bs>>>(m, n, k, dlhs, drhs, dout);

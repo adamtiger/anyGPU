@@ -94,6 +94,7 @@ std::string print_cuda_device_props()
 	ss << "    Num devices:                 " << num_devices << "\n";
 	ss << "    Device id:                   " << 0 << "\n";  // for now, assume only one device
 	ss << "    Device name:                 " << device_props.name << "\n";
+	ss << "    Compute capability:          " << device_props.major << "." << device_props.minor << "\n";
 	ss << "    integrated:                  " << device_props.integrated << "\n";
 	ss << "\n";
 
