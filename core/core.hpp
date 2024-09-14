@@ -1,6 +1,7 @@
 #ifndef __CORE__
 #define __CORE__
 
+#include <unordered_map>
 #include <vector>
 #include <array>
 #include <iostream>

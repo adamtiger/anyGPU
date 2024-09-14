@@ -51,7 +51,7 @@ source_group("core" FILES ${CORE_HEADERS} ${CORE_SRCS})
 set(IO_DIR ${ANYGPU_ROOT}/io)
 
 set (IO_SRCS
-
+    ${IO_DIR}/safetensors_file.cpp
 )
 
 set (IO_HEADERS

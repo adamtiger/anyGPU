@@ -1,7 +1,7 @@
 #include "tests.hpp"
 #include "performance.hpp"
+#include "safetensors_file.hpp"
 
-#include "attention.hpp"
 
 int main()
 {
@@ -12,7 +12,6 @@ int main()
 
 	test_binary_mul_f32();
 	test_binary_mul_i32();
-
 
 	test_mm_f32();
 
@@ -36,26 +35,18 @@ int main()
 
 	test_quant_sdp_fwd_f32_i8();*/
 
-	// experiment
-	/*auto qw = crt_random_tensor<float32, CUDA>({ 16, 64 }, 11);
-	auto kw = crt_random_tensor<float32, CUDA>({ 16, 64 }, 15);
-	auto vw = crt_random_tensor<float32, CUDA>({ 16, 64 }, 18);
-
-	auto y = single_head_attention_fwd<float32, CUDA, NONE, FULL>(qw, kw, vw);
-
-	std::cout << represent_tensor(y.copy_to_host(), 15) << std::endl;*/
-
-	/*auto q = load_tensor("C:\\Data\\AI\\projects\\anyGPU\\artifacts\\sdp_nomask_noscore_f32_16_64\\q.dat");
-	auto y = load_tensor("C:\\Data\\AI\\projects\\anyGPU\\artifacts\\sdp_nomask_noscore_f32_16_64\\y.dat");
-
-	std::cout << represent_tensor(q, 10) << std::endl;
-	std::cout << represent_tensor(y, 10) << std::endl;*/
-
 	/* performance measurement (cuda) */
 
-	test_mm_f32_640x1280_1280x320();
+	// test_mm_f32_640x1280_1280x320();
 	
 	//perf_mm_f16_640x1280_1280x320();
+
+	std::string path = "C:\\Data\\AI\\projects\\anyGPU\\artifacts\\safetensors\\diffusion_pytorch_model.safetensors";
+	std::vector<Tensor<float32, CPU>> tensors;
+	sft_read_tensors(path, tensors);
+
+	std::cout << represent_tensor(tensors[0]) << "\n";
+	std::cout << represent_tensor(tensors[1]) << "\n";
 
 	std::cout << "Finished" << std::endl;
 

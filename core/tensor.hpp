@@ -153,6 +153,7 @@ struct Tensor
 	int alignment;  // in bytes
 	Shape shape;
 	Stride stride;
+	std::string name;
 
 	// returns the start of tensor elements
 	//   takes into account the offset
@@ -406,6 +407,7 @@ static std::string represent_tensor(const Tensor<dtype, CPU>& tensor, const int 
 	std::stringstream ss;
 
 	ss << "-- Tensor -- \n";
+	ss << "  name:       " << tensor.name << "\n";
 	ss << "  id:         " << tensor.id << "\n";
 	ss << "  dtype:      " << get_datatype_enum<dtype>() << "\n";
 	ss << "  dim:        " << tensor.dim << "\n";
