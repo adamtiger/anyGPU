@@ -59,11 +59,11 @@ Tensor<dtype, CUDA> tensor_mm(const Tensor<dtype, CUDA>& lhs, const Tensor<dtype
 
 	if constexpr (std::is_same_v<dtype, float32>)
 	{
-		tensor_mm_f32_opt1(lhs, rhs, res);
+		opt1::tensor_mm_f32(lhs, rhs, res);
 	}
 	else if constexpr (std::is_same_v<dtype, float16>)
 	{
-		tensor_mm_f16_opt2(lhs, rhs, res);
+		opt2::tensor_mm_f16(lhs, rhs, res);
 	}
 	else
 	{

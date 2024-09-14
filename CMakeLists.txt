@@ -46,6 +46,21 @@ set (CORE_HEADERS
 
 source_group("core" FILES ${CORE_HEADERS} ${CORE_SRCS})
 
+# io
+
+set(IO_DIR ${ANYGPU_ROOT}/io)
+
+set (IO_SRCS
+
+)
+
+set (IO_HEADERS
+    ${IO_DIR}/dat_file.hpp
+	${IO_DIR}/safetensors_file.hpp
+)
+
+source_group("io" FILES ${IO_HEADERS} ${IO_SRCS})
+
 # tests
 
 set(TEST_DIR ${ANYGPU_ROOT}/tests)
@@ -72,7 +87,6 @@ set(OPS_DIR ${ANYGPU_ROOT}/ops)
 set (OPS_SRCS
     ${OPS_DIR}/binary_ops.cu
 	${OPS_DIR}/mm_ops.cu
-	${OPS_DIR}/mm_ops_opt2.cu
 	${OPS_DIR}/transp_ops.cu
     ${OPS_DIR}/softmax_ops.cu
 	${OPS_DIR}/quantize_ops.cu
@@ -119,6 +133,7 @@ set (SOURCES
     ${ANYGPU_ROOT}/main.cpp
     ${TRF_SRCS}
 	${CORE_SRCS}
+	${IO_SRCS}
 	${TEST_SRCS}
 	${OPS_SRCS}
 )
@@ -126,6 +141,7 @@ set (SOURCES
 set (HEADERS
     ${TRF_HEADERS}
 	${CORE_HEADERS}
+	${IO_HEADERS}
 	${TEST_HEADERS}
 	${OPS_HEADERS}
 )
@@ -134,7 +150,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
 
 add_executable(anygpu ${SOURCES} ${HEADERS})
-target_include_directories(anygpu PUBLIC ${TRF_DIR} ${CORE_DIR} ${TEST_DIR} ${OPS_DIR})
+target_include_directories(anygpu PUBLIC ${TRF_DIR} ${CORE_DIR} ${IO_DIR} ${TEST_DIR} ${OPS_DIR})
 #target_compile_options(anygpu PUBLIC $<$<COMPILE_LANGUAGE:CUDA>:--keep>)
 target_link_options(anygpu PUBLIC "/NODEFAULTLIB:libcmt.lib") 
 

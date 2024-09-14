@@ -2,6 +2,7 @@
 #include "test_tools.hpp"
 #include "tensor.hpp"
 #include "attention.hpp"
+#include "dat_file.hpp"
 #include <filesystem>
 
 const std::filesystem::path artifact_folder_path = "C:\\Data\\AI\\projects\\anyGPU\\artifacts";
