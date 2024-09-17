@@ -124,6 +124,19 @@ set (TRF_HEADERS
 
 source_group("transformers" FILES ${TRF_HEADERS} ${TRF_SRCS})
 
+# model related (zamba2)
+
+set(ZAM2_DIR ${ANYGPU_ROOT}/srcs/zamba2)
+
+set (ZAM2_SRCS
+    
+)
+
+set (ZAM2_HEADERS
+    
+)
+
+source_group("zamba2" FILES ${ZAM2_HEADERS} ${ZAM2_SRCS})
 
 # filter for main and similar files in visual studio
 source_group("apps" FILES ${ANYGPU_ROOT}/main.cpp)
@@ -131,6 +144,7 @@ source_group("apps" FILES ${ANYGPU_ROOT}/main.cpp)
 # set all sources
 set (SOURCES
     ${ANYGPU_ROOT}/main.cpp
+	${ZAM2_SRCS}
     ${TRF_SRCS}
 	${CORE_SRCS}
 	${IO_SRCS}
@@ -139,6 +153,7 @@ set (SOURCES
 )
 
 set (HEADERS
+    ${ZAM2_HEADERS}
     ${TRF_HEADERS}
 	${CORE_HEADERS}
 	${IO_HEADERS}
