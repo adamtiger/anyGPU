@@ -53,10 +53,6 @@ static void sft_read_tensors(const std::string& path, std::vector<Tensor<T, CPU>
 		);
 	}
 
-	std::cout << tensor_infos[0];
-	std::cout << tensor_infos[1];
-	std::cout << tensor_infos[2];
-
 	// create tensors from tensor infos
 	size_t prev_offset_end = 0;
 	tensors.reserve(tensor_infos.size());

@@ -31,7 +31,7 @@ set(ANYGPU_ROOT ${CMAKE_CURRENT_LIST_DIR})
 
 # core
 
-set(CORE_DIR ${ANYGPU_ROOT}/core)
+set(CORE_DIR ${ANYGPU_ROOT}/srcs/core)
 
 set (CORE_SRCS
     ${CORE_DIR}/core.cpp
@@ -48,7 +48,7 @@ source_group("core" FILES ${CORE_HEADERS} ${CORE_SRCS})
 
 # io
 
-set(IO_DIR ${ANYGPU_ROOT}/io)
+set(IO_DIR ${ANYGPU_ROOT}/srcs/io)
 
 set (IO_SRCS
     ${IO_DIR}/safetensors_file.cpp
@@ -82,7 +82,7 @@ source_group("tests" FILES ${TEST_HEADERS} ${TEST_SRCS})
 
 # ops
 
-set(OPS_DIR ${ANYGPU_ROOT}/ops)
+set(OPS_DIR ${ANYGPU_ROOT}/srcs/ops)
 
 set (OPS_SRCS
     ${OPS_DIR}/binary_ops.cu
@@ -110,7 +110,7 @@ source_group("ops" FILES ${OPS_HEADERS} ${OPS_SRCS})
 
 # transformers
 
-set(TRF_DIR ${ANYGPU_ROOT}/transformers)
+set(TRF_DIR ${ANYGPU_ROOT}/srcs/transformers)
 
 set (TRF_SRCS
     
