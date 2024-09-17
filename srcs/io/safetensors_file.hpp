@@ -44,8 +44,6 @@ static void sft_read_tensors(const std::string& path, std::vector<Tensor<T, CPU>
 		sft_file.read(header_raw_content.data(), header_size);
 		std::string header_string(header_raw_content.data());
 
-		std::cout << header_string << std::endl;
-
 		// read the tensor infos from json string
 		_sft_read_tensorinfo_from_json(
 			header_string,
@@ -66,6 +64,7 @@ static void sft_read_tensors(const std::string& path, std::vector<Tensor<T, CPU>
 
 		// move the position in the file to the right offset
 		sft_file.seekg(tensor_info.offset_start - prev_offset_end, sft_file.cur);
+		prev_offset_end = tensor_info.offset_end;
 
 		// copy data into tensor from file
 		size_t buffer_size = tensor_info.offset_end - tensor_info.offset_start;

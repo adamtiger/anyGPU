@@ -1,5 +1,6 @@
 #include "ext_torch_tests.hpp"
 #include "test_tools.hpp"
+#include "safetensors_file.hpp"
 #include "tensor.hpp"
 #include "attention.hpp"
 #include "dat_file.hpp"
@@ -102,4 +103,43 @@ void external_test_cpu_softmax_bwd_f32()
 	bool eq = cmp(h_grad_x, grad_x);
 
 	std::cout << "TestCase [external_test_cpu_softmax_bwd_f32]: " << (eq ? "PASSED" : "FAILED") << "\n";
+}
+
+
+void external_test_sf_data_reading()
+{
+	// comparator
+	auto cmp = [&](const Tensor<float32, CPU>& expected, const Tensor<float32, CPU>& actual)
+		{
+			bool eq = elementwise_compatible(expected, actual);  // checks the sizes
+			eq = eq && compare_data_buffers(actual, expected);
+			return eq;
+		};
+
+	bool eq = true;
+
+	// gather test file names
+	std::unordered_map<std::string, Tensor<float32, CPU>> expected_tensors;
+	const std::filesystem::path sf_exp_tensors_folder{ artifact_folder_path / "sf_diffuser_tensors" };
+	for (auto const& sf_tensor_path : std::filesystem::directory_iterator{ sf_exp_tensors_folder })
+	{
+		const std::string sf_tensor_name = sf_tensor_path.path().stem().string();
+		expected_tensors[sf_tensor_name] = load_tensor(sf_tensor_path.path().string());
+	}
+
+	// read tensors from files
+	std::string path = "C:\\Data\\AI\\projects\\anyGPU\\artifacts\\safetensors\\diffusion_pytorch_model.safetensors";
+	std::vector<Tensor<float32, CPU>> tensors;
+	sft_read_tensors(path, tensors);
+
+	for (auto& t : tensors)
+	{
+		if (expected_tensors.contains(t.name))
+		{
+			auto& expected = expected_tensors.at(t.name);
+			eq = eq && cmp(expected, t);
+		}
+	}
+
+	std::cout << "TestCase [external_test_sf_data_reading]: " << (eq ? "PASSED" : "FAILED") << "\n";
 }

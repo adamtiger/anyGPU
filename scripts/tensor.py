@@ -62,9 +62,9 @@ def save_tensor(tensor: torch.Tensor, file_path: str):
 
         # write the tensor elements
         num_elements = calc_num_elements(shape)
-        data_tensor = tensor.flatten()
+        data_tensor = tensor.flatten().detach().numpy()
         
-        buffer = struct.pack("=f", data_tensor[0])
-        for i in range(1, num_elements):
-            buffer = buffer + struct.pack("=f", data_tensor[i])  # it is float
+        buffer = data_tensor.tobytes()
+        # for i in range(1, num_elements):
+        #     buffer = buffer + struct.pack("=f", data_tensor[i])  # it is float
         dat.write(buffer)

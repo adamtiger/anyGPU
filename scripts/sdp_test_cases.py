@@ -152,9 +152,3 @@ def generate_softmax_bwd(path: str, test_name: str, N: int, d: int):
     print(f"x: {x[0, 0:10]}")
     print(f"grad_x: {grad_x[0, 0:10]}")
 
-
-if __name__ == '__main__':
-    path = r"C:\Data\AI\projects\anyGPU\artifacts"
-    generate_sdp_fwd_nomask_noscore(path, "sdp_fwd_nomask_noscore_f32_16_64", 16, 64)
-    generate_sdp_bwd_nomask_noscore(path, "sdp_bwd_nomask_noscore_f32_16_64", 16, 64)
-    generate_softmax_bwd(path, "softmax_bwd_f32_16_64", 16, 64)

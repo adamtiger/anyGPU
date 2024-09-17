@@ -35,18 +35,21 @@ int main()
 
 	test_quant_sdp_fwd_f32_i8();*/
 
+	//external_test_sf_data_reading();
+
 	/* performance measurement (cuda) */
 
-	// test_mm_f32_640x1280_1280x320();
+	test_mm_f32_640x1280_1280x320();
 	
 	//perf_mm_f16_640x1280_1280x320();
 
-	std::string path = "C:\\Data\\AI\\projects\\anyGPU\\artifacts\\safetensors\\diffusion_pytorch_model.safetensors";
+
+	/*std::string path = "C:\\Data\\AI\\projects\\anyGPU\\artifacts\\safetensors\\diffusion_pytorch_model.safetensors";
 	std::vector<Tensor<float32, CPU>> tensors;
 	sft_read_tensors(path, tensors);
 
 	std::cout << represent_tensor(tensors[0]) << "\n";
-	std::cout << represent_tensor(tensors[1]) << "\n";
+	std::cout << represent_tensor(tensors[1]) << "\n";*/
 
 	std::cout << "Finished" << std::endl;
 
