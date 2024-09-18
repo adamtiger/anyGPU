@@ -86,10 +86,11 @@ set(OPS_DIR ${ANYGPU_ROOT}/srcs/ops)
 
 set (OPS_SRCS
     ${OPS_DIR}/binary_ops.cu
-	${OPS_DIR}/mm_ops.cu
-	${OPS_DIR}/transp_ops.cu
+    ${OPS_DIR}/mm_ops.cu
+    ${OPS_DIR}/norm_ops.cu
+    ${OPS_DIR}/transp_ops.cu
     ${OPS_DIR}/softmax_ops.cu
-	${OPS_DIR}/quantize_ops.cu
+    ${OPS_DIR}/quantize_ops.cu
 )
 
 set (OPS_HEADERS
@@ -97,11 +98,13 @@ set (OPS_HEADERS
     ${OPS_DIR}/binary_ops.hpp
     ${OPS_DIR}/mm_ops.cuh
     ${OPS_DIR}/mm_ops.hpp
-	${OPS_DIR}/transp_ops.cuh
-	${OPS_DIR}/transp_ops.hpp
+    ${OPS_DIR}/norm_ops.cuh
+    ${OPS_DIR}/norm_ops.hpp
+    ${OPS_DIR}/transp_ops.cuh
+    ${OPS_DIR}/transp_ops.hpp
     ${OPS_DIR}/softmax_ops.cuh
     ${OPS_DIR}/softmax_ops.hpp
-	${OPS_DIR}/quantize_ops.cuh
+    ${OPS_DIR}/quantize_ops.cuh
     ${OPS_DIR}/quantize_ops.hpp
     ${OPS_DIR}/ops.hpp
 )
