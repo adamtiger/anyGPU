@@ -182,6 +182,43 @@ void external_test_layer_norm_fwd_f32()
 	std::cout << "TestCase [external_test_layer_norm_fwd_f32 - CUDA]: " << (eq ? "PASSED" : "FAILED") << "\n";
 }
 
+
+void external_test_rms_norm_fwd_f32()
+{
+	auto path = artifact_folder_path / "test_rms_norm_fwd_f32";
+
+	// read tensors from files
+	auto hx = load_tensor((path / "x.dat").string());
+	auto hw = load_tensor((path / "w.dat").string());
+	auto exp_hy = load_tensor((path / "y.dat").string());
+
+	auto act_hy_cpu = tensor_rms_norm(hx, 2, hw, 2e-3f);
+
+
+	auto dx = hx.copy_to_cuda();
+	auto dw = hw.copy_to_cuda();
+
+	auto act_dy_cuda = tensor_rms_norm(dx, 2, dw, 2e-3f);
+	auto act_hy_cuda = act_dy_cuda.copy_to_host();
+
+	// compare
+	auto cmp = [&](const Tensor<float32, CPU>& expected, const Tensor<float32, CPU>& actual)
+		{
+			bool eq = elementwise_compatible(expected, actual);  // checks the sizes
+			eq = eq && compare_data_buffers(actual, expected);
+			return eq;
+		};
+
+	// test cpu
+	bool eq = cmp(exp_hy, act_hy_cpu);
+	std::cout << "TestCase [external_test_rms_norm_fwd_f32 - CPU]: " << (eq ? "PASSED" : "FAILED") << "\n";
+
+	// test cuda
+	eq = cmp(exp_hy, act_hy_cuda);
+	std::cout << "TestCase [external_test_rms_norm_fwd_f32 - CUDA]: " << (eq ? "PASSED" : "FAILED") << "\n";
+}
+
+
 void external_test_silu_fwd_f32()
 {
 	auto path = artifact_folder_path / "test_silu_fwd_f32";

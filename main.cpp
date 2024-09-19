@@ -38,6 +38,7 @@ int main()
 	//external_test_sf_data_reading();
 
 	external_test_layer_norm_fwd_f32();
+	external_test_rms_norm_fwd_f32();
 	external_test_silu_fwd_f32();
 
 
