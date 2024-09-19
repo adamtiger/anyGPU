@@ -18,8 +18,10 @@ static Tensor<dtype, CPU> tensor_embedding(const Tensor<int32, CPU>& xt, const T
 	// access the data arrays
 	const int length = xt.size();
 	const int emb_size = wt.shape[1];
-	Shape y_shape = { length, emb_size };
-	Tensor<dtype, CPU> yt(2, y_shape);
+
+	Shape y_shape = xt.shape;
+	y_shape[xt.dim] = emb_size;
+	Tensor<dtype, CPU> yt(xt.dim + 1, y_shape);
 	dtype* y_data = yt.buffer();
 	int32* x_data = xt.buffer();
 	dtype* w_data = wt.buffer();
@@ -41,13 +43,9 @@ template<FloatingPointType dtype>
 static Tensor<dtype, CUDA> tensor_embedding(const Tensor<int32, CUDA>& xt, const Tensor<dtype, CUDA>& wt)
 {
 	// access the data arrays
-	const int length = xt.size();
-	const int emb_size = wt.shape[1];
-	Shape y_shape = { length, emb_size };
-	Tensor<dtype, CUDA> yt(2, y_shape);
-	dtype* y_data = yt.buffer();
-	int32* x_data = xt.buffer();
-	dtype* w_data = wt.buffer();
+	Shape y_shape = xt.shape;
+	y_shape[xt.dim] = wt.shape[1];
+	Tensor<dtype, CUDA> yt(xt.dim + 1, y_shape);
 
 	if constexpr (std::is_same_v<dtype, float32>)
 	{

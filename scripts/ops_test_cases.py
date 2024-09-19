@@ -112,7 +112,7 @@ def generate_embedding_fwd_f32(path: str, test_name: str):
         test_name: The name of the folder.
     """
     # generate random inputs
-    indices = torch.randint(0, 117, (12,), dtype=torch.int32)
+    indices = torch.randint(0, 117, (12, 4), dtype=torch.int32)
     embedding = torch.randn((118, 71), dtype=torch.float32)
 
     # calculate the attention output
