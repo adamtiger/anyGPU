@@ -47,9 +47,7 @@ def generate_sdp_fwd_nomask_noscore(path: str, test_name: str, N: int, d: int):
     save_tensor(v, pjoin(test_fld_name, "v.dat"))
     save_tensor(y, pjoin(test_fld_name, "y.dat"))
 
-    # print sample
-    print(f"q: {q[0, 0:10]}")
-    print(f"y: {y[0, 0:10]}")
+    print(f"Generated: {test_name}")
 
 
 def generate_sdp_bwd_nomask_noscore(path: str, test_name: str, N: int, d: int):
@@ -104,9 +102,7 @@ def generate_sdp_bwd_nomask_noscore(path: str, test_name: str, N: int, d: int):
     save_tensor(grad_k, pjoin(test_fld_name, "grad_k.dat"))
     save_tensor(grad_v, pjoin(test_fld_name, "grad_v.dat"))
 
-    # print sample
-    print(f"q: {q[0, 0:10]}")
-    print(f"grad_q: {grad_q[0, 0:10]}")
+    print(f"Generated: {test_name}")
 
 
 def generate_softmax_bwd(path: str, test_name: str, N: int, d: int):
@@ -148,7 +144,4 @@ def generate_softmax_bwd(path: str, test_name: str, N: int, d: int):
 
     save_tensor(grad_x, pjoin(test_fld_name, "grad_x.dat"))
 
-    # print sample
-    print(f"x: {x[0, 0:10]}")
-    print(f"grad_x: {grad_x[0, 0:10]}")
-
+    print(f"Generated: {test_name}")

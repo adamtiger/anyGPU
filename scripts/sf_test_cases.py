@@ -30,4 +30,5 @@ def generate_sf_file_reading(path: str, test_name: str):
             torch_t = torch.tensor(t)
             save_tensor(torch_t, pjoin(test_fld_name, f"{nm}.dat"))
         cntr += 1
-
+    
+    print(f"Generated: {test_name}")

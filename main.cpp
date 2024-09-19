@@ -37,9 +37,12 @@ int main()
 
 	//external_test_sf_data_reading();
 
+	external_test_layer_norm_fwd_f32();
+
+
 	/* performance measurement (cuda) */
 
-	test_mm_f32_640x1280_1280x320();
+	// test_mm_f32_640x1280_1280x320();
 	
 	//perf_mm_f16_640x1280_1280x320();
 

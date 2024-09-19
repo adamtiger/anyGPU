@@ -10,7 +10,7 @@ const std::filesystem::path artifact_folder_path = "C:\\Data\\AI\\projects\\anyG
 
 void external_test_sdp_fwd_f32()
 {
-	auto path = artifact_folder_path / "sdp_fwd_nomask_noscore_f32_16_64";
+	auto path = artifact_folder_path / "test_sdp_fwd_nomask_noscore_f32_16_64";
 
 	// read tensors from files
 	auto hq = load_tensor((path / "q.dat").string());
@@ -36,7 +36,7 @@ void external_test_sdp_fwd_f32()
 
 void external_test_sdp_bwd_f32()
 {
-	auto path = artifact_folder_path / "sdp_bwd_nomask_noscore_f32_16_64";
+	auto path = artifact_folder_path / "test_sdp_bwd_nomask_noscore_f32_16_64";
 
 	// read tensors from files
 	auto hq = load_tensor((path / "q.dat").string());
@@ -81,7 +81,7 @@ void external_test_sdp_bwd_f32()
 
 void external_test_cpu_softmax_bwd_f32()
 {
-	auto path = artifact_folder_path / "softmax_bwd_f32_16_64";
+	auto path = artifact_folder_path / "test_softmax_bwd_f32_16_64";
 
 	// read tensors from files
 	auto hx = load_tensor((path / "x.dat").string());
@@ -120,7 +120,7 @@ void external_test_sf_data_reading()
 
 	// gather test file names
 	std::unordered_map<std::string, Tensor<float32, CPU>> expected_tensors;
-	const std::filesystem::path sf_exp_tensors_folder{ artifact_folder_path / "sf_diffuser_tensors" };
+	const std::filesystem::path sf_exp_tensors_folder{ artifact_folder_path / "test_sf_diffuser_tensors" };
 	for (auto const& sf_tensor_path : std::filesystem::directory_iterator{ sf_exp_tensors_folder })
 	{
 		const std::string sf_tensor_name = sf_tensor_path.path().stem().string();
@@ -142,4 +142,42 @@ void external_test_sf_data_reading()
 	}
 
 	std::cout << "TestCase [external_test_sf_data_reading]: " << (eq ? "PASSED" : "FAILED") << "\n";
+}
+
+
+void external_test_layer_norm_fwd_f32()
+{
+	auto path = artifact_folder_path / "test_layer_norm_fwd_f32";
+
+	// read tensors from files
+	auto hx = load_tensor((path / "x.dat").string());
+	auto hw = load_tensor((path / "w.dat").string());
+	auto hb = load_tensor((path / "b.dat").string());
+	auto exp_hy = load_tensor((path / "y.dat").string());
+
+	auto act_hy_cpu = tensor_layer_norm(hx, 2, hw, hb, 2e-3f);
+
+
+	auto dx = hx.copy_to_cuda();
+	auto dw = hw.copy_to_cuda();
+	auto db = hb.copy_to_cuda();
+
+	auto act_dy_cuda = tensor_layer_norm(dx, 2, dw, db, 2e-3f);
+	auto act_hy_cuda = act_dy_cuda.copy_to_host();
+
+	// compare
+	auto cmp = [&](const Tensor<float32, CPU>& expected, const Tensor<float32, CPU>& actual)
+		{
+			bool eq = elementwise_compatible(expected, actual);  // checks the sizes
+			eq = eq && compare_data_buffers(actual, expected);
+			return eq;
+		};
+
+	// test cpu
+	bool eq = cmp(exp_hy, act_hy_cpu);
+	std::cout << "TestCase [external_test_layer_norm_fwd_f32 - CPU]: " << (eq ? "PASSED" : "FAILED") << "\n";
+
+	// test cuda
+	eq = cmp(exp_hy, act_hy_cuda);
+	std::cout << "TestCase [external_test_layer_norm_fwd_f32 - CUDA]: " << (eq ? "PASSED" : "FAILED") << "\n";
 }

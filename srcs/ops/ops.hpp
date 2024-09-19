@@ -6,5 +6,6 @@
 #include "softmax_ops.hpp"
 #include "transp_ops.hpp"
 #include "quantize_ops.hpp"
+#include "norm_ops.hpp"
 
 #endif  // __OPS__

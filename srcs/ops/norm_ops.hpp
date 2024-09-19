@@ -19,19 +19,21 @@ template<PreciseFloatType dtype>
 static Tensor<dtype, CPU> tensor_layer_norm(
 	const Tensor<dtype, CPU>& xt, 
 	const int32 axis, 
-	const dtype gamma, 
-	const dtype beta, 
+	const Tensor<dtype, CPU> wt,
+	const Tensor<dtype, CPU> bt,
 	const dtype eps)
 {
 	// check and modify axis if needed
 	int32 dim = xt.dim;
 	ACASSERT((-dim <= axis && axis < dim), "axis is out of range");
-	int32 paxis = (dim + axis) % axis;
+	int32 paxis = (dim + axis) % dim;
 	
 	// access the data arrays
 	Tensor<dtype, CPU> yt(dim, xt.shape);
 	dtype* y_data = yt.buffer();
 	dtype* x_data = xt.buffer();
+	dtype* w_data = wt.buffer();
+	dtype* b_data = bt.buffer();
 
 	// reference implementation
 	// reliable (but slow)
@@ -40,7 +42,9 @@ static Tensor<dtype, CPU> tensor_layer_norm(
 	int32 norm_region_size = 1;
 	for (int32 k = paxis; k < dim; ++k)
 	{
-		norm_region_size += xt.shape[k];
+		norm_region_size *= xt.shape[k];
+		ACASSERT(xt.shape[k] == wt.shape[k - paxis], "wt shape is incorrect");
+		ACASSERT(xt.shape[k] == bt.shape[k - paxis], "bt shape is incorrect");
 	}
 	int32 num_norm_regions = yt.size() / norm_region_size;
 
@@ -67,7 +71,9 @@ static Tensor<dtype, CPU> tensor_layer_norm(
 		for (int32 ix = 0; ix < norm_region_size; ++ix)
 		{
 			dtype x = x_data[region_mem_offs + ix];
-			dtype y = ((x - mean) / sqrt(var + eps)) * gamma + beta;
+			dtype w = w_data[ix];
+			dtype b = b_data[ix];
+			dtype y = ((x - mean) / sqrt(var + eps)) * w + b;
 			y_data[region_mem_offs + ix] = y;
 		}
 	}
@@ -80,28 +86,34 @@ template<FloatingPointType dtype>
 static Tensor<dtype, CUDA> tensor_layer_norm(
 	const Tensor<dtype, CUDA>& xt,
 	const int32 axis,
-	const dtype gamma,
-	const dtype beta,
+	const Tensor<dtype, CUDA> wt,
+	const Tensor<dtype, CUDA> bt,
 	const dtype eps)
 {
 	// check and modify axis if needed
 	int32 dim = xt.dim;
 	ACASSERT((-dim <= axis && axis < dim), "axis is out of range");
-	int32 paxis = (dim + axis) % axis;
+	int32 paxis = (dim + axis) % dim;
+
+	for (int32 k = paxis; k < dim; ++k)
+	{
+		ACASSERT(xt.shape[k] == wt.shape[k - paxis], "wt shape is incorrect");
+		ACASSERT(xt.shape[k] == bt.shape[k - paxis], "bt shape is incorrect");
+	}
 
 	// access the data arrays
-	Tensor<dtype, CPU> yt(dim, xt.shape);
+	Tensor<dtype, CUDA> yt(dim, xt.shape);
 
 	if constexpr (std::is_same_v<dtype, float32>)
 	{
-		cu_tensor_layer_norm_f32(xt, paxis, gamma, beta, eps, yt);
+		cu_tensor_layer_norm_f32(xt, wt, bt, eps, yt);
 	}
 	else
 	{
 		static_assert(std::is_same_v<dtype, float32>, "Unsupported data types");
 	}
 
-	return y;
+	return yt;
 }
 
 
