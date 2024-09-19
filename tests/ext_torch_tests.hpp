@@ -13,4 +13,6 @@ void external_test_rms_norm_fwd_f32();
 
 void external_test_silu_fwd_f32();
 
+void external_test_embedding_fwd_f32();
+
 #endif  // __EXT_TORCH_TESTS__

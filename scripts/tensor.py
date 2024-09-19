@@ -31,6 +31,18 @@ def calc_num_elements(shape: torch.Size):
     return n
 
 
+def get_dtype_index(tensor: torch.Tensor):
+    dtype_indices = {
+        torch.int32: 2,
+        torch.float32: 5
+    }
+    
+    index = None
+    if tensor.dtype in dtype_indices:
+        index = dtype_indices[tensor.dtype]
+    return index
+
+
 def save_tensor(tensor: torch.Tensor, file_path: str):
     """
         Save the torch tensor into a dat file (no compression).
@@ -42,8 +54,8 @@ def save_tensor(tensor: torch.Tensor, file_path: str):
     dim = tensor.dim()
     shape = tensor.size()
 
-    assert(tensor.dtype == torch.float32)
-    dtype = 5  # assume float32 for now
+    dtype = get_dtype_index(tensor)
+    assert(not(dtype is None))
 
     with open(file_path, 'wb') as dat:
 
@@ -65,6 +77,4 @@ def save_tensor(tensor: torch.Tensor, file_path: str):
         data_tensor = tensor.flatten().detach().numpy()
         
         buffer = data_tensor.tobytes()
-        # for i in range(1, num_elements):
-        #     buffer = buffer + struct.pack("=f", data_tensor[i])  # it is float
         dat.write(buffer)

@@ -101,3 +101,31 @@ def generate_silu_fwd_f32(path: str, test_name: str):
 
     # print sample
     print(f"Generated: {test_name}")
+
+
+def generate_embedding_fwd_f32(path: str, test_name: str):
+    """
+        Embedding test.
+        ref: https://pytorch.org/docs/stable/generated/torch.nn.Embedding.html#embedding
+    
+        path: The path to a folder where the test case folder will be stored. 
+        test_name: The name of the folder.
+    """
+    # generate random inputs
+    indices = torch.randint(0, 117, (12,), dtype=torch.int32)
+    embedding = torch.randn((118, 71), dtype=torch.float32)
+
+    # calculate the attention output
+    y = F.embedding(indices, embedding)
+
+    # create test folders
+    test_fld_name = pjoin(path, test_name)
+    os.mkdir(test_fld_name)
+
+    # save tensors
+    save_tensor(indices, pjoin(test_fld_name, "indices.dat"))
+    save_tensor(embedding, pjoin(test_fld_name, "embedding.dat"))
+    save_tensor(y, pjoin(test_fld_name, "y.dat"))
+
+    # print sample
+    print(f"Generated: {test_name}")

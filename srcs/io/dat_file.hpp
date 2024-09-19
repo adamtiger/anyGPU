@@ -29,7 +29,8 @@
 /**
   Tensor reader from .dat files.
 */
-static Tensor<float32, CPU> load_tensor(const std::string& file_path)
+template<typename T=float32>
+static Tensor<T, CPU> load_tensor(const std::string& file_path)
 {
 	std::ifstream tensor_file(file_path, std::ios::binary);
 
@@ -49,15 +50,24 @@ static Tensor<float32, CPU> load_tensor(const std::string& file_path)
 		shape[ix] = axis_size;
 	}
 
-	// read the dtype (it has to be float32)
+	// read the dtype
 	int dtype;
 	tensor_file.read(reinterpret_cast<char*>(&dtype), sizeof(int32));
-	ACASSERT(dtype == 5, "Data type in tensor data file must be float32");
+
+    if constexpr (std::is_same_v<T, float32>)
+    {
+        ACASSERT(dtype == 5, "Data type in tensor data file expected to be float32");
+    }
+    else
+    {
+		static_assert(std::is_same_v<T, int32>, "Unsupported data type");
+        ACASSERT(dtype == 2, "Data type in tensor data file expected to be int32");
+    }
 
 	// read the data
 	int num_elements = calc_default_size(shape);
-	std::vector<float32> tensor_data(num_elements);
-	tensor_file.read(reinterpret_cast<char*>(tensor_data.data()), sizeof(float32) * num_elements);
+	std::vector<T> tensor_data(num_elements);
+	tensor_file.read(reinterpret_cast<char*>(tensor_data.data()), sizeof(T) * num_elements);
 
 	if (!tensor_file)
 	{
@@ -65,7 +75,7 @@ static Tensor<float32, CPU> load_tensor(const std::string& file_path)
 		log_error(msg.c_str());
 	}
 
-	Tensor<float32, CPU> tensor(shape, tensor_data);
+	Tensor<T, CPU> tensor(shape, tensor_data);
 	return tensor;
 }
 

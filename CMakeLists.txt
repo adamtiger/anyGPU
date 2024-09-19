@@ -92,6 +92,7 @@ set (OPS_SRCS
     ${OPS_DIR}/transp_ops.cu
     ${OPS_DIR}/softmax_ops.cu
     ${OPS_DIR}/quantize_ops.cu
+    ${OPS_DIR}/embedding_ops.cu
 )
 
 set (OPS_HEADERS
@@ -109,6 +110,8 @@ set (OPS_HEADERS
     ${OPS_DIR}/softmax_ops.hpp
     ${OPS_DIR}/quantize_ops.cuh
     ${OPS_DIR}/quantize_ops.hpp
+    ${OPS_DIR}/embedding_ops.cuh
+    ${OPS_DIR}/embedding_ops.hpp
     ${OPS_DIR}/ops.hpp
 )
 
