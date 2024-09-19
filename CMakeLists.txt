@@ -6,6 +6,7 @@ project(AnyGPU CXX CUDA)
 message("Start generating!")
 
 option(BUILD_WITH_CUDA "Whether NVIDIA CUDA based modules built" ON)
+option(BUILD_WITH_VULKAN "Whether Vulkan based modules built" ON)
 option(BUILD_WITH_SYCL "Whether SYCL based modules built" ON)
 option(BUILD_WITH_ASSERT "Whether to assert when needed" ON)
 
@@ -14,9 +15,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 IF (BUILD_WITH_CUDA)
-    #find_package(CUDA 12.5 REQUIRED)
-	add_compile_definitions(XG_WITH_CUDA)
+	add_compile_definitions(AC_WITH_CUDA)
     message("Compile with cuda")
+ENDIF()
+
+IF (BUILD_WITH_VULKAN)
+    find_package(Vulkan REQUIRED)
+	add_compile_definitions(AC_WITH_VULKAN)
+    message("Compile with vulkan")
 ENDIF()
 
 IF (BUILD_WITH_ASSERT)
@@ -69,6 +75,7 @@ set (TEST_SRCS
     ${TEST_DIR}/tests.cpp
     ${TEST_DIR}/ext_torch_tests.cpp
 	${TEST_DIR}/performance.cpp
+	${TEST_DIR}/vk_relu_skeleton.cpp
 )
 
 set (TEST_HEADERS
@@ -76,6 +83,7 @@ set (TEST_HEADERS
     ${TEST_DIR}/tests.hpp
     ${TEST_DIR}/ext_torch_tests.hpp
 	${TEST_DIR}/performance.hpp
+	${TEST_DIR}/vk_relu_skeleton.hpp
 )
 
 source_group("tests" FILES ${TEST_HEADERS} ${TEST_SRCS})
@@ -174,8 +182,9 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
 
 add_executable(anygpu ${SOURCES} ${HEADERS})
-target_include_directories(anygpu PUBLIC ${TRF_DIR} ${CORE_DIR} ${IO_DIR} ${TEST_DIR} ${OPS_DIR})
+target_include_directories(anygpu PUBLIC ${Vulkan_INCLUDE_DIR} ${TRF_DIR} ${CORE_DIR} ${IO_DIR} ${TEST_DIR} ${OPS_DIR})
 #target_compile_options(anygpu PUBLIC $<$<COMPILE_LANGUAGE:CUDA>:--keep>)
 target_link_options(anygpu PUBLIC "/NODEFAULTLIB:libcmt.lib") 
+target_link_libraries(anygpu PUBLIC ${Vulkan_LIBRARIES})
 
 message("Finished")

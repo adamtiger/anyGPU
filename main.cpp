@@ -1,7 +1,7 @@
 #include "tests.hpp"
 #include "performance.hpp"
 #include "safetensors_file.hpp"
-
+#include "vk_relu_skeleton.hpp"
 
 int main()
 {
@@ -42,6 +42,7 @@ int main()
 	external_test_silu_fwd_f32();
 	external_test_embedding_fwd_f32();
 
+	run_vk_compute();
 
 	/* performance measurement (cuda) */
 

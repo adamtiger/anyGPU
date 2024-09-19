@@ -14,6 +14,31 @@ Execute the install and follow the commands.
 conda create -n anygpu python=3.10
 ```
 
+## Cuda install
+
+Follow instructions on [this link](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#network-repo-installation-for-ubuntu).
+
+Reboot and the following line to the bashrc:
+
+```
+export PATH=/usr/local/cuda-12.6/bin${PATH:+:${PATH}}
+```
+
+```
+sudo apt install nvidia-utils-550
+```
+
+The driver needs to be installed separately:
+```
+sudo apt-get install nvidia-open
+```
+
+Install cudnn too:
+```
+sudo apt-get -y install cudnn9-cuda-12
+```
+
+
 ## Clone the repository
 
 E.g.:
@@ -28,33 +53,13 @@ Also needs to be installed (the flash-attn python package install needs more tha
 
 ```
 pip install -U mamba-ssm causal-conv1d
-pip install transformer_engine[pytorch]
+MAX_JOBS=1 pip install transformer_engine[pytorch] --no-build-isolation
 ```
+The last one takes a lot of time to complete. Several hours. Needs to set more properly.
 
 For the memory problem this can help:
 ```
-MAX_JOBS=4 pip install flash-attn --no-build-isolation
-```
-
-
-## Cuda install
-
-Follow instructions on [this link](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#network-repo-installation-for-ubuntu).
-
-Reboot and the following line to the bashrc:
-
-```
-export PATH=/usr/local/cuda-12.6/bin${PATH:+:${PATH}}
-```
-
-The driver needs to be installed separately:
-```
-sudo apt-get install nvidia-open
-```
-
-Install cudnn too:
-```
-sudo apt-get -y install cudnn9-cuda-12
+MAX_JOBS=1 pip install flash-attn --no-build-isolation
 ```
 
 ## Test it with running the test file

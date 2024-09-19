@@ -9,7 +9,7 @@
 
 /*
   Embedding operator.
-  @param xt: input tensor with indices (flattened)
+  @param xt: input tensor with indices
   @param wt: embedding weights
 */
 template<PreciseFloatType dtype>
