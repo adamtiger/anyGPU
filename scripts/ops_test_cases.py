@@ -44,3 +44,31 @@ def generate_layer_norm_fwd_f32(path: str, test_name: str):
 
     # print sample
     print(f"Generated: {test_name}")
+
+
+def generate_silu_fwd_f32(path: str, test_name: str):
+    """
+        Silu test.
+        ref: https://pytorch.org/docs/stable/generated/torch.nn.SiLU.html#silu
+    
+        path: The path to a folder where the test case folder will be stored. 
+        test_name: The name of the folder.
+    """
+
+    # generate random q, k and v
+    tensor_size = (20, 30, 12, 104)
+    x = torch.randn(tensor_size, dtype=torch.float32)
+
+    # calculate the attention output
+    y = F.silu(x)
+
+    # create test folders
+    test_fld_name = pjoin(path, test_name)
+    os.mkdir(test_fld_name)
+
+    # save tensors
+    save_tensor(x, pjoin(test_fld_name, "x.dat"))
+    save_tensor(y, pjoin(test_fld_name, "y.dat"))
+
+    # print sample
+    print(f"Generated: {test_name}")

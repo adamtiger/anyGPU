@@ -7,5 +7,6 @@
 #include "transp_ops.hpp"
 #include "quantize_ops.hpp"
 #include "norm_ops.hpp"
+#include "math_ops.hpp"
 
 #endif  // __OPS__

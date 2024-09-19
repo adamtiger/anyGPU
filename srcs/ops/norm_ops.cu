@@ -1,4 +1,4 @@
-#include "quantize_ops.cuh"
+#include "norm_ops.cuh"
 
 __device__ int calc_nk(const int region_size)
 {
