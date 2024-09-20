@@ -1,7 +1,8 @@
 #include "vk_relu_skeleton.hpp"
 
-#include <sstream>
 #include <iostream>
+#include <sstream>
+#include <vector>
 
 
 // helper function to get the error immediately
@@ -76,6 +77,85 @@ void create_instance(Context& ctx)
 
 void select_physical_device(Context& ctx)
 {
+	// query the physical devices
+	uint32_t num_phys_devices;
+	CHECK_RESULT(vkEnumeratePhysicalDevices(ctx.instance, &num_phys_devices, 0));
+
+	std::vector<VkPhysicalDevice> phys_devices(num_phys_devices);
+	CHECK_RESULT(vkEnumeratePhysicalDevices(ctx.instance, &num_phys_devices, phys_devices.data()));
+
+	// select the right physical device
+	for (auto phys_dev : phys_devices)
+	{
+		VkPhysicalDeviceProperties phys_dev_props;
+		vkGetPhysicalDeviceProperties(phys_dev, &phys_dev_props);
+
+		if (phys_dev_props.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)  // TODO: add more checks
+		{
+			// save selected device
+			ctx.phys_device = phys_dev;
+
+			// print selected device data
+			std::cout << "Selected device name: " << phys_dev_props.deviceName << std::endl;
+			std::cout << "  Vendor id: " << phys_dev_props.vendorID << std::endl;
+
+			return;
+		}
+	}
+
+	std::cout << "Error: no device was found \n";
+	exit(1);
+}
+
+void create_logical_device(Context& ctx)
+{
+	// select an appropriate queue family
+	uint32_t queue_family_prop_count;
+	vkGetPhysicalDeviceQueueFamilyProperties(ctx.phys_device, &queue_family_prop_count, 0);
+
+	std::vector<VkQueueFamilyProperties> queue_family_props(queue_family_prop_count);
+	vkGetPhysicalDeviceQueueFamilyProperties(ctx.phys_device, &queue_family_prop_count, queue_family_props.data());
+
+	uint32_t qidx = 0;
+	for (auto& queue_family_prop : queue_family_props)
+	{
+		bool at_least_one = (queue_family_prop.queueCount > 0);  // guaranteed
+		bool has_compute_bit = queue_family_prop.queueFlags & VK_QUEUE_COMPUTE_BIT;
+		bool has_transfer_bit = queue_family_prop.queueFlags & VK_QUEUE_TRANSFER_BIT;
+
+		if (at_least_one && has_compute_bit && has_transfer_bit)
+		{
+			ctx.queue_family_idx = qidx;
+			break;
+		}
+
+		qidx += 1;
+	}
+
+	// TODO: report error if not found
+
+	// create the queues for the logical device
+	VkDeviceQueueCreateInfo queue_crt_info = {};
+	queue_crt_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+	queue_crt_info.flags = VK_QUEUE_COMPUTE_BIT;
+	queue_crt_info.queueCount = 1;
+	queue_crt_info.queueFamilyIndex = ctx.queue_family_idx;
+
+	// create the logical device
+	VkDeviceCreateInfo logical_device_crt_info = {};
+	logical_device_crt_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+	logical_device_crt_info.queueCreateInfoCount = 1;
+	logical_device_crt_info.pQueueCreateInfos = &queue_crt_info;
+
+	CHECK_RESULT(vkCreateDevice(ctx.phys_device, &logical_device_crt_info, 0, &ctx.device));
+}
+
+
+
+
+void destroy_context(Context& ctx)
+{
+	vkDestroyDevice(ctx.device, 0);
 	
 }
 
@@ -92,4 +172,11 @@ void run_vk_compute()
 	// devices
 	initate_app_info(ctx);
 	create_instance(ctx);
+	select_physical_device(ctx);
+	create_logical_device(ctx);
+
+
+
+	// clean up
+	destroy_context(ctx);
 }
