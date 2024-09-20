@@ -38,6 +38,15 @@ Install cudnn too:
 sudo apt-get -y install cudnn9-cuda-12
 ```
 
+Other commands for information:
+```
+nvidia-smi --query-gpu=compute_cap --format=csv
+```
+
+```
+lspci | grep -i nvidia
+```
+
 
 ## Clone the repository
 
@@ -53,9 +62,9 @@ Also needs to be installed (the flash-attn python package install needs more tha
 
 ```
 pip install -U mamba-ssm causal-conv1d
-MAX_JOBS=1 pip install transformer_engine[pytorch] --no-build-isolation
+MAX_JOBS=4 pip install transformer_engine[pytorch] --no-build-isolation
 ```
-The last one takes a lot of time to complete. Several hours. Needs to set more properly.
+The last one takes a lot of time to complete. Several hours (around 3h).
 
 For the memory problem this can help:
 ```
@@ -64,5 +73,11 @@ MAX_JOBS=1 pip install flash-attn --no-build-isolation
 
 ## Test it with running the test file
 
+Problems (with zamba2 execution):
+    - sm_75 is not enough (T4)
+	- unable to execute on cpu!
+	- bigger gpu machine is required!
+	- A10G is sm_86
 
-
+With A10G, the models work fine.
+But zambra1.2b is quite inaccurate and hallucinates a lot.
