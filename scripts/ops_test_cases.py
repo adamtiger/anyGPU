@@ -160,3 +160,57 @@ def generate_rotary_embedding_fwd_f32(path: str, test_name: str):
     # print sample
     print(f"Generated: {test_name}")
 
+
+def generate_alt_rotary_embedding_fwd_f32(path: str, test_name: str):
+    """
+        Alternative Rotary Embedding test.
+        ref: https://github.com/huggingface/transformers/blob/main/src/transformers/models/gemma2/modeling_gemma2.py#L131
+    
+        path: The path to a folder where the test case folder will be stored. 
+        test_name: The name of the folder.
+    """
+
+    # implementation
+    def alternative_rotary_embedding(q, position_ids, dim, base=10000):
+        inv_freq = 1.0 / (base ** (torch.arange(0, dim, 2, dtype=torch.int64).float() / dim))
+        inv_freq_expanded = inv_freq[None, :, None].float().expand(position_ids.shape[0], -1, 1)
+        position_ids_expanded = position_ids[:, None, :].float()
+        freqs = (inv_freq_expanded.float() @ position_ids_expanded.float()).transpose(1, 2)
+        emb = torch.cat((freqs, freqs), dim=-1)
+        cos = emb.cos()
+        sin = emb.sin()
+
+        def rotate_half(x):
+            x1 = x[..., : x.shape[-1] // 2]
+            x2 = x[..., x.shape[-1] // 2 :]
+            return torch.cat((-x2, x1), dim=-1)
+        
+        unsqueeze_dim=2
+        cos = cos.unsqueeze(unsqueeze_dim)
+        sin = sin.unsqueeze(unsqueeze_dim)
+        q_embed = (q * cos) + (rotate_half(q) * sin)
+        return q_embed
+
+
+    # generate random inputs
+    batch = 4
+    seq_len = 1024
+    heads = 2
+    dim = 64
+    q = torch.randn((batch, seq_len, heads, dim), dtype=torch.float32)
+    pos_ids = torch.arange(0, seq_len, 1, dtype=torch.int32).repeat(batch, 1)
+
+    # calculate the attention output
+    y = alternative_rotary_embedding(q, pos_ids, dim)
+
+    # create test folders
+    test_fld_name = pjoin(path, test_name)
+    os.mkdir(test_fld_name)
+
+    # save tensors
+    save_tensor(q, pjoin(test_fld_name, "q.dat"))
+    save_tensor(pos_ids, pjoin(test_fld_name, "p.dat"))
+    save_tensor(y, pjoin(test_fld_name, "y.dat"))
+
+    # print sample
+    print(f"Generated: {test_name}")

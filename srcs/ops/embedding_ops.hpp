@@ -233,4 +233,84 @@ static Tensor<dtype, CUDA> tensor_apply_rotary_embedding(
 	return yt;
 }
 
+
+
+/*
+  Alternative Rotary position embedding operator.
+  Applies the embedding on the input tensor.
+  Alternative version that creates the pairs not from the
+  consequtive elements but half dimension away.
+  @param xt: input tensor (b, seq_len, [num_head], num_dims=2*emb_size)
+  @param ft: angles for rotations (embedding tensor)
+*/
+template<PreciseFloatType dtype>
+static Tensor<dtype, CPU> tensor_apply_alt_rotary_embedding(
+	const Tensor<dtype, CPU>& xt,
+	const Tensor<dtype, CPU>& ft)
+{
+	dtype* xt_data = xt.buffer();
+	dtype* ft_data = ft.buffer();
+
+	// initiate the output
+	Tensor<dtype, CPU> yt(xt.dim, xt.shape);
+	dtype* yt_data = yt.buffer();
+
+	ACASSERT(ft.dim == 2, "embedding tensor dim should be 2");
+	int x_size = xt.size();
+	int x_seq_stride = xt.stride[1];
+	int x_emb_stride = xt.stride[xt.dim - 2];  // stride corresponding to the embedding (last dim - 1)
+	int x_emb_num = x_size / x_emb_stride;     // number of embeddings 
+
+	int seq_len = ft.shape[0];
+	int d_per_2 = ft.shape[1];
+	int f_stride = ft.stride[0];
+
+	int emb_offset = 0;
+	for (int ix = 0; ix < x_emb_num; ++ix)
+	{
+		int m = (emb_offset / x_seq_stride) % seq_len;  // sequence position, rotating index
+
+		for (int i = 0; i < d_per_2; ++i)
+		{
+			dtype angle = ft_data[m * f_stride + i];
+			dtype cos_angle = cos(angle);
+			dtype sin_angle = sin(angle);
+
+			dtype x1 = xt_data[ix * x_emb_stride + i];
+			dtype x2 = xt_data[ix * x_emb_stride + d_per_2 + i];
+
+			dtype y1 = cos_angle * x1 - sin_angle * x2;
+			dtype y2 = sin_angle * x1 + cos_angle * x2;
+
+			yt_data[ix * x_emb_stride + i] = y1;
+			yt_data[ix * x_emb_stride + d_per_2 + i] = y2;
+		}
+
+		emb_offset += x_emb_stride;
+	}
+
+	return yt;
+}
+
+
+template<FloatingPointType dtype>  // TODO: implement
+static Tensor<dtype, CUDA> tensor_apply_alt_rotary_embedding(
+	const Tensor<dtype, CUDA>& xt,
+	const Tensor<dtype, CUDA>& ft)
+{
+	// access the data arrays
+	Tensor<dtype, CUDA> yt(xt.dim, xt.shape);
+
+	if constexpr (std::is_same_v<dtype, float32>)
+	{
+		//cu_tensor_embedding_f32(xt, wt, yt);
+	}
+	else
+	{
+		static_assert(std::is_same_v<dtype, float32>, "Unsupported data types");
+	}
+
+	return yt;
+}
+
 #endif  // __EMBEDDING_OPS__
