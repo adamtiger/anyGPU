@@ -18,3 +18,4 @@ if __name__ == '__main__':
     generate_embedding_fwd_f32(path, "test_embedding_fwd_f32")
     generate_rotary_embedding_fwd_f32(path, "test_rotary_embedding_fwd_f32")
     generate_alt_rotary_embedding_fwd_f32(path, "test_alt_rotary_embedding_fwd_f32")
+    generate_linear_fwd_f32(path, "test_linear_fwd_f32")

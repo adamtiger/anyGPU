@@ -336,6 +336,12 @@ DimArray calc_default_stride(const int dim, const DimArray& shape);
 DimArray cvt_vector2array(const std::vector<int>& v);
 
 /*
+  Transforms int array to vector.
+  Vector can be shape or stride.
+*/
+std::vector<int> cvt_array2vector(const int dim, const DimArray& arr);
+
+/*
   Dimension from vector.
 */
 int calc_dim(const std::vector<int>& v);

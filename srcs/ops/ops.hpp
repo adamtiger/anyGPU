@@ -9,5 +9,6 @@
 #include "embedding_ops.hpp"
 #include "norm_ops.hpp"
 #include "math_ops.hpp"
+#include "shape_ops.hpp"
 
 #endif  // __OPS__

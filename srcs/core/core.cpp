@@ -186,6 +186,16 @@ DimArray cvt_vector2array(const std::vector<int>& v)
 	return arr;
 }
 
+std::vector<int> cvt_array2vector(const int dim, const DimArray& arr)
+{
+	std::vector<int> v(dim);
+	for (int dix = 0; dix < dim; ++dix)
+	{
+		v[dix] = arr[dix];
+	}
+	return v;
+}
+
 int calc_dim(const std::vector<int>& v)
 {
 	return static_cast<int>(v.size());

@@ -120,6 +120,7 @@ set (OPS_HEADERS
     ${OPS_DIR}/quantize_ops.hpp
     ${OPS_DIR}/embedding_ops.cuh
     ${OPS_DIR}/embedding_ops.hpp
+    ${OPS_DIR}/shape_ops.hpp
     ${OPS_DIR}/ops.hpp
 )
 
