@@ -161,14 +161,17 @@ static Tensor<dtype, device> tensor_precomp_rotary_embedding(
   Applies the embedding on the input tensor.
   Article compatible version (https://arxiv.org/pdf/2104.09864)
   @param xt: input tensor (b, seq_len, [num_head], num_dims=2*emb_size)
+  @param pt: positiion indices (b, seq_len)
   @param ft: angles for rotations (embedding tensor)
 */
 template<PreciseFloatType dtype>
 static Tensor<dtype, CPU> tensor_apply_rotary_embedding(
 	const Tensor<dtype, CPU>& xt,
+	const Tensor<int32, CPU>& pt,
 	const Tensor<dtype, CPU>& ft)
 {
 	dtype* xt_data = xt.buffer();
+	int32* pt_data = pt.buffer();
 	dtype* ft_data = ft.buffer();
 
 	// initiate the output
@@ -177,18 +180,22 @@ static Tensor<dtype, CPU> tensor_apply_rotary_embedding(
 
 	ACASSERT(ft.dim == 2, "embedding tensor dim should be 2");
 	int x_size = xt.size();
+	int x_batch_stride = xt.stride[0];
 	int x_seq_stride = xt.stride[1];
 	int x_emb_stride = xt.stride[xt.dim - 2];  // stride corresponding to the embedding (last dim - 1)
 	int x_emb_num = x_size / x_emb_stride;     // number of embeddings 
-
-	int seq_len = ft.shape[0];
+	int seq_len = xt.shape[1];
+	
 	int d_per_2 = ft.shape[1];
 	int f_stride = ft.stride[0];
 
 	int emb_offset = 0;
 	for (int ix = 0; ix < x_emb_num; ++ix)
 	{
-		int m = (emb_offset / x_seq_stride) % seq_len;  // sequence position, rotating index
+		int b = emb_offset / x_batch_stride;
+		int s = (emb_offset / x_seq_stride) % seq_len;  // sequence position, rotating index
+
+		int m = pt_data[b * pt.stride[0] + s];
 
 		for (int i = 0; i < d_per_2; ++i)
 		{
@@ -216,6 +223,7 @@ static Tensor<dtype, CPU> tensor_apply_rotary_embedding(
 template<FloatingPointType dtype>  // TODO: implement
 static Tensor<dtype, CUDA> tensor_apply_rotary_embedding(
 	const Tensor<dtype, CUDA>& xt,
+	const Tensor<int32, CUDA>& pt,
 	const Tensor<dtype, CUDA>& ft)
 {
 	// access the data arrays
@@ -241,14 +249,17 @@ static Tensor<dtype, CUDA> tensor_apply_rotary_embedding(
   Alternative version that creates the pairs not from the
   consequtive elements but half dimension away.
   @param xt: input tensor (b, seq_len, [num_head], num_dims=2*emb_size)
+  @param pt: positiion indices (b, seq_len)
   @param ft: angles for rotations (embedding tensor)
 */
 template<PreciseFloatType dtype>
 static Tensor<dtype, CPU> tensor_apply_alt_rotary_embedding(
 	const Tensor<dtype, CPU>& xt,
+	const Tensor<int32, CPU>& pt,
 	const Tensor<dtype, CPU>& ft)
 {
 	dtype* xt_data = xt.buffer();
+	int32* pt_data = pt.buffer();
 	dtype* ft_data = ft.buffer();
 
 	// initiate the output
@@ -257,18 +268,22 @@ static Tensor<dtype, CPU> tensor_apply_alt_rotary_embedding(
 
 	ACASSERT(ft.dim == 2, "embedding tensor dim should be 2");
 	int x_size = xt.size();
+	int x_batch_stride = xt.stride[0];
 	int x_seq_stride = xt.stride[1];
 	int x_emb_stride = xt.stride[xt.dim - 2];  // stride corresponding to the embedding (last dim - 1)
 	int x_emb_num = x_size / x_emb_stride;     // number of embeddings 
+	int seq_len = xt.shape[1];
 
-	int seq_len = ft.shape[0];
 	int d_per_2 = ft.shape[1];
 	int f_stride = ft.stride[0];
 
 	int emb_offset = 0;
 	for (int ix = 0; ix < x_emb_num; ++ix)
 	{
-		int m = (emb_offset / x_seq_stride) % seq_len;  // sequence position, rotating index
+		int b = emb_offset / x_batch_stride;
+		int s = (emb_offset / x_seq_stride) % seq_len;  // sequence position, rotating index
+
+		int m = pt_data[b * pt.stride[0] + s];
 
 		for (int i = 0; i < d_per_2; ++i)
 		{
@@ -296,6 +311,7 @@ static Tensor<dtype, CPU> tensor_apply_alt_rotary_embedding(
 template<FloatingPointType dtype>  // TODO: implement
 static Tensor<dtype, CUDA> tensor_apply_alt_rotary_embedding(
 	const Tensor<dtype, CUDA>& xt,
+	const Tensor<int32, CUDA>& pt,
 	const Tensor<dtype, CUDA>& ft)
 {
 	// access the data arrays

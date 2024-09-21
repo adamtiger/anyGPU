@@ -289,11 +289,12 @@ void external_test_rotary_embedding_fwd_f32()
 	auto path = artifact_folder_path / "test_rotary_embedding_fwd_f32";
 
 	// read tensors from files
-	auto hx = load_tensor((path / "x.dat").string());
+	auto hq = load_tensor((path / "q.dat").string());
+	auto hp = load_tensor<int32>((path / "p.dat").string());
 	auto exp_hy = load_tensor((path / "y.dat").string());
 
 	auto hf = tensor_precomp_rotary_embedding<float32, CPU>(1024, 64);
-	auto act_hy_cpu = tensor_apply_rotary_embedding(hx, hf);  // cpu test
+	auto act_hy_cpu = tensor_apply_rotary_embedding(hq, hp, hf);  // cpu test
 
 	/*auto dx = hx.copy_to_cuda();
 	auto dw = hw.copy_to_cuda();
@@ -323,11 +324,12 @@ void external_test_alt_rotary_embedding_fwd_f32()
 	auto path = artifact_folder_path / "test_alt_rotary_embedding_fwd_f32";
 
 	// read tensors from files
-	auto hx = load_tensor((path / "q.dat").string());
+	auto hq = load_tensor((path / "q.dat").string());
+	auto hp = load_tensor<int32>((path / "p.dat").string());
 	auto exp_hy = load_tensor((path / "y.dat").string());
 
 	auto hf = tensor_precomp_rotary_embedding<float32, CPU>(1024, 64);
-	auto act_hy_cpu = tensor_apply_alt_rotary_embedding(hx, hf);  // cpu test
+	auto act_hy_cpu = tensor_apply_alt_rotary_embedding(hq, hp, hf);  // cpu test
 
 	/*auto dx = hx.copy_to_cuda();
 	auto dw = hw.copy_to_cuda();

@@ -141,20 +141,26 @@ def generate_rotary_embedding_fwd_f32(path: str, test_name: str):
         test_name: The name of the folder.
     """
     # generate random inputs
+    max_seq_len = 1024
+
+    batch = 2
+    seq = max_seq_len // 2
+    heads = 4
     dim = 64
-    seq_len = 1024
-    x = torch.randn((2, seq_len, 4, dim), dtype=torch.float32)
+    q = torch.randn((batch, seq, heads, dim), dtype=torch.float32)
+    pos_idcs = torch.randint(0, max_seq_len, (batch, seq), dtype=torch.int32)
 
     # calculate the attention output
-    rope = RotaryPositionalEmbeddings(dim, seq_len)
-    y = rope(x)
+    rope = RotaryPositionalEmbeddings(dim, max_seq_len)
+    y = rope(q, input_pos=pos_idcs)
 
     # create test folders
     test_fld_name = pjoin(path, test_name)
     os.mkdir(test_fld_name)
 
     # save tensors
-    save_tensor(x, pjoin(test_fld_name, "x.dat"))
+    save_tensor(q, pjoin(test_fld_name, "q.dat"))
+    save_tensor(pos_idcs, pjoin(test_fld_name, "p.dat"))
     save_tensor(y, pjoin(test_fld_name, "y.dat"))
 
     # print sample
@@ -194,11 +200,11 @@ def generate_alt_rotary_embedding_fwd_f32(path: str, test_name: str):
 
     # generate random inputs
     batch = 4
-    seq_len = 1024
+    seq_len = 512
     heads = 2
     dim = 64
     q = torch.randn((batch, seq_len, heads, dim), dtype=torch.float32)
-    pos_ids = torch.arange(0, seq_len, 1, dtype=torch.int32).repeat(batch, 1)
+    pos_ids = torch.randint(0, seq_len * 2, (batch, seq_len), dtype=torch.int32)
 
     # calculate the attention output
     y = alternative_rotary_embedding(q, pos_ids, dim)
