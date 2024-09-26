@@ -296,10 +296,11 @@ void external_test_rotary_embedding_fwd_f32()
 	auto hf = tensor_precomp_rotary_embedding<float32, CPU>(1024, 64);
 	auto act_hy_cpu = tensor_apply_rotary_embedding(hq, hp, hf);  // cpu test
 
-	/*auto dx = hx.copy_to_cuda();
-	auto dw = hw.copy_to_cuda();
-	auto act_dy_cuda = tensor_embedding(dx, dw);
-	auto act_hy_cuda = act_dy_cuda.copy_to_host();*/
+	auto dq = hq.copy_to_cuda();
+	auto dp = hp.copy_to_cuda();
+	auto df = tensor_precomp_rotary_embedding<float32, CUDA>(1024, 64);
+	auto act_dy_cuda = tensor_apply_rotary_embedding(dq, dp, df);
+	auto act_hy_cuda = act_dy_cuda.copy_to_host();
 
 	// compare
 	auto cmp = [&](const Tensor<float32, CPU>& expected, const Tensor<float32, CPU>& actual)
@@ -314,8 +315,8 @@ void external_test_rotary_embedding_fwd_f32()
 	std::cout << "TestCase [external_test_rotary_embedding_fwd_f32 - CPU]: " << (eq ? "PASSED" : "FAILED") << "\n";
 
 	// test cuda
-	/*eq = cmp(exp_hy, act_hy_cuda);
-	std::cout << "TestCase [external_test_embedding_fwd_f32 - CUDA]: " << (eq ? "PASSED" : "FAILED") << "\n";*/
+	eq = cmp(exp_hy, act_hy_cuda);
+	std::cout << "TestCase [external_test_rotary_embedding_fwd_f32 - CUDA]: " << (eq ? "PASSED" : "FAILED") << "\n";
 }
 
 
