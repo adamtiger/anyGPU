@@ -13,6 +13,18 @@ void tensor_mm_f32_opt0(
 	const Tensor<float32, CUDA>& out);
 
 
+/*
+  gemm operator on gpu, float32 support, all shapes
+  Opt0 - the base kernel implementation without
+	relevant optimizations.
+*/
+void tensor_gemm_f32_opt0(
+	const Tensor<float32, CUDA>& xt,
+	const Tensor<float32, CUDA>& wt,
+	const Tensor<float32, CUDA>& bt,
+	const Tensor<float32, CUDA>& out);
+
+
 namespace opt1
 {
 	/*

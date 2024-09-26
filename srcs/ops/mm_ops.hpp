@@ -138,7 +138,7 @@ Tensor<dtype, CUDA> tensor_gemm(
 
 	if constexpr (std::is_same_v<dtype, float32>)
 	{
-		//opt1::tensor_mm_f32(lhs, rhs, res);
+		tensor_gemm_f32_opt0(xt, wt, bt, res);
 	}
 	else
 	{

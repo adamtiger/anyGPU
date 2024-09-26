@@ -366,11 +366,11 @@ void external_test_linear_fwd_f32()
 
 	auto act_hy_cpu = tensor_linear(hx, hw, hb);  // cpu test
 
-	/*auto dx = hx.copy_to_cuda();
+	auto dx = hx.copy_to_cuda();
 	auto dw = hw.copy_to_cuda();
 	auto db = hb.copy_to_cuda();
 	auto act_dy_cuda = tensor_linear(dx, dw, db);
-	auto act_hy_cuda = act_dy_cuda.copy_to_host();*/
+	auto act_hy_cuda = act_dy_cuda.copy_to_host();
 
 	// compare
 	auto cmp = [&](const Tensor<float32, CPU>& expected, const Tensor<float32, CPU>& actual)
@@ -385,6 +385,6 @@ void external_test_linear_fwd_f32()
 	std::cout << "TestCase [external_test_linear_fwd_f32 - CPU]: " << (eq ? "PASSED" : "FAILED") << "\n";
 
 	// test cuda
-	/*eq = cmp(exp_hy, act_hy_cuda);
-	std::cout << "TestCase [external_test_linear_fwd_f32 - CUDA]: " << (eq ? "PASSED" : "FAILED") << "\n";*/
+	eq = cmp(exp_hy, act_hy_cuda);
+	std::cout << "TestCase [external_test_linear_fwd_f32 - CUDA]: " << (eq ? "PASSED" : "FAILED") << "\n";
 }
