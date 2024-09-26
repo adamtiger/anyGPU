@@ -308,7 +308,7 @@ static Tensor<dtype, CPU> tensor_apply_alt_rotary_embedding(
 }
 
 
-template<FloatingPointType dtype>  // TODO: implement
+template<FloatingPointType dtype>
 static Tensor<dtype, CUDA> tensor_apply_alt_rotary_embedding(
 	const Tensor<dtype, CUDA>& xt,
 	const Tensor<int32, CUDA>& pt,
@@ -319,7 +319,7 @@ static Tensor<dtype, CUDA> tensor_apply_alt_rotary_embedding(
 
 	if constexpr (std::is_same_v<dtype, float32>)
 	{
-		//cu_tensor_embedding_f32(xt, wt, yt);
+		cu_tensor_apply_alt_rotary_embedding_f32(xt, pt, ft, yt);
 	}
 	else
 	{
