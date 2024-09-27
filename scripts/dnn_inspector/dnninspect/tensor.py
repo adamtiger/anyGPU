@@ -34,6 +34,8 @@ def calc_num_elements(shape: torch.Size):
 def get_dtype_index(tensor: torch.Tensor):
     dtype_indices = {
         torch.int32: 2,
+        torch.bfloat16: 3,
+        torch.float16: 4,
         torch.float32: 5
     }
     
@@ -56,6 +58,7 @@ def save_tensor(tensor: torch.Tensor, file_path: str):
 
     dtype = get_dtype_index(tensor)
     assert(not(dtype is None))
+    assert(dtype != 3)  # bfloat16 is not supported yet well
 
     with open(file_path, 'wb') as dat:
 
@@ -73,8 +76,7 @@ def save_tensor(tensor: torch.Tensor, file_path: str):
         dat.write(buffer)
 
         # write the tensor elements
-        num_elements = calc_num_elements(shape)
-        data_tensor = tensor.flatten().detach().numpy()
+        data_tensor = tensor.flatten().cpu().detach().numpy()
         
         buffer = data_tensor.tobytes()
         dat.write(buffer)
