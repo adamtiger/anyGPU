@@ -3,7 +3,7 @@
 # reading.
 
 from safetensors.numpy import load_file
-from tensor import save_tensor
+from dnn_inspector.dnninspect.tensor import save_tensor
 import torch
 import os
 

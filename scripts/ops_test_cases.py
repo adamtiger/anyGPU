@@ -5,7 +5,7 @@
 # saved into separate files.
 
 from torchtune.modules import RotaryPositionalEmbeddings
-from tensor import save_tensor
+from dnn_inspector.dnninspect.tensor import save_tensor
 from torch.nn import functional as F
 import torch
 import os

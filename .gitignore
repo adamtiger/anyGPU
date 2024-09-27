@@ -1,6 +1,8 @@
 build/**
 *.pdf
 *.md
+*.dat
+*.json
 
 *.i
 *.ii
@@ -11,6 +13,7 @@ build/**
 
 # Python related
 **/__pycache__/*
+*.egg-info*
 
 # Others
 artifacts/**
