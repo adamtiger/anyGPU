@@ -5,7 +5,7 @@
 constexpr int WARP_SIZE = 32;
 constexpr float32 LOWEST_FLOAT32 = std::numeric_limits<float32>::lowest();
 
-__global__ void tensor_softmax_kernel_f32(const int m, const int n, const float32* dx, float32* dy)
+__global__ void cu_tensor_softmax_kernel_f32(const int m, const int n, const float32* dx, float32* dy)
 {
 	int tx = threadIdx.x;
 	int ty = blockDim.y * blockIdx.y + threadIdx.y;
@@ -89,7 +89,7 @@ __global__ void tensor_softmax_kernel_f32(const int m, const int n, const float3
 }
 
 
-void tensor_softmax_f32(
+void cu_tensor_softmax_f32(
 	const Tensor<float32, CUDA>& x,
 	Tensor<float32, CUDA>& y)
 {
@@ -105,14 +105,14 @@ void tensor_softmax_f32(
 	unsigned int gsy = m / bs.y + ((m % bs.y > 0) ? 1 : 0);  // vertical
 	dim3 gs = { gsx, gsy, 1 };
 
-	tensor_softmax_kernel_f32<<<gs, bs>>>(m, n, dx, dy);
+	cu_tensor_softmax_kernel_f32<<<gs, bs>>>(m, n, dx, dy);
 	CUDA_CHECK_LAST_ERROR();
 }
 
 
 
 
-__global__ void tensor_softmax_bwd_kernel_f32(
+__global__ void cu_tensor_softmax_bwd_kernel_f32(
 	const int m, const int n, 
 	const float32* dx, 
 	const float32* d_grad_y, 
@@ -166,7 +166,7 @@ __global__ void tensor_softmax_bwd_kernel_f32(
 }
 
 
-void tensor_softmax_bwd_f32(
+void cu_tensor_softmax_bwd_f32(
 	const Tensor<float32, CUDA>& x,
 	const Tensor<float32, CUDA>& grad_y,
 	Tensor<float32, CUDA>& grad_x)
@@ -184,6 +184,6 @@ void tensor_softmax_bwd_f32(
 	unsigned int gsy = m / bs.y + ((m % bs.y > 0) ? 1 : 0);  // vertical
 	dim3 gs = { gsx, gsy, 1 };
 
-	tensor_softmax_bwd_kernel_f32<<<gs, bs>>>(m, n, dx, gy_data, gx_data);
+	cu_tensor_softmax_bwd_kernel_f32<<<gs, bs>>>(m, n, dx, gy_data, gx_data);
 	CUDA_CHECK_LAST_ERROR();
 }

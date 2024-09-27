@@ -94,7 +94,7 @@ Tensor<dtype, CUDA> tensor_softmax(const Tensor<dtype, CUDA>& x)
 
 	if constexpr (std::is_same_v<dtype, float32>)
 	{
-		tensor_softmax_f32(x, y);
+		cu_tensor_softmax_f32(x, y);
 	}
 	else
 	{
@@ -185,7 +185,7 @@ Tensor<dtype, CUDA> tensor_softmax_bwd(const Tensor<dtype, CUDA>& x, const Tenso
 
 	if constexpr (std::is_same_v<dtype, float32>)
 	{
-		tensor_softmax_bwd_f32(x, grad_y, grad_x);
+		cu_tensor_softmax_bwd_f32(x, grad_y, grad_x);
 	}
 	else
 	{

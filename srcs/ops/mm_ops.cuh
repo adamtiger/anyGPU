@@ -7,7 +7,7 @@
   Opt0 - the base kernel implementation without
     relevant optimizations.
 */
-void tensor_mm_f32_opt0(
+void cu_tensor_mm_f32_opt0(
 	const Tensor<float32, CUDA>& lhs,
 	const Tensor<float32, CUDA>& rhs,
 	const Tensor<float32, CUDA>& out);
@@ -18,7 +18,7 @@ void tensor_mm_f32_opt0(
   Opt0 - the base kernel implementation without
 	relevant optimizations.
 */
-void tensor_gemm_f32_opt0(
+void cu_tensor_gemm_f32_opt0(
 	const Tensor<float32, CUDA>& xt,
 	const Tensor<float32, CUDA>& wt,
 	const Tensor<float32, CUDA>& bt,
@@ -37,7 +37,7 @@ namespace opt1
 		fixed tile size and block size (minimal flexibility);
 		specified for rtx3050Ti
 	*/
-	void tensor_mm_f32(
+	void cu_tensor_mm_f32(
 		const Tensor<float32, CUDA>& lhs,
 		const Tensor<float32, CUDA>& rhs,
 		const Tensor<float32, CUDA>& out);
@@ -57,7 +57,7 @@ namespace opt2
 		fixed tile size and block size (minimal flexibility);
 		specified for rtx3050Ti
 	*/
-	void tensor_mm_f16(
+	void cu_tensor_mm_f16(
 		const Tensor<float16, CUDA>& lhs,
 		const Tensor<float16, CUDA>& rhs,
 		const Tensor<float16, CUDA>& out);

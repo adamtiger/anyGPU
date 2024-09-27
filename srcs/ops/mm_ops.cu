@@ -4,7 +4,7 @@ using namespace nvcuda;
 
 /* opt0 implementation */
 
-__global__ void tensor_mm_kernel_f32_opt0(const int m, const int n, const int k, const float32* dlhs, const float32* drhs, float32* dout)
+__global__ void cu_tensor_mm_kernel_f32_opt0(const int m, const int n, const int k, const float32* dlhs, const float32* drhs, float32* dout)
 {
 	int tx = blockDim.x * blockIdx.x + threadIdx.x;
 	int ty = blockDim.y * blockIdx.y + threadIdx.y;
@@ -27,7 +27,7 @@ __global__ void tensor_mm_kernel_f32_opt0(const int m, const int n, const int k,
 }
 
 
-void tensor_mm_f32_opt0(
+void cu_tensor_mm_f32_opt0(
 	const Tensor<float32, CUDA>& lhs,
 	const Tensor<float32, CUDA>& rhs,
 	const Tensor<float32, CUDA>& out)
@@ -46,14 +46,14 @@ void tensor_mm_f32_opt0(
 	unsigned int gsy = n / bs.y + ((n % bs.y > 0) ? 1 : 0);  // horizontal
 	dim3 gs = {gsx, gsy, 1};
 
-	tensor_mm_kernel_f32_opt0<<<gs, bs>>>(m, n, k, dlhs, drhs, dout);
+	cu_tensor_mm_kernel_f32_opt0<<<gs, bs>>>(m, n, k, dlhs, drhs, dout);
 	CUDA_CHECK_LAST_ERROR();
 }
 
 
 /* gemm - opt0 implementation */
 
-__global__ void tensor_gemm_kernel_f32_opt0(
+__global__ void cu_tensor_gemm_kernel_f32_opt0(
 	const int m, 
 	const int n, 
 	const int k, 
@@ -83,7 +83,7 @@ __global__ void tensor_gemm_kernel_f32_opt0(
 }
 
 
-void tensor_gemm_f32_opt0(
+void cu_tensor_gemm_f32_opt0(
 	const Tensor<float32, CUDA>& xt,
 	const Tensor<float32, CUDA>& wt,
 	const Tensor<float32, CUDA>& bt,
@@ -104,7 +104,7 @@ void tensor_gemm_f32_opt0(
 	unsigned int gsy = n / bs.y + ((n % bs.y > 0) ? 1 : 0);  // horizontal
 	dim3 gs = { gsx, gsy, 1 };
 
-	tensor_gemm_kernel_f32_opt0<<<gs, bs>>>(m, n, k, dx, dw, db, dout);
+	cu_tensor_gemm_kernel_f32_opt0<<<gs, bs>>>(m, n, k, dx, dw, db, dout);
 	CUDA_CHECK_LAST_ERROR();
 }
 
@@ -118,7 +118,7 @@ namespace opt1
 	constexpr int NC = 2;   // cols handled by a warp
 	constexpr int WS = 32;  // warp size
 
-	__global__ void tensor_mm_kernel_f32(
+	__global__ void cu_tensor_mm_kernel_f32(
 		const int m, const int n, const int k,
 		const float32* dlhs, const float32* drhs,
 		float32* dout)
@@ -199,7 +199,7 @@ namespace opt1
 	}
 
 
-	void tensor_mm_f32(
+	void cu_tensor_mm_f32(
 		const Tensor<float32, CUDA>& lhs,
 		const Tensor<float32, CUDA>& rhs,
 		const Tensor<float32, CUDA>& out)
@@ -218,7 +218,7 @@ namespace opt1
 		unsigned int gsy = calc_req_num_blocks(m, TS);  // vertical
 		dim3 gs = { gsx, gsy, 1 };
 
-		tensor_mm_kernel_f32<<<gs, bs>>>(m, n, k, dlhs, drhs, dout);
+		cu_tensor_mm_kernel_f32<<<gs, bs>>>(m, n, k, dlhs, drhs, dout);
 		cudaDeviceSynchronize();
 		CUDA_CHECK_LAST_ERROR();
 	}
@@ -237,7 +237,7 @@ namespace opt2
 	constexpr int NC = 2;   // cols handled by a warp
 	constexpr int WS = 32;  // warp size
 
-	__global__ void tensor_mm_kernel_f16(
+	__global__ void cu_tensor_mm_kernel_f16(
 		const int m, const int n, const int k,
 		const float16* dlhs, const float16* drhs,
 		float16* dout)
@@ -324,7 +324,7 @@ namespace opt2
 	}
 
 
-	void tensor_mm_f16(
+	void cu_tensor_mm_f16(
 		const Tensor<float16, CUDA>& lhs,
 		const Tensor<float16, CUDA>& rhs,
 		const Tensor<float16, CUDA>& out)
@@ -343,7 +343,7 @@ namespace opt2
 		unsigned int gsy = calc_req_num_blocks(m, TS);  // vertical
 		dim3 gs = { gsx, gsy, 1 };
 
-		tensor_mm_kernel_f16<<<gs, bs>>>(m, n, k, dlhs, drhs, dout);
+		cu_tensor_mm_kernel_f16<<<gs, bs>>>(m, n, k, dlhs, drhs, dout);
 		cudaDeviceSynchronize();
 		CUDA_CHECK_LAST_ERROR();
 	}

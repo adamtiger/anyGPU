@@ -4,7 +4,7 @@ constexpr int32 INT8_LOWEST = std::numeric_limits<int8>::lowest();
 constexpr int32 INT8_HIGHEST = std::numeric_limits<int8>::max();
 
 
-__global__ void tensor_quantize_linear_cuda_f32_i8_kernel(
+__global__ void cu_tensor_quantize_linear_cuda_f32_i8_kernel(
 	const int length, 
 	const float32* dx, 
 	const float32 scale, 
@@ -21,7 +21,7 @@ __global__ void tensor_quantize_linear_cuda_f32_i8_kernel(
 	}
 }
 
-void tensor_quantize_linear_cuda_f32_i8(
+void cu_tensor_quantize_linear_cuda_f32_i8(
 	const Tensor<float32, CUDA>& x,
 	const float32 scale,
 	const int8 bias,
@@ -36,12 +36,12 @@ void tensor_quantize_linear_cuda_f32_i8(
 
 	dim3 gs = { calc_req_num_blocks(length, bs.x), 1, 1 };
 
-	tensor_quantize_linear_cuda_f32_i8_kernel<<<gs, bs>>>(length, dx, scale, bias, dy);
+	cu_tensor_quantize_linear_cuda_f32_i8_kernel<<<gs, bs>>>(length, dx, scale, bias, dy);
 	CUDA_CHECK_LAST_ERROR();
 }
 
 
-__global__ void tensor_dequantize_linear_cuda_i8_f32_kernel(
+__global__ void cu_tensor_dequantize_linear_cuda_i8_f32_kernel(
 	const int length,
 	const int8* dx,
 	const float32 scale,
@@ -57,7 +57,7 @@ __global__ void tensor_dequantize_linear_cuda_i8_f32_kernel(
 	}
 }
 
-void tensor_dequantize_linear_cuda_i8_f32(
+void cu_tensor_dequantize_linear_cuda_i8_f32(
 	const Tensor<int8, CUDA>& x,
 	const float32 scale,
 	const int8 bias,
@@ -72,12 +72,12 @@ void tensor_dequantize_linear_cuda_i8_f32(
 
 	dim3 gs = { calc_req_num_blocks(length, bs.x), 1, 1 };
 
-	tensor_dequantize_linear_cuda_i8_f32_kernel<<<gs, bs>>>(length, dx, scale, bias, dy);
+	cu_tensor_dequantize_linear_cuda_i8_f32_kernel<<<gs, bs>>>(length, dx, scale, bias, dy);
 	CUDA_CHECK_LAST_ERROR();
 }
 
 
-__global__ void tensor_qmm_cuda_i8_f32_kernel(
+__global__ void cu_tensor_qmm_cuda_i8_f32_kernel(
 	const int m, const int n, const int k,
 	const int8* da, const int8* db,
 	const float32 sa, const int8 zpa,
@@ -106,7 +106,7 @@ __global__ void tensor_qmm_cuda_i8_f32_kernel(
 	}
 }
 
-void tensor_qmm_cuda_i8_f32(
+void cu_tensor_qmm_cuda_i8_f32(
 	const Tensor<int8, CUDA>& a,
 	const Tensor<int8, CUDA>& b,
 	const float32 sa, const int8 zpa,
@@ -125,6 +125,6 @@ void tensor_qmm_cuda_i8_f32(
 	dim3 bs = { 32, 8, 1 };
 	dim3 gs = { calc_req_num_blocks(n, bs.x), calc_req_num_blocks(m, bs.y), 1 };
 
-	tensor_qmm_cuda_i8_f32_kernel<<<gs, bs>>>(m, n, k, da, db, sa, zpa, sb, zpb, sy, zpy, dy);
+	cu_tensor_qmm_cuda_i8_f32_kernel<<<gs, bs>>>(m, n, k, da, db, sa, zpa, sb, zpb, sy, zpy, dy);
 	CUDA_CHECK_LAST_ERROR();
 }

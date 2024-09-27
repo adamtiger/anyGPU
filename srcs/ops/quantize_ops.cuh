@@ -3,21 +3,21 @@
 
 #include "tensor.hpp"
 
-void tensor_quantize_linear_cuda_f32_i8(
+void cu_tensor_quantize_linear_cuda_f32_i8(
 	const Tensor<float32, CUDA>& x, 
 	const float32 scale, 
 	const int8 bias,
 	Tensor<int8, CUDA>& y);
 
 
-void tensor_dequantize_linear_cuda_i8_f32(
+void cu_tensor_dequantize_linear_cuda_i8_f32(
 	const Tensor<int8, CUDA>& x,
 	const float32 scale,
 	const int8 bias,
 	Tensor<float32, CUDA>& y);
 
 
-void tensor_qmm_cuda_i8_f32(
+void cu_tensor_qmm_cuda_i8_f32(
 	const Tensor<int8, CUDA>& a,
 	const Tensor<int8, CUDA>& b,
 	const float32 sa, const int8 zpa,

@@ -41,11 +41,11 @@ Tensor<dtype, CUDA> tensor_add(const Tensor<dtype, CUDA>& lhs, const Tensor<dtyp
 
 	if constexpr (std::is_same_v<dtype, float32>)
 	{
-		tensor_add_f32(kpms, lhs, rhs, res);
+		cu_tensor_add_f32(kpms, lhs, rhs, res);
 	}
 	else if constexpr (std::is_same_v<dtype, int32>)
 	{
-		tensor_add_i32(kpms, lhs, rhs, res);
+		cu_tensor_add_i32(kpms, lhs, rhs, res);
 	}
 	else
 	{
@@ -86,12 +86,12 @@ Tensor<dtype, CUDA> tensor_mul(const Tensor<dtype, CUDA>& lhs, const dtype rhs)
 
 	if constexpr (std::is_same_v<dtype, float32>)
 	{
-		tensor_mul_f32(kpms, lhs, rhs, res);
+		cu_tensor_mul_f32(kpms, lhs, rhs, res);
 	}
 	else
 	{
 		static_assert(std::is_same_v<dtype, int32>, "Unsupported data type in binary mul.");
-		tensor_mul_i32(kpms, lhs, rhs, res);
+		cu_tensor_mul_i32(kpms, lhs, rhs, res);
 	}
 
 	return res;

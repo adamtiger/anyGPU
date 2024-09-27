@@ -51,7 +51,7 @@ static Tensor<trg_dtype, CUDA> tensor_quantize_linear(const Tensor<src_dtype, CU
 
 	if constexpr (std::is_same_v<src_dtype, float32> && std::is_same_v<trg_dtype, int8>)
 	{
-		tensor_quantize_linear_cuda_f32_i8(x, scale, bias, y);
+		cu_tensor_quantize_linear_cuda_f32_i8(x, scale, bias, y);
 	}
 	else
 	{
@@ -100,7 +100,7 @@ static Tensor<trg_dtype, CUDA> tensor_dequantize_linear(const Tensor<src_dtype, 
 
 	if constexpr (std::is_same_v<src_dtype, int8> && std::is_same_v<trg_dtype, float32>)
 	{
-		tensor_dequantize_linear_cuda_i8_f32(x, scale, bias, y);
+		cu_tensor_dequantize_linear_cuda_i8_f32(x, scale, bias, y);
 	}
 	else
 	{
@@ -188,7 +188,7 @@ static Tensor<lp_dtype, CUDA> tensor_qmm(
 
 	if constexpr (std::is_same_v<lp_dtype, int8> && std::is_same_v<hp_dtype, float32>)
 	{
-		tensor_qmm_cuda_i8_f32(a, b, sa, zpa, sb, zpb, sy, zpy, y);
+		cu_tensor_qmm_cuda_i8_f32(a, b, sa, zpa, sb, zpb, sy, zpy, y);
 	}
 	else
 	{
