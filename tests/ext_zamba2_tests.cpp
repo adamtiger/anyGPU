@@ -24,11 +24,8 @@ void external_test_zamba2_model_rmsnorm()
 	// compare
 	auto cmp = [&](const Tensor<float32, CPU>& expected, const Tensor<float32, CPU>& actual)
 		{
-			//bool eq = elementwise_compatible(expected, actual);  // checks the sizes
-			//eq = eq && compare_data_buffers(actual, expected);
-			// TODO: size is different: [1, 11, 2048] vs [11, 2048], where is the difference in zamba2?
-			// TODO: the output tensor saver requires fix!
-			bool eq = compare_data_buffers(actual, expected);
+			bool eq = elementwise_compatible(expected, actual);  // checks the sizes
+			eq = eq && compare_data_buffers(actual, expected);
 			return eq;
 		};
 

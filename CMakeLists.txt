@@ -149,11 +149,12 @@ source_group("transformers" FILES ${TRF_HEADERS} ${TRF_SRCS})
 set(ZAM2_DIR ${ANYGPU_ROOT}/srcs/zamba2)
 
 set (ZAM2_SRCS
-    
+    ${ZAM2_DIR}/zamba_glu.cu
 )
 
 set (ZAM2_HEADERS
-    
+    ${ZAM2_DIR}/zamba_glu.cuh
+    ${ZAM2_DIR}/zamba_glu.hpp
 )
 
 source_group("zamba2" FILES ${ZAM2_HEADERS} ${ZAM2_SRCS})
