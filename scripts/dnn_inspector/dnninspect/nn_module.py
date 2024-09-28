@@ -109,17 +109,18 @@ def save_torch_module_calc(m: nn.Module, ckp_folder: str, *inputs, **kwargs):
     outputs = m.forward(*inputs, **kwargs)
 
     # save outputs
+    iterable_outputs = outputs
     if isinstance(outputs, torch.Tensor):
-        outputs = [outputs]  # create a list from it
+        iterable_outputs = [outputs]  # create a list from it
 
-    for i, x in enumerate(outputs):
+    for i, y in enumerate(iterable_outputs):
         nm = f"out_{i}"
-        if isinstance(x, torch.Tensor):
-            save_tensor(x, pjoin(ckp_folder, f"{nm}.dat"))
-            others[f"{nm}_shape"] = x.size()
-            others[f"{nm}_type"] = str(x.dtype)
+        if isinstance(y, torch.Tensor):
+            save_tensor(y, pjoin(ckp_folder, f"{nm}.dat"))
+            others[f"{nm}_shape"] = y.size()
+            others[f"{nm}_type"] = str(y.dtype)
         else:
-            others[f"{nm}"] = x
+            others[f"{nm}"] = y
     
     # save others
     with open(pjoin(ckp_folder, "non_tensors.json"), "wt") as js:
