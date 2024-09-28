@@ -2,6 +2,7 @@
 #define __TESTS__
 
 #include "ext_torch_tests.hpp"
+#include "ext_zamba2_tests.hpp"
 
 void test_binary_add_f32();
 void test_binary_add_i32();

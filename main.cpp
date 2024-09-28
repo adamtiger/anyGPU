@@ -7,7 +7,7 @@ int main()
 {
 	//std::cout << print_cuda_device_props();
 
-	test_binary_add_f32();
+	/*test_binary_add_f32();
 	test_binary_add_i32();
 
 	test_binary_mul_f32();
@@ -43,7 +43,9 @@ int main()
 	external_test_embedding_fwd_f32();
 	external_test_rotary_embedding_fwd_f32();
 	external_test_alt_rotary_embedding_fwd_f32();
-	external_test_linear_fwd_f32();
+	external_test_linear_fwd_f32();*/
+
+	external_test_zamba2_model_rmsnorm();
 
 	//run_vk_compute();
 

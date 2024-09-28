@@ -109,6 +109,9 @@ def save_torch_module_calc(m: nn.Module, ckp_folder: str, *inputs, **kwargs):
     outputs = m.forward(*inputs, **kwargs)
 
     # save outputs
+    if isinstance(outputs, torch.Tensor):
+        outputs = [outputs]  # create a list from it
+
     for i, x in enumerate(outputs):
         nm = f"out_{i}"
         if isinstance(x, torch.Tensor):
