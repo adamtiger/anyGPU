@@ -193,24 +193,27 @@ def inspect_torch_module(m: nn.Module, name: str) -> any:
 def inspect_torch_tensor(t: torch.Tensor, location: str, name: str) -> any:
     """
     Inspects and saves a torch tensor.
+    The tensor with this name is saved only once.
         location: name of the location
         name: tensor name
     """
     # create output folder if needed
     output_path = pjoin(path_inspection_output_folder, location)
-    save_tensor_data = not os.path.exists(output_path)
 
-    tensor_path = pjoin(output_path, const.TENSORS)
+    tensor_fld_path = pjoin(output_path, const.TENSORS)
+    tensor_path = pjoin(tensor_fld_path, f"{name}.dat")
     tinfo_path = pjoin(output_path, f"tinfo_{name}.json")
+
+    save_tensor_data = not os.path.exists(tensor_path)
 
     if save_tensor_data:
         os.mkdir(output_path)
-        os.mkdir(tensor_path)
+        os.mkdir(tensor_fld_path)
     
     # save module info
     m_info = dict()
     if save_tensor_data:
-        save_tensor(t, pjoin(tensor_path, f"{name}.dat"))
+        save_tensor(t, tensor_path)
         m_info["shape"] = t.size()
         m_info["type"] = str(t.dtype)
 
