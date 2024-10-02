@@ -181,4 +181,33 @@ Tensor<dtype, device> tensor_linear(
 	return y;
 }
 
+
+template<FloatingPointType dtype, Device device>
+Tensor<dtype, device> tensor_linear(
+	const Tensor<dtype, device>& xt,  // (*, in_features)
+	const Tensor<dtype, device>& wt)  // (in_features, out_features)
+{
+	// view xt as a 2d matrix
+	int d = xt.dim;
+	int cols = xt.shape[d - 1];
+	int rows = xt.numel() / cols;
+	Tensor<dtype, device> x_as_mtx = tensor_view(xt, { rows, cols });
+
+	// linear transformation
+	auto xw = tensor_mm(x_as_mtx, wt);
+
+	// result should have the same head shape as the input
+	// (head: ignoring the last dimension)
+	std::vector<int> y_shape(d);
+	for (int ix = 0; ix < d - 1; ++ix)
+	{
+		y_shape[ix] = xt.shape[ix];
+	}
+	y_shape[d - 1] = xw.shape[1];
+
+	auto y = tensor_view(xw, y_shape);
+
+	return y;
+}
+
 #endif  // __MM_OPS__

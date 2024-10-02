@@ -201,6 +201,21 @@ struct Tensor
 	// deep copies the tensor to cuda
 	Tensor<dtype, CUDA> copy_to_cuda() const;
 
+	// deep copies the tensor to given device
+	template<Device trg_device>
+	Tensor<dtype, trg_device> copy_to_device() const
+	{
+		if constexpr (trg_device == CPU)
+		{
+			return copy_to_host();
+		}
+		else
+		{
+			static_assert(trg_device == CUDA, "unknown device");
+			return copy_to_cuda();
+		}
+	}
+
 	explicit Tensor()
 	{
 		id = GlobalUUIDGenerator::generate_id();

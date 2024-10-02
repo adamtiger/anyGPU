@@ -46,7 +46,8 @@ int main()
 	external_test_linear_fwd_f32();*/
 
 	//external_test_zamba2_model_rmsnorm();
-	test_zamba2_glu();
+	external_test_zamba2_attndeco_mlp();
+	//test_zamba2_glu();
 
 	//run_vk_compute();
 

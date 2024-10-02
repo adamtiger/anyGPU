@@ -6,6 +6,7 @@
 #include <filesystem>
 
 #include "zamba_glu.hpp"
+#include "zamba_mlp.hpp"
 
 
 const std::filesystem::path artifact_folder_path = "C:\\Data\\AI\\projects\\anyGPU\\artifacts\\zamba2_tests";
@@ -35,6 +36,56 @@ void external_test_zamba2_model_rmsnorm()
 	// test cuda
 	bool eq = cmp(exp_hy, act_hy_cuda);
 	std::cout << "TestCase [external_test_zamba2_model_rmsnorm - CUDA]: " << (eq ? "PASSED" : "FAILED") << "\n";
+}
+
+
+void external_test_zamba2_attndeco_mlp()
+{
+	auto path = artifact_folder_path / "test_zamba2AttenDecodLy_mlp";
+
+	// read tensors from files
+	auto hx = load_tensor((path / "in_0.dat").string());
+	auto exp_hy = load_tensor((path / "out_0.dat").string());
+
+	ZambaMLPweights<float32, CUDA> mlp_weights;
+	mlp_weights.load_weights(
+		(path / "zamba2AttenDecodLy_mlp.zamba2mlp.linear_fc1.weight.dat").string(),
+		(path / "zamba2AttenDecodLy_mlp.zamba2mlp.linear_fc2.weight.dat").string(),
+		{
+			(path / "zamba2AttenDecodLy_mlp.zamba2mlp.linear_fc1_lora_A_list.0.weight.dat").string(),
+			(path / "zamba2AttenDecodLy_mlp.zamba2mlp.linear_fc1_lora_A_list.1.weight.dat").string(),
+			(path / "zamba2AttenDecodLy_mlp.zamba2mlp.linear_fc1_lora_A_list.2.weight.dat").string(),
+			(path / "zamba2AttenDecodLy_mlp.zamba2mlp.linear_fc1_lora_A_list.3.weight.dat").string(),
+			(path / "zamba2AttenDecodLy_mlp.zamba2mlp.linear_fc1_lora_A_list.4.weight.dat").string(),
+			(path / "zamba2AttenDecodLy_mlp.zamba2mlp.linear_fc1_lora_A_list.5.weight.dat").string()
+		},
+		{
+			(path / "zamba2AttenDecodLy_mlp.zamba2mlp.linear_fc1_lora_B_list.0.weight.dat").string(),
+			(path / "zamba2AttenDecodLy_mlp.zamba2mlp.linear_fc1_lora_B_list.1.weight.dat").string(),
+			(path / "zamba2AttenDecodLy_mlp.zamba2mlp.linear_fc1_lora_B_list.2.weight.dat").string(),
+			(path / "zamba2AttenDecodLy_mlp.zamba2mlp.linear_fc1_lora_B_list.3.weight.dat").string(),
+			(path / "zamba2AttenDecodLy_mlp.zamba2mlp.linear_fc1_lora_B_list.4.weight.dat").string(),
+			(path / "zamba2AttenDecodLy_mlp.zamba2mlp.linear_fc1_lora_B_list.5.weight.dat").string()
+		}
+	);
+
+	const int fwd_layer_idx = 0;
+
+	auto dx = hx.copy_to_cuda();
+	auto act_dy_cuda = tensor_zamba_mlp(mlp_weights, dx, fwd_layer_idx);
+	auto act_hy_cuda = act_dy_cuda.copy_to_host();
+
+	// compare
+	auto cmp = [&](const Tensor<float32, CPU>& expected, const Tensor<float32, CPU>& actual)
+		{
+			bool eq = elementwise_compatible(expected, actual);  // checks the sizes
+			eq = eq && compare_data_buffers(actual, expected);
+			return eq;
+		};
+
+	// test cuda
+	bool eq = cmp(exp_hy, act_hy_cuda);
+	std::cout << "TestCase [external_test_zamba2_attndeco_mlp - CUDA]: " << (eq ? "PASSED" : "FAILED") << "\n";
 }
 
 
