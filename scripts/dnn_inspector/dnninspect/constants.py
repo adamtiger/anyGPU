@@ -5,3 +5,4 @@
 MODULE_WEIGHTS = "weights"
 IO_CHECKPOINT = "io_ckpt"
 MODULE_INFO_JSON = "minfo.json"
+TENSORS = "tensors"
