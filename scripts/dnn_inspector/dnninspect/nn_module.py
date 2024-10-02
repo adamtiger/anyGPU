@@ -207,8 +207,10 @@ def inspect_torch_tensor(t: torch.Tensor, location: str, name: str) -> any:
     save_tensor_data = not os.path.exists(tensor_path)
 
     if save_tensor_data:
-        os.mkdir(output_path)
-        os.mkdir(tensor_fld_path)
+        if not os.path.exists(output_path):
+            os.mkdir(output_path)
+        if not os.path.exists(tensor_fld_path):
+            os.mkdir(tensor_fld_path)
     
     # save module info
     m_info = dict()
