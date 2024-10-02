@@ -24,13 +24,25 @@ static Tensor<dtype, CPU> tensor_zamba_glu(const Tensor<dtype, CPU>& xt)
 	int y_dim = xt.dim;
 	Shape y_shape = xt.shape;
 	y_shape[y_dim - 1] /= 2;  // end dimension will be half
-	Tensor<dtype, CUDA> yt(y_dim, y_shape);
+	Tensor<dtype, CPU> yt(y_dim, y_shape);
 	dtype* y_data = yt.buffer();
 	dtype* x_data = xt.buffer();
 
 	// reference implementation
 	// reliable (but slow)
+	int h = xt.shape[xt.dim - 1] / 2;  // last axis size, hidden dim size
+	int n = yt.size() / h;  // number of slices, (number of elements without last axis)
 
+	for (int i = 0; i < n; ++i)
+	{
+		for (int j = 0; j < h; ++j)
+		{
+			dtype x0 = x_data[i * h * 2 + j];
+			dtype gelu_x = 0.5f * x0 * (1.f + erff(x0 / sqrtf(2.f)));
+			dtype x1 = x_data[i * h * 2 + h + j];
+			y_data[i * h + j] = gelu_x * x1;
+		}
+	}
 	
 	return yt;
 }

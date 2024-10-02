@@ -117,6 +117,7 @@ void create_logical_device(Context& ctx)
 	vkGetPhysicalDeviceQueueFamilyProperties(ctx.phys_device, &queue_family_prop_count, queue_family_props.data());
 
 	uint32_t qidx = 0;
+	bool found = false;
 	for (auto& queue_family_prop : queue_family_props)
 	{
 		bool at_least_one = (queue_family_prop.queueCount > 0);  // guaranteed
@@ -126,13 +127,19 @@ void create_logical_device(Context& ctx)
 		if (at_least_one && has_compute_bit && has_transfer_bit)
 		{
 			ctx.queue_family_idx = qidx;
+			found = true;
 			break;
 		}
 
 		qidx += 1;
 	}
 
-	// TODO: report error if not found
+	// report error if not found
+	if (!found)
+	{
+		std::cout << "Error: no suitable queue family was found \n";
+		exit(1);
+	}
 
 	// create the queues for the logical device
 	VkDeviceQueueCreateInfo queue_crt_info = {};

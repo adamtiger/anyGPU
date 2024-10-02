@@ -73,7 +73,7 @@ set(TEST_DIR ${ANYGPU_ROOT}/tests)
 
 set (TEST_SRCS
     ${TEST_DIR}/tests.cpp
-    ${TEST_DIR}/ext_zamba2_tests.cpp
+    ${TEST_DIR}/zamba2_tests.cpp
     ${TEST_DIR}/ext_torch_tests.cpp
 	${TEST_DIR}/performance.cpp
 	${TEST_DIR}/vk_relu_skeleton.cpp
@@ -82,7 +82,7 @@ set (TEST_SRCS
 set (TEST_HEADERS
     ${TEST_DIR}/test_tools.hpp
     ${TEST_DIR}/tests.hpp
-    ${TEST_DIR}/ext_zamba2_tests.hpp
+    ${TEST_DIR}/zamba2_tests.hpp
     ${TEST_DIR}/ext_torch_tests.hpp
 	${TEST_DIR}/performance.hpp
 	${TEST_DIR}/vk_relu_skeleton.hpp
@@ -186,7 +186,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
 
 add_executable(anygpu ${SOURCES} ${HEADERS})
-target_include_directories(anygpu PUBLIC ${Vulkan_INCLUDE_DIR} ${TRF_DIR} ${CORE_DIR} ${IO_DIR} ${TEST_DIR} ${OPS_DIR})
+target_include_directories(anygpu PUBLIC ${Vulkan_INCLUDE_DIR} ${TRF_DIR} ${CORE_DIR} ${IO_DIR} ${TEST_DIR} ${OPS_DIR} ${ZAM2_DIR})
 #target_compile_options(anygpu PUBLIC $<$<COMPILE_LANGUAGE:CUDA>:--keep>)
 target_link_options(anygpu PUBLIC "/NODEFAULTLIB:libcmt.lib") 
 target_link_libraries(anygpu PUBLIC ${Vulkan_LIBRARIES})

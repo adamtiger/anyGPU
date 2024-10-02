@@ -1,9 +1,12 @@
-#include "ext_zamba2_tests.hpp"
+#include "zamba2_tests.hpp"
 #include "test_tools.hpp"
 #include "dat_file.hpp"
 #include "tensor.hpp"
 #include "ops.hpp"
 #include <filesystem>
+
+#include "zamba_glu.hpp"
+
 
 const std::filesystem::path artifact_folder_path = "C:\\Data\\AI\\projects\\anyGPU\\artifacts\\zamba2_tests";
 
@@ -34,3 +37,22 @@ void external_test_zamba2_model_rmsnorm()
 	std::cout << "TestCase [external_test_zamba2_model_rmsnorm - CUDA]: " << (eq ? "PASSED" : "FAILED") << "\n";
 }
 
+
+void test_zamba2_glu()
+{
+	// cuda based calculation
+	auto dta = crt_random_tensor<float32, CUDA>({ 2, 4, 5, 2048 }, 11);
+	auto dtc = tensor_zamba_glu(dta);
+
+	// cpu based calculation (expected result)
+	auto hta = dta.copy_to_host();
+	auto htc = tensor_zamba_glu(hta);
+
+	// compare
+	auto htc_from_cuda = dtc.copy_to_host();
+
+	bool eq = elementwise_compatible(htc_from_cuda, htc);  // checks the sizes
+	eq = eq && compare_data_buffers(htc_from_cuda, htc);
+
+	std::cout << "TestCase [test_zamba2_glu]: " << (eq ? "PASSED" : "FAILED") << "\n";
+}
