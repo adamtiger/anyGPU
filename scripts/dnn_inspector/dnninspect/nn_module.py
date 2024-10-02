@@ -78,9 +78,9 @@ def save_torch_module_weights(m: nn.Module, weight_folder: str, prefix: str = No
         save_tensor(pm, pjoin(weight_folder, f"{nm}.dat"))
 
 
-def save_torch_module_calc(m: nn.Module, ckp_folder: str, *inputs, **kwargs):
+def save_function_calc(func: any, ckp_folder: str, *inputs, **kwargs):
     """
-    Saves the inputs and outputs of the module call (forward function).
+    Saves the inputs and outputs of the function call.
         ckp_folder: the folder to save the model weights in
         *inputs: inputs enlisted
         **kwargs: key-value named arguments enlisted
@@ -106,7 +106,7 @@ def save_torch_module_calc(m: nn.Module, ckp_folder: str, *inputs, **kwargs):
             others[f"{nm}"] = x
 
     # execute the network
-    outputs = m.forward(*inputs, **kwargs)
+    outputs = func(*inputs, **kwargs)
 
     # save outputs
     iterable_outputs = outputs
@@ -126,6 +126,16 @@ def save_torch_module_calc(m: nn.Module, ckp_folder: str, *inputs, **kwargs):
     with open(pjoin(ckp_folder, "non_tensors.json"), "wt") as js:
         json.dump(others, js)
     return outputs
+
+
+def save_torch_module_calc(m: nn.Module, ckp_folder: str, *inputs, **kwargs):
+    """
+    Saves the inputs and outputs of the module call (forward function).
+        ckp_folder: the folder to save the model weights in
+        *inputs: inputs enlisted
+        **kwargs: key-value named arguments enlisted
+    """
+    return save_function_calc(m.forward, ckp_folder, *inputs, **kwargs)
 
 
 def set_inspection_output_folder(path: str):
