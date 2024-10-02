@@ -202,7 +202,7 @@ def inspect_torch_tensor(t: torch.Tensor, location: str, name: str) -> any:
 
     tensor_fld_path = pjoin(output_path, const.TENSORS)
     tensor_path = pjoin(tensor_fld_path, f"{name}.dat")
-    tinfo_path = pjoin(output_path, f"tinfo_{name}.json")
+    tinfo_path = pjoin(tensor_fld_path, f"tinfo_{name}.json")
 
     save_tensor_data = not os.path.exists(tensor_path)
 
