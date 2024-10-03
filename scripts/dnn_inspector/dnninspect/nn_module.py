@@ -223,3 +223,28 @@ def inspect_torch_tensor(t: torch.Tensor, location: str, name: str) -> any:
     if save_tensor_data:
         with open(tinfo_path, "wt") as js:
             json.dump(m_info, js)
+
+
+def inspect_function(func: any, name: str) -> any:
+    """
+    Inspects a function. Returns a function executor function
+    therefore the inspection and execution can be done in a single line.
+    """
+    # create output folder if needed
+    output_path = pjoin(path_inspection_output_folder, name)
+    save_function_call_data = not os.path.exists(output_path)
+
+    if save_function_call_data:
+        os.mkdir(output_path)
+    
+    # create executor function
+    # save input and output if needed
+    def execute_module(*inputs, **kwargs):
+        y = None
+        if save_function_call_data:
+            y = save_function_calc(func, output_path, *inputs, **kwargs)
+        else:
+            y = func(*inputs, **kwargs)
+        return y
+
+    return execute_module

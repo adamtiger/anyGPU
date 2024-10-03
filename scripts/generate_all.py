@@ -33,3 +33,16 @@ if __name__ == '__main__':
     dnni.inspect_torch_module(m, "resnet18")(x)
 
     dnni.inspect_torch_module(m, "resnet18")(x)
+
+    from transformers import AutoTokenizer, AutoModelForCausalLM
+    import torch
+
+    tokenizer = AutoTokenizer.from_pretrained("Zyphra/Zamba2-1.2B")
+    model = AutoModelForCausalLM.from_pretrained("Zyphra/Zamba2-1.2B", device_map="cuda", torch_dtype=torch.bfloat16)
+
+    input_text = "What factors contributed to the fall of the Roman Empire?"
+    input_ids = tokenizer(input_text, return_tensors="pt").to("cuda")
+
+    outputs = model.generate(**input_ids, max_new_tokens=100)
+    print(tokenizer.decode(outputs[0]))
+
