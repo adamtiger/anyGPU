@@ -1,4 +1,4 @@
-#include "embedding_ops.hpp"
+#include "embedding_ops.cuh"
 
 
 __global__ void cu_tensor_embedding_f32_kernel(
@@ -184,8 +184,8 @@ __global__ void cu_tensor_apply_alt_rotary_embedding_f32_kernel(
 		float32 y1 = cos_angle * x1 - sin_angle * x2;
 		float32 y2 = sin_angle * x1 + cos_angle * x2;
 
-		dy[b * mid * emb_size + m * emb_size + i * 2] = y1;
-		dy[b * mid * emb_size + m * emb_size + i * 2 + 1] = y2;
+		dy[b * mid * emb_size + m * emb_size + i] = y1;
+		dy[b * mid * emb_size + m * emb_size + emb_size / 2 + i] = y2;
 	}
 }
 
@@ -215,7 +215,7 @@ void cu_tensor_apply_alt_rotary_embedding_f32(
 		calc_req_num_blocks(batch, 1)
 	};
 
-	cu_tensor_apply_rotary_embedding_f32_kernel << <gs, bs >> > (
+	cu_tensor_apply_alt_rotary_embedding_f32_kernel<<<gs, bs>>>(
 		batch, mid, emb_size, seq_stride,
 		x_data, p_data,
 		f_data, y_data

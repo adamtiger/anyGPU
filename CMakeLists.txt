@@ -150,12 +150,15 @@ set(ZAM2_DIR ${ANYGPU_ROOT}/srcs/zamba2)
 
 set (ZAM2_SRCS
     ${ZAM2_DIR}/zamba_glu.cu
+	${ZAM2_DIR}/zamba_rotary.cu
 )
 
 set (ZAM2_HEADERS
     ${ZAM2_DIR}/zamba_glu.cuh
     ${ZAM2_DIR}/zamba_glu.hpp
     ${ZAM2_DIR}/zamba_mlp.hpp
+	${ZAM2_DIR}/zamba_rotary.cuh
+	${ZAM2_DIR}/zamba_rotary.hpp
 )
 
 source_group("zamba2" FILES ${ZAM2_HEADERS} ${ZAM2_SRCS})

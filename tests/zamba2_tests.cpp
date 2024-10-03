@@ -7,6 +7,7 @@
 
 #include "zamba_glu.hpp"
 #include "zamba_mlp.hpp"
+#include "zamba_rotary.hpp"
 
 
 const std::filesystem::path artifact_folder_path = "C:\\Data\\AI\\projects\\anyGPU\\artifacts\\zamba2_tests";
@@ -86,6 +87,44 @@ void external_test_zamba2_attndeco_mlp()
 	// test cuda
 	bool eq = cmp(exp_hy, act_hy_cuda);
 	std::cout << "TestCase [external_test_zamba2_attndeco_mlp - CUDA]: " << (eq ? "PASSED" : "FAILED") << "\n";
+}
+
+
+void external_test_zamba2_attn_rotary()
+{
+	auto path = artifact_folder_path / "test_zamba2attention_rotary";
+
+	// read tensors from files
+	auto hp = load_tensor<int32>((path / "position_ids.dat").string());
+
+	auto hq = load_tensor((path / "query_states_in.dat").string());
+	auto exp_hq = load_tensor((path / "query_states_out.dat").string());
+	auto hk = load_tensor((path / "key_states_in.dat").string());
+	auto exp_hk = load_tensor((path / "key_states_out.dat").string());
+
+	auto dp = hp.copy_to_cuda();
+	auto dq = hq.copy_to_cuda();
+	auto dk = hk.copy_to_cuda();
+
+	auto freq = tensor_zamba_precomp_rotary_embedding<float32>(dp, 128);
+	auto act_dq_cuda = tensor_apply_zamba_rotary_embedding(dq, freq);
+	auto act_dk_cuda = tensor_apply_zamba_rotary_embedding(dk, freq);
+
+	auto act_hq_cuda = act_dq_cuda.copy_to_host();
+	auto act_hk_cuda = act_dk_cuda.copy_to_host();
+
+	// compare
+	auto cmp = [&](const Tensor<float32, CPU>& expected, const Tensor<float32, CPU>& actual)
+		{
+			bool eq = elementwise_compatible(expected, actual);  // checks the sizes
+			eq = eq && compare_data_buffers(actual, expected);
+			return eq;
+		};
+
+	// test cuda
+	bool eq = cmp(exp_hq, act_hq_cuda);
+	eq = eq && cmp(exp_hk, act_hk_cuda);
+	std::cout << "TestCase [external_test_zamba2_attn_rotary - CUDA]: " << (eq ? "PASSED" : "FAILED") << "\n";
 }
 
 

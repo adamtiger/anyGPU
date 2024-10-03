@@ -335,7 +335,7 @@ void external_test_alt_rotary_embedding_fwd_f32()
 	auto dq = hq.copy_to_cuda();
 	auto dp = hp.copy_to_cuda();
 	auto df = tensor_precomp_rotary_embedding<float32, CUDA>(1024, 64);
-	auto act_dy_cuda = tensor_apply_alt_rotary_embedding(hq, hp, hf);
+	auto act_dy_cuda = tensor_apply_alt_rotary_embedding(dq, dp, df);
 	auto act_hy_cuda = act_dy_cuda.copy_to_host();
 
 	// compare
