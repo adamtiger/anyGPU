@@ -10,6 +10,32 @@ bool equal(const int dim, const DimArray& lhs, const DimArray& rhs)
 	return eq;
 }
 
+void increment_index(const int dim, const Shape& shape, Index& index)
+{
+	for (int dix = dim - 1; dix >= 0; --dix)
+	{
+		if (index[dix] >= shape[dix] - 1)
+		{
+			index[dix] = 0;
+		}
+		else
+		{
+			index[dix] += 1;
+			break;
+		}
+	}
+}
+
+int calculate_offset(const int dim, const Stride& strides, const Index& index)
+{
+	int offset = 0;
+	for (int ix = 0; ix < dim; ++ix)
+	{
+		offset += strides[ix] * index[ix];
+	}
+	return offset;
+}
+
 std::string represent_datatype(const DataType dtype)
 {
 	static std::string names[] =

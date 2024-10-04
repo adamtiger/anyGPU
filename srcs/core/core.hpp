@@ -5,6 +5,7 @@
 #include <vector>
 #include <array>
 #include <functional>
+#include <algorithm>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -30,9 +31,11 @@ const int MAX_TENSOR_DIM = 8;
 using DimArray = std::array<int, MAX_TENSOR_DIM>;
 using Shape = DimArray;
 using Stride = DimArray;
+using Index = DimArray;
 
 bool equal(const int dim, const DimArray& lhs, const DimArray& rhs);
-
+void increment_index(const int dim, const Shape& shape, Index& index);
+int calculate_offset(const int dim, const Stride& strides, const Index& index);
 
 /* Enums */
 

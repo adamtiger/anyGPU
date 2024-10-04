@@ -7,6 +7,8 @@
 #include "core_concepts.hpp"
 
 
+/* tranpose for 2d tensors */
+
 template<NotHalfFloatType dtype>
 Tensor<dtype, CPU> tensor_transp(const Tensor<dtype, CPU>& x)
 {
@@ -70,6 +72,65 @@ Tensor<dtype, CUDA> tensor_transp(const Tensor<dtype, CUDA>& x)
 	}
 
 	return y;
+}
+
+
+/* tranpose nd tensors, by swapping two axes */
+
+template<NotHalfFloatType dtype>
+Tensor<dtype, CPU> tensor_transp(const Tensor<dtype, CPU>& x, const int32 ax1, const int32 ax2)
+{
+	int32 dim = x.dim;
+	Shape y_shape = x.shape;
+	std::swap(y_shape[ax1], y_shape[ax2]);
+	Tensor<dtype, CPU> y(dim, y_shape);
+
+	dtype* x_data = x.buffer();
+	dtype* y_data = y.buffer();
+
+	// reference implementation
+	// reliable (but slow)
+
+	int num_elements = x.numel();
+	Index x_index{};
+	for (int ix = 0; ix < num_elements; ++ix)
+	{
+		int x_offset = calculate_offset(dim, x.stride, x_index);
+
+		Index& y_index = x_index;
+		std::swap(y_index[ax1], y_index[ax2]);
+		int y_offset = calculate_offset(dim, y.stride, y_index);
+		
+		y_data[y_offset] = x_data[x_offset];
+
+		std::swap(y_index[ax1], y_index[ax2]);
+		increment_index(dim, x.shape, x_index);
+	}
+
+	return y;
+}
+
+
+template<typename dtype>
+Tensor<dtype, CUDA> tensor_transp(const Tensor<dtype, CUDA>& xt, const int32 ax1, const int32 ax2)
+{
+	int32 dim = xt.dim;
+	Shape y_shape = xt.shape;
+	std::swap(y_shape[ax1], y_shape[ax2]);
+	Tensor<dtype, CUDA> yt(dim, y_shape);
+
+	if constexpr (std::is_same_v<dtype, float32>)
+	{
+		// assumes contigous memory
+		cu_tensor_transp_swap_f32(xt, ax1, ax2, yt);
+	}
+	else
+	{
+		static_assert(std::is_same_v<dtype, int32>, "Unsupported data type");
+		//tensor_add_i32(kpms, lhs, rhs, res);
+	}
+
+	return yt;
 }
 
 #endif  // __TRANSP_OPS__

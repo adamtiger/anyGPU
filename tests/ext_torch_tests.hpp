@@ -18,5 +18,6 @@ void external_test_rotary_embedding_fwd_f32();
 void external_test_alt_rotary_embedding_fwd_f32();
 
 void external_test_linear_fwd_f32();
+void external_test_transpose_fwd_f32();
 
 #endif  // __EXT_TORCH_TESTS__

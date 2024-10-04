@@ -44,10 +44,11 @@ int main()
 	//external_test_rotary_embedding_fwd_f32();
 	//external_test_alt_rotary_embedding_fwd_f32();
 	//external_test_linear_fwd_f32();
+	external_test_transpose_fwd_f32();
 
 	//external_test_zamba2_model_rmsnorm();
 	//external_test_zamba2_attndeco_mlp();
-	external_test_zamba2_attn_rotary();
+	//external_test_zamba2_attn_rotary();
 	//test_zamba2_glu();
 
 	//run_vk_compute();

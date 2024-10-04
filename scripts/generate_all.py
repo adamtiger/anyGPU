@@ -4,7 +4,7 @@ from ops_test_cases import *
 
 if __name__ == '__main__':
 
-    # path = r"C:\Data\AI\projects\anyGPU\artifacts"
+    path = r"C:\Data\AI\projects\anyGPU\artifacts"
 
     # generate_sdp_fwd_nomask_noscore(path, "test_sdp_fwd_nomask_noscore_f32_16_64", 16, 64)
     # generate_sdp_bwd_nomask_noscore(path, "test_sdp_bwd_nomask_noscore_f32_16_64", 16, 64)
@@ -19,30 +19,18 @@ if __name__ == '__main__':
     # generate_rotary_embedding_fwd_f32(path, "test_rotary_embedding_fwd_f32")
     # generate_alt_rotary_embedding_fwd_f32(path, "test_alt_rotary_embedding_fwd_f32")
     # generate_linear_fwd_f32(path, "test_linear_fwd_f32")
+    generate_transpose_fwd_f32(path, "test_transpose_fwd_f32")
 
-    import torchvision
-    import dnninspect as dnni
-    m = torchvision.models.resnet18()
-    #print(get_torch_module_info(m))
-    #print(get_torch_top_submodule_names(m))
-    #save_torch_module_weights(m, r"C:\Data\AI\projects\anyGPU\scripts\zamba2")
 
-    x = torch.randn((1, 3, 224, 224), dtype=torch.float32)
+    # from transformers import AutoTokenizer, AutoModelForCausalLM
+    # import torch
 
-    dnni.set_inspection_output_folder(r"C:\Data\AI\projects\anyGPU\scripts\zamba2")
-    dnni.inspect_torch_module(m, "resnet18")(x)
+    # tokenizer = AutoTokenizer.from_pretrained("Zyphra/Zamba2-1.2B")
+    # model = AutoModelForCausalLM.from_pretrained("Zyphra/Zamba2-1.2B", device_map="cuda", torch_dtype=torch.bfloat16)
 
-    dnni.inspect_torch_module(m, "resnet18")(x)
+    # input_text = "What factors contributed to the fall of the Roman Empire?"
+    # input_ids = tokenizer(input_text, return_tensors="pt").to("cuda")
 
-    from transformers import AutoTokenizer, AutoModelForCausalLM
-    import torch
-
-    tokenizer = AutoTokenizer.from_pretrained("Zyphra/Zamba2-1.2B")
-    model = AutoModelForCausalLM.from_pretrained("Zyphra/Zamba2-1.2B", device_map="cuda", torch_dtype=torch.bfloat16)
-
-    input_text = "What factors contributed to the fall of the Roman Empire?"
-    input_ids = tokenizer(input_text, return_tensors="pt").to("cuda")
-
-    outputs = model.generate(**input_ids, max_new_tokens=100)
-    print(tokenizer.decode(outputs[0]))
+    # outputs = model.generate(**input_ids, max_new_tokens=100)
+    # print(tokenizer.decode(outputs[0]))
 

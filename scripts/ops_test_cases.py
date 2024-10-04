@@ -251,3 +251,29 @@ def generate_linear_fwd_f32(path: str, test_name: str):
 
     # print sample
     print(f"Generated: {test_name}")
+
+
+def generate_transpose_fwd_f32(path: str, test_name: str):
+    """
+        Transpose test.
+    
+        path: The path to a folder where the test case folder will be stored. 
+        test_name: The name of the folder.
+    """
+    # generate random inputs
+    tensor_size = (20, 4, 12, 128)
+    x = torch.randn(tensor_size, dtype=torch.float32)
+
+    # calculate the attention output
+    y = x.transpose(1, 2)
+
+    # create test folders
+    test_fld_name = pjoin(path, test_name)
+    os.mkdir(test_fld_name)
+
+    # save tensors
+    save_tensor(x, pjoin(test_fld_name, "x.dat"))
+    save_tensor(y, pjoin(test_fld_name, "y.dat"))
+
+    # print sample
+    print(f"Generated: {test_name}")
