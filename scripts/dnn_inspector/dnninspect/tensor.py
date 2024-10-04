@@ -1,8 +1,10 @@
 # This module is responsible for providing functions
 # to save a torch tensor into a byte format (.dat).
 
+import functools
 import struct
 import torch
+import sys
 
 # Tensor data file format (no compression):
 # dimension   - int (4 bytes)
@@ -80,3 +82,40 @@ def save_tensor(tensor: torch.Tensor, file_path: str):
         
         buffer = data_tensor.tobytes()
         dat.write(buffer)
+
+
+def load_tensor(file_path: str) -> torch.Tensor:
+    """
+        Loads the torch tensor from a dat file (no compression).
+
+        tensor - Torch tensor to be saved.
+        file_path - The path to the output file storing the tensor.
+    """
+    int_as_bytes = struct.pack("=i", 0)
+    int_size = len(int_as_bytes)
+    
+    tensor = None
+    with open(file_path, 'rb') as dat:
+        # read the dim
+        dim = int.from_bytes(dat.read(int_size), sys.byteorder)
+
+        # read the shape
+        shape = list()
+        for i in range(dim):
+            shape.append(int.from_bytes(dat.read(int_size), sys.byteorder))
+        
+        # read the data type
+        dtype = int.from_bytes(dat.read(int_size), sys.byteorder)
+
+        # read the data buffer
+        buffer = dat.read(4 * functools.reduce(lambda x, y: x * y, shape))
+        #data_tensor = np.frombuffer(buffer, np.float32).reshape(shape)
+        tensor = torch.frombuffer(buffer, dtype=torch.float32).reshape(shape)
+    
+    print(dim)
+    print(shape)
+    print(dtype)
+
+    print(tensor)
+
+    return tensor

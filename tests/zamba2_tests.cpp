@@ -8,6 +8,7 @@
 #include "zamba_glu.hpp"
 #include "zamba_mlp.hpp"
 #include "zamba_rotary.hpp"
+#include "sdp.hpp"
 
 
 const std::filesystem::path artifact_folder_path = "C:\\Data\\AI\\projects\\anyGPU\\artifacts\\zamba2_tests";
@@ -125,6 +126,40 @@ void external_test_zamba2_attn_rotary()
 	bool eq = cmp(exp_hq, act_hq_cuda);
 	eq = eq && cmp(exp_hk, act_hk_cuda);
 	std::cout << "TestCase [external_test_zamba2_attn_rotary - CUDA]: " << (eq ? "PASSED" : "FAILED") << "\n";
+}
+
+
+void external_test_zamba2_attn_sdp()
+{
+	auto path = artifact_folder_path / "test_zamba2attention_sdp";
+
+	// read tensors from files
+	auto hq = load_tensor((path / "in_0.dat").string());
+	auto hk = load_tensor((path / "in_1.dat").string());
+	auto hv = load_tensor((path / "in_2.dat").string());
+	auto hmask = load_tensor((path / "in_attn_mask.dat").string());
+	auto exp_hy = load_tensor((path / "out_0.dat").string());
+
+	auto dq = hq.copy_to_cuda();
+	auto dk = hk.copy_to_cuda();
+	auto dv = hv.copy_to_cuda();
+	auto dmask = hmask.copy_to_cuda();
+
+	auto act_dy_cuda = sdp_attention_masked_scaled_fwd(dq, dk, dv, dmask, 0.125f);
+
+	auto act_hy_cuda = act_dy_cuda.copy_to_host();
+
+	// compare
+	auto cmp = [&](const Tensor<float32, CPU>& expected, const Tensor<float32, CPU>& actual)
+		{
+			bool eq = elementwise_compatible(expected, actual);  // checks the sizes
+			eq = eq && compare_data_buffers(actual, expected);
+			return eq;
+		};
+
+	// test cuda
+	bool eq = cmp(exp_hy, act_hy_cuda);
+	std::cout << "TestCase [external_test_zamba2_attn_sdp - CUDA]: " << (eq ? "PASSED" : "FAILED") << "\n";
 }
 
 

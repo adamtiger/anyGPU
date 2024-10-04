@@ -79,6 +79,34 @@ void external_test_sdp_bwd_f32()
 }
 
 
+void external_test_sdp_masked_scaled_fwd_f32()
+{
+	auto path = artifact_folder_path / "test_sdp_fwd_masked_scaled_f32_16_128";
+
+	// read tensors from files
+	auto hq = load_tensor((path / "q.dat").string());
+	auto hk = load_tensor((path / "k.dat").string());
+	auto hv = load_tensor((path / "v.dat").string());
+	auto hmask = load_tensor((path / "mask.dat").string());
+	auto hy = load_tensor((path / "y.dat").string());
+
+	// cuda based calculation
+	auto dq = hq.copy_to_cuda();
+	auto dk = hk.copy_to_cuda();
+	auto dv = hv.copy_to_cuda();
+	auto dmask = hmask.copy_to_cuda();
+	auto dy = sdp_attention_masked_scaled_fwd(dq, dk, dv, dmask, 0.125f);
+
+	// compare
+	auto hy_from_cuda = dy.copy_to_host();
+
+	bool eq = elementwise_compatible(hy_from_cuda, hy);  // checks the sizes
+	eq = eq && compare_data_buffers(hy_from_cuda, hy);
+
+	std::cout << "TestCase [external_test_sdp_masked_scaled_fwd_f32]: " << (eq ? "PASSED" : "FAILED") << "\n";
+}
+
+
 void external_test_cpu_softmax_bwd_f32()
 {
 	auto path = artifact_folder_path / "test_softmax_bwd_f32_16_64";

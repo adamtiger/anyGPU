@@ -172,4 +172,78 @@ static Tensor<int8, CUDA> quant_sdp_attention_fwd_cuda_basic_f32_i8(
 	return y;
 }
 
+
+
+/* SDP with masking and scaling, shape is general */
+
+template<FloatingPointType dtype, Device device>
+Tensor<dtype, device> sdp_attention_masked_scaled_fwd(
+	const Tensor<dtype, device>& qw,
+	const Tensor<dtype, device>& kw,
+	const Tensor<dtype, device>& vw,
+	const Tensor<dtype, device>& mask,
+	const dtype alpha)
+{
+	if constexpr (device == CPU)
+	{
+		static_assert(PreciseFloatType<dtype>, "for cpu only precise float is supported");
+	}
+
+	// qw, kw, vw are not 2 dimensional but instead 3 or 4
+	// qw, kw, vw are assumed to have similar shapes
+	// mask is assumed to have 1s in the first dims
+	ACASSERT(qw.dim == kw.dim && vw.dim == kw.dim, "dimension missmatch");
+	ACASSERT(mask.dim == qw.dim, "mask dimension is inappropriate");
+
+	// calculate the number of 2d matrices
+	int dim = qw.dim;
+	int num_mtcs = 1;
+	for (int ix = 0; ix < dim - 2; ++ix)
+	{
+		num_mtcs *= qw.shape[ix];
+
+		ACASSERT(
+			qw.shape[ix] == kw.shape[ix] && kw.shape[ix] == vw.shape[ix], 
+			"qw, kw, vw needs to have the same number of 2d matrices"
+		);
+
+		ACASSERT(mask.shape[ix] == 1, "mask needs to have 1s in the first dims except the last two");
+	}
+
+	// view, with 3d
+	auto qwn = tensor_view(qw, { num_mtcs, qw.shape[dim - 2], qw.shape[dim - 1] });
+	auto kwn = tensor_view(kw, { num_mtcs, kw.shape[dim - 2], kw.shape[dim - 1] });
+	auto vwn = tensor_view(vw, { num_mtcs, vw.shape[dim - 2], vw.shape[dim - 1] });
+	auto maskn = tensor_view(mask, { mask.shape[dim - 2], mask.shape[dim - 1] });
+
+	// split (no memory copy)
+	auto qw_mtcs = tensor_split(qwn, num_mtcs);
+	auto kw_mtcs = tensor_split(kwn, num_mtcs);
+	auto vw_mtcs = tensor_split(vwn, num_mtcs);
+
+	// output
+	Tensor<dtype, device> y(dim, qw.shape);
+	auto yn = tensor_view(y, { num_mtcs, y.shape[dim - 2], y.shape[dim - 1] });
+	auto y_mtcs = tensor_split(yn, num_mtcs);
+
+	// calculate attention for each submatrix
+	for (int ix = 0; ix < num_mtcs; ++ix)
+	{
+		auto qw_mtx = tensor_view(qw_mtcs[ix], { qw_mtcs[ix].shape[1], qw_mtcs[ix].shape[2] });
+		auto kw_mtx = tensor_view(kw_mtcs[ix], { kw_mtcs[ix].shape[1], kw_mtcs[ix].shape[2] });
+		auto vw_mtx = tensor_view(vw_mtcs[ix], { vw_mtcs[ix].shape[1], vw_mtcs[ix].shape[2] });
+		auto y_mtx = tensor_view(y_mtcs[ix], { y_mtcs[ix].shape[1], y_mtcs[ix].shape[2] });
+
+		auto kw_tr = tensor_transp(kw_mtx);
+		auto qk = tensor_mm(qw_mtx, kw_tr);
+		auto nqk = tensor_mul(qk, alpha);
+		auto nqk_masked = tensor_add(nqk, maskn);
+		auto score = tensor_softmax(nqk_masked);
+		tensor_mm(score, vw_mtx, y_mtx);
+	}
+
+	return y;
+}
+
+
 #endif  // __SDP__

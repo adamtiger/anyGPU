@@ -9,6 +9,7 @@ if __name__ == '__main__':
     # generate_sdp_fwd_nomask_noscore(path, "test_sdp_fwd_nomask_noscore_f32_16_64", 16, 64)
     # generate_sdp_bwd_nomask_noscore(path, "test_sdp_bwd_nomask_noscore_f32_16_64", 16, 64)
     # generate_softmax_bwd(path, "test_softmax_bwd_f32_16_64", 16, 64)
+    generate_sdp_fwd_masked_scaled(path, "test_sdp_fwd_masked_scaled_f32_16_128", 16, 128)
 
     # generate_sf_file_reading(path, "test_sf_diffuser_tensors")
 
@@ -19,18 +20,4 @@ if __name__ == '__main__':
     # generate_rotary_embedding_fwd_f32(path, "test_rotary_embedding_fwd_f32")
     # generate_alt_rotary_embedding_fwd_f32(path, "test_alt_rotary_embedding_fwd_f32")
     # generate_linear_fwd_f32(path, "test_linear_fwd_f32")
-    generate_transpose_fwd_f32(path, "test_transpose_fwd_f32")
-
-
-    # from transformers import AutoTokenizer, AutoModelForCausalLM
-    # import torch
-
-    # tokenizer = AutoTokenizer.from_pretrained("Zyphra/Zamba2-1.2B")
-    # model = AutoModelForCausalLM.from_pretrained("Zyphra/Zamba2-1.2B", device_map="cuda", torch_dtype=torch.bfloat16)
-
-    # input_text = "What factors contributed to the fall of the Roman Empire?"
-    # input_ids = tokenizer(input_text, return_tensors="pt").to("cuda")
-
-    # outputs = model.generate(**input_ids, max_new_tokens=100)
-    # print(tokenizer.decode(outputs[0]))
-
+    # generate_transpose_fwd_f32(path, "test_transpose_fwd_f32")

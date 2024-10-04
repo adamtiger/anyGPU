@@ -145,3 +145,41 @@ def generate_softmax_bwd(path: str, test_name: str, N: int, d: int):
     save_tensor(grad_x, pjoin(test_fld_name, "grad_x.dat"))
 
     print(f"Generated: {test_name}")
+
+
+def generate_sdp_fwd_masked_scaled(path: str, test_name: str, N: int, d: int):
+    """
+        Single dot product (attention). Simple case, 
+        no masking and no score.    
+    
+        path: The path to a folder where the test case folder will be stored. 
+        test_name: The name of the folder.
+        N: Number of embeddings.
+        d: Embedding size.
+    """
+
+    # generate random q, k and v
+    tensor_size = (1, 32, N, d)
+    q = torch.randn(tensor_size, dtype=torch.float32)
+    k = torch.randn(tensor_size, dtype=torch.float32)
+    v = torch.randn(tensor_size, dtype=torch.float32)
+    mask = torch.zeros(1, 1, N, N, dtype=torch.float32)
+    temp_mask = torch.ones(1, 1, N, N, dtype=torch.bool).tril(diagonal=0)
+    mask.masked_fill_(temp_mask.logical_not(), float("-inf"))
+    
+    # calculate the attention output
+    y = F.scaled_dot_product_attention(q, k, v, mask, scale=0.125)
+
+    # create test folders
+    test_fld_name = pjoin(path, test_name)
+    os.mkdir(test_fld_name)
+
+    # save tensors
+    save_tensor(q, pjoin(test_fld_name, "q.dat"))
+    save_tensor(k, pjoin(test_fld_name, "k.dat"))
+    save_tensor(v, pjoin(test_fld_name, "v.dat"))
+    save_tensor(mask, pjoin(test_fld_name, "mask.dat"))
+    save_tensor(y, pjoin(test_fld_name, "y.dat"))
+
+    print(f"Generated: {test_name}")
+

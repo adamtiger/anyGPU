@@ -9,7 +9,7 @@
 
 
 template<NotHalfFloatType dtype>
-Tensor<dtype, CPU> tensor_mm(const Tensor<dtype, CPU>& lhs, const Tensor<dtype, CPU>& rhs)
+static void tensor_mm(const Tensor<dtype, CPU>& lhs, const Tensor<dtype, CPU>& rhs, Tensor<dtype, CPU>& res)
 {
 	ACASSERT(matmul_compatible(lhs, rhs) == true, "matrix multiplication requires compatible matrices");
 
@@ -17,11 +17,10 @@ Tensor<dtype, CPU> tensor_mm(const Tensor<dtype, CPU>& lhs, const Tensor<dtype, 
 	int n = rhs.shape[1];
 	int k = lhs.shape[1];
 
+	ACASSERT(m == res.shape[0] && n == res.shape[1], "result mtx shape is wrong");
+
 	dtype* lhs_data = lhs.buffer();
 	dtype* rhs_data = rhs.buffer();
-
-	std::vector<int> res_shape({m, n});
-	Tensor<dtype, CPU> res(res_shape);
 	dtype* res_data = res.buffer();
 
 	// reference implementation
@@ -36,27 +35,25 @@ Tensor<dtype, CPU> tensor_mm(const Tensor<dtype, CPU>& lhs, const Tensor<dtype, 
 			{
 				int offs_lhs = r * lhs.stride[0] + l * lhs.stride[1];
 				int offs_rhs = l * rhs.stride[0] + c * rhs.stride[1];
-				
+
 				acc += lhs_data[offs_lhs] * rhs_data[offs_rhs];
 			}
 
 			res_data[offs_out] = acc;
 		}
 	}
-
-	return res;
 }
 
 
 template<typename dtype>
-Tensor<dtype, CUDA> tensor_mm(const Tensor<dtype, CUDA>& lhs, const Tensor<dtype, CUDA>& rhs)
+static void tensor_mm(const Tensor<dtype, CUDA>& lhs, const Tensor<dtype, CUDA>& rhs, Tensor<dtype, CUDA>& res)
 {
 	ACASSERT(matmul_compatible(lhs, rhs) == true, "matrix multiplication requires compatible matrices");
 
 	int m = lhs.shape[0];
 	int n = rhs.shape[1];
-	std::vector<int> res_shape({ m, n });
-	Tensor<dtype, CUDA> res(res_shape);
+
+	ACASSERT(m == res.shape[0] && n == res.shape[1], "result mtx shape is wrong");
 
 	if constexpr (std::is_same_v<dtype, float32>)
 	{
@@ -71,7 +68,31 @@ Tensor<dtype, CUDA> tensor_mm(const Tensor<dtype, CUDA>& lhs, const Tensor<dtype
 		static_assert(std::is_same_v<dtype, int32>, "Unsupported data type");
 		//tensor_add_i32(kpms, lhs, rhs, res);
 	}
+}
 
+
+template<NotHalfFloatType dtype>
+static Tensor<dtype, CPU> tensor_mm(const Tensor<dtype, CPU>& lhs, const Tensor<dtype, CPU>& rhs)
+{
+	int m = lhs.shape[0];
+	int n = rhs.shape[1];
+
+	std::vector<int> res_shape({m, n});
+	Tensor<dtype, CPU> res(res_shape);
+	tensor_mm(lhs, rhs, res);
+	return res;
+}
+
+
+template<typename dtype>
+static Tensor<dtype, CUDA> tensor_mm(const Tensor<dtype, CUDA>& lhs, const Tensor<dtype, CUDA>& rhs)
+{
+	int m = lhs.shape[0];
+	int n = rhs.shape[1];
+
+	std::vector<int> res_shape({ m, n });
+	Tensor<dtype, CUDA> res(res_shape);
+	tensor_mm(lhs, rhs, res);
 	return res;
 }
 
@@ -79,7 +100,7 @@ Tensor<dtype, CUDA> tensor_mm(const Tensor<dtype, CUDA>& lhs, const Tensor<dtype
 
 
 template<NotHalfFloatType dtype>
-Tensor<dtype, CPU> tensor_gemm(
+static Tensor<dtype, CPU> tensor_gemm(
 	const Tensor<dtype, CPU>& xt,
 	const Tensor<dtype, CPU>& wt,
 	const Tensor<dtype, CPU>& bt)
@@ -124,7 +145,7 @@ Tensor<dtype, CPU> tensor_gemm(
 
 
 template<typename dtype>
-Tensor<dtype, CUDA> tensor_gemm(
+static Tensor<dtype, CUDA> tensor_gemm(
 	const Tensor<dtype, CUDA>& xt, 
 	const Tensor<dtype, CUDA>& wt,
 	const Tensor<dtype, CUDA>& bt)
@@ -153,7 +174,7 @@ Tensor<dtype, CUDA> tensor_gemm(
 
 
 template<FloatingPointType dtype, Device device>
-Tensor<dtype, device> tensor_linear(
+static Tensor<dtype, device> tensor_linear(
 	const Tensor<dtype, device>& xt,  // (*, in_features)
 	const Tensor<dtype, device>& wt,  // (in_features, out_features)
 	const Tensor<dtype, device>& bt)  // (out_features)
@@ -183,7 +204,7 @@ Tensor<dtype, device> tensor_linear(
 
 
 template<FloatingPointType dtype, Device device>
-Tensor<dtype, device> tensor_linear(
+static Tensor<dtype, device> tensor_linear(
 	const Tensor<dtype, device>& xt,  // (*, in_features)
 	const Tensor<dtype, device>& wt)  // (in_features, out_features)
 {
