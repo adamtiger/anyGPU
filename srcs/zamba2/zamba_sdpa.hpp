@@ -86,7 +86,7 @@ struct ZambaSDPAweights
 };
 
 template<FloatingPointType dtype>
-static Tensor<dtype, CUDA> tensor_zamba_sdpa(
+static Tensor<dtype, CUDA> tensor_zamba_sdpa(  // Zamba2SdpaAttention
 	const ZambaSDPAweights<dtype>& sdpa_weights,
 	const ZambaKVcache& kv_cache,
 	const Tensor<dtype, CUDA>& hidden_states,

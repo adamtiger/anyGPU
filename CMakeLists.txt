@@ -160,6 +160,7 @@ set (ZAM2_HEADERS
     ${ZAM2_DIR}/zamba_rotary.cuh
     ${ZAM2_DIR}/zamba_rotary.hpp
     ${ZAM2_DIR}/zamba_sdpa.hpp
+	${ZAM2_DIR}/zamba_attn_decoder.hpp
 )
 
 source_group("zamba2" FILES ${ZAM2_HEADERS} ${ZAM2_SRCS})

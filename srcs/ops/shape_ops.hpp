@@ -40,4 +40,25 @@ static std::vector<Tensor<dtype, device>> tensor_split(const Tensor<dtype, devic
 	return ys;
 }
 
+/*
+  Concatenating over the last dimension of the given vector.
+*/
+template<ArithmeticType dtype, Device device>
+static Tensor<dtype, device> tensor_concat(const Tensor<dtype, device>& x1, const Tensor<dtype, device>& x2)
+{
+	ACASSERT(x1.dim == x2.dim, "dimension has to be equal");
+
+	int y_dim = x1.dim;
+	Shape y_shape = x1.shape;
+	y_shape[y_dim - 1] = x1.shape[y_dim - 1] + x2.shape[y_dim - 1];
+	Tensor<dtype, device> y(y_dim, y_shape);
+	
+	// device specific implementations
+
+	// TODO: finish this
+
+
+	return y;
+}
+
 #endif  // __SHAPE_OPS__
