@@ -104,12 +104,12 @@ static Tensor<dtype, CUDA> tensor_zamba_sdpa(
 	auto q_proj_lora = tensor_add(q_proj, q_lora);
 
 	auto k_lora_a = tensor_linear(hidden_states, sdpa_weights.k_lora_A_weights[fwd_layer_idx]);
-	auto k_lora = tensor_linear(q_lora_a, sdpa_weights.k_lora_B_weights[fwd_layer_idx]);
+	auto k_lora = tensor_linear(k_lora_a, sdpa_weights.k_lora_B_weights[fwd_layer_idx]);
 	auto k_proj = tensor_linear(hidden_states, sdpa_weights.k_proj_weight);
 	auto k_proj_lora = tensor_add(k_proj, k_lora);
 
 	auto v_lora_a = tensor_linear(hidden_states, sdpa_weights.v_lora_A_weights[fwd_layer_idx]);
-	auto v_lora = tensor_linear(q_lora_a, sdpa_weights.v_lora_B_weights[fwd_layer_idx]);
+	auto v_lora = tensor_linear(v_lora_a, sdpa_weights.v_lora_B_weights[fwd_layer_idx]);
 	auto v_proj = tensor_linear(hidden_states, sdpa_weights.v_proj_weight);
 	auto v_proj_lora = tensor_add(v_proj, v_lora);
 
@@ -126,9 +126,9 @@ static Tensor<dtype, CUDA> tensor_zamba_sdpa(
 	auto k_proj_lora_view = tensor_view(k_proj_lora, { bsz, q_len, num_key_value_heads, hdim });
 	auto v_proj_lora_view = tensor_view(v_proj_lora, { bsz, q_len, num_key_value_heads, hdim });
 
-	auto q_plv_t = tensor_transp(q_proj_lora, 1, 2);
-	auto k_plv_t = tensor_transp(k_proj_lora, 1, 2);
-	auto v_plv_t = tensor_transp(v_proj_lora, 1, 2);
+	auto q_plv_t = tensor_transp(q_proj_lora_view, 1, 2);
+	auto k_plv_t = tensor_transp(k_proj_lora_view, 1, 2);
+	auto v_plv_t = tensor_transp(v_proj_lora_view, 1, 2);
 
 
 	// rotary embedding
