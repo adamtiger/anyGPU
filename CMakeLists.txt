@@ -157,8 +157,9 @@ set (ZAM2_HEADERS
     ${ZAM2_DIR}/zamba_glu.cuh
     ${ZAM2_DIR}/zamba_glu.hpp
     ${ZAM2_DIR}/zamba_mlp.hpp
-	${ZAM2_DIR}/zamba_rotary.cuh
-	${ZAM2_DIR}/zamba_rotary.hpp
+    ${ZAM2_DIR}/zamba_rotary.cuh
+    ${ZAM2_DIR}/zamba_rotary.hpp
+    ${ZAM2_DIR}/zamba_sdpa.hpp
 )
 
 source_group("zamba2" FILES ${ZAM2_HEADERS} ${ZAM2_SRCS})
