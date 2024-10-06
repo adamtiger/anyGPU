@@ -90,20 +90,28 @@ def save_function_calc(func: any, ckp_folder: str, *inputs, **kwargs):
     for i, x in enumerate(inputs):
         nm = f"in_{i}"
         if isinstance(x, torch.Tensor):
+
+            if x.dtype == torch.long:  # long is not supported yet
+                x = x.to(dtype=torch.int32)
+
             save_tensor(x, pjoin(ckp_folder, f"{nm}.dat"))
             others[f"{nm}_shape"] = x.size()
             others[f"{nm}_type"] = str(x.dtype)
         else:
-            others[nm] = x
+            others[nm] = str(x)
     
     for nm, x in kwargs.items():
         nm = f"in_{nm}"
         if isinstance(x, torch.Tensor):
+
+            if x.dtype == torch.int64:  # (int64) long is not supported yet
+                x = x.to(dtype=torch.int32)
+
             save_tensor(x, pjoin(ckp_folder, f"{nm}.dat"))
             others[f"{nm}_shape"] = x.size()
             others[f"{nm}_type"] = str(x.dtype)
         else:
-            others[f"{nm}"] = x
+            others[f"{nm}"] = str(x)
 
     # execute the network
     outputs = func(*inputs, **kwargs)
@@ -120,7 +128,7 @@ def save_function_calc(func: any, ckp_folder: str, *inputs, **kwargs):
             others[f"{nm}_shape"] = y.size()
             others[f"{nm}_type"] = str(y.dtype)
         else:
-            others[f"{nm}"] = y
+            others[f"{nm}"] = str(y)
     
     # save others
     with open(pjoin(ckp_folder, "non_tensors.json"), "wt") as js:
