@@ -277,3 +277,32 @@ def generate_transpose_fwd_f32(path: str, test_name: str):
 
     # print sample
     print(f"Generated: {test_name}")
+
+
+def generate_concat_fwd_f32(path: str, test_name: str):
+    """
+        Concatenation test.
+    
+        path: The path to a folder where the test case folder will be stored. 
+        test_name: The name of the folder.
+    """
+    # generate random inputs
+    ts_1 = (20, 4, 12, 256)
+    ts_2 = (20, 4, 12, 512)
+    x1 = torch.randn(ts_1, dtype=torch.float32)
+    x2 = torch.randn(ts_2, dtype=torch.float32)
+
+    # calculate the attention output
+    y = torch.concatenate([x1, x2], dim=-1)
+
+    # create test folders
+    test_fld_name = pjoin(path, test_name)
+    os.mkdir(test_fld_name)
+
+    # save tensors
+    save_tensor(x1, pjoin(test_fld_name, "x1.dat"))
+    save_tensor(x2, pjoin(test_fld_name, "x2.dat"))
+    save_tensor(y, pjoin(test_fld_name, "y.dat"))
+
+    # print sample
+    print(f"Generated: {test_name}")

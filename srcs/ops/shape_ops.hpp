@@ -42,21 +42,74 @@ static std::vector<Tensor<dtype, device>> tensor_split(const Tensor<dtype, devic
 
 /*
   Concatenating over the last dimension of the given vector.
+  Assumes contigous memory.
 */
 template<ArithmeticType dtype, Device device>
 static Tensor<dtype, device> tensor_concat(const Tensor<dtype, device>& x1, const Tensor<dtype, device>& x2)
 {
-	ACASSERT(x1.dim == x2.dim, "dimension has to be equal");
+	ACASSERT(x1.dim == x2.dim, "dimensions have to be equal");
 
 	int y_dim = x1.dim;
+
+	ACASSERT(y_dim >= 2, "tensor needs to be at least 2 dim");
+
+	for (int ix = 0; ix < y_dim - 1; ++ix)
+	{
+		ACASSERT(x1.shape[ix] == x2.shape[ix], "non concatenated axis should have the same length");
+	}
+	
 	Shape y_shape = x1.shape;
 	y_shape[y_dim - 1] = x1.shape[y_dim - 1] + x2.shape[y_dim - 1];
 	Tensor<dtype, device> y(y_dim, y_shape);
 	
 	// device specific implementations
 
-	// TODO: finish this
+	dtype* x1_data = x1.buffer();
+	dtype* x2_data = x2.buffer();
+	dtype* y_data = y.buffer();
 
+	int x1_lastd_stride = x1.stride[y_dim - 2];
+	int x2_lastd_stride = x2.stride[y_dim - 2];
+	int y_lastd_stride = y.stride[y_dim - 2];
+
+	int x1_lastd_size = x1.shape[y_dim - 1];
+	int x1_lastd_byte_size = x1_lastd_size * sizeof(dtype);
+	int x2_lastd_byte_size = x2.shape[y_dim - 1] * sizeof(dtype);
+
+	int num_slices = x1.size() / x1_lastd_stride;
+	for (int nix = 0; nix < num_slices; ++nix)
+	{
+		if constexpr (device == CPU)
+		{
+			memcpy(
+				y_data + nix * y_lastd_stride, 
+				x1_data + nix * x1_lastd_stride, 
+				x1_lastd_byte_size);
+
+			memcpy(
+				y_data + nix * y_lastd_stride + x1_lastd_size,
+				x2_data + nix * x2_lastd_stride, 
+				x2_lastd_byte_size);
+		}
+		else if constexpr (device == CUDA)
+		{
+			cudaMemcpy(
+				y_data + nix * y_lastd_stride,
+				x1_data + nix * x1_lastd_stride,
+				x1_lastd_byte_size,
+				cudaMemcpyDeviceToDevice);
+
+			cudaMemcpy(
+				y_data + nix * y_lastd_stride + x1_lastd_size,
+				x2_data + nix * x2_lastd_stride,
+				x2_lastd_byte_size,
+				cudaMemcpyDeviceToDevice);
+		}
+		else
+		{
+			static_assert(device == CUDA, "unknown device");
+		}
+	}
 
 	return y;
 }
