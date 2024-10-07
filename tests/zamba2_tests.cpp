@@ -9,6 +9,7 @@
 #include "zamba_mlp.hpp"
 #include "zamba_rotary.hpp"
 #include "zamba_sdpa.hpp"
+#include "zamba_attn_decoder.hpp"
 #include "sdp.hpp"
 
 
@@ -285,4 +286,133 @@ void test_zamba2_glu()
 	eq = eq && compare_data_buffers(htc_from_cuda, htc);
 
 	std::cout << "TestCase [test_zamba2_glu]: " << (eq ? "PASSED" : "FAILED") << "\n";
+}
+
+
+void external_test_zamba2_model_attndecoder()
+{
+	auto path = artifact_folder_path / "test_zamba2model_attndecoder";
+
+	// read tensors from files
+	auto h_hidden_states = load_tensor((path / "in_0.dat").string());
+	auto h_orig_hidden_states = load_tensor((path / "in_original_hidden_states.dat").string());
+	auto h_attn_mask = load_tensor((path / "in_attention_mask.dat").string());
+	auto h_pos_ids = load_tensor<int32>((path / "in_position_ids.dat").string());
+
+	auto exp_hy = load_tensor((path / "out_0.dat").string());
+
+	ZambaKVcache kv_cache = {};
+
+	ZambaAttentionDecoderweights<float32> ad_weights;
+	ad_weights.load_weights(
+		(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.input_layernorm.weight.dat").string(),
+		(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.pre_ff_layernorm.weight.dat").string(),
+		(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.self_attn.q_proj.weight.dat").string(),
+		(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.self_attn.k_proj.weight.dat").string(),
+		(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.self_attn.v_proj.weight.dat").string(),
+		(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.self_attn.o_proj.weight.dat").string(),
+		{
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.self_attn.linear_q_lora_A_list.0.weight.dat").string(),
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.self_attn.linear_q_lora_A_list.1.weight.dat").string(),
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.self_attn.linear_q_lora_A_list.2.weight.dat").string(),
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.self_attn.linear_q_lora_A_list.3.weight.dat").string(),
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.self_attn.linear_q_lora_A_list.4.weight.dat").string(),
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.self_attn.linear_q_lora_A_list.5.weight.dat").string()
+		},
+		{
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.self_attn.linear_q_lora_B_list.0.weight.dat").string(),
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.self_attn.linear_q_lora_B_list.1.weight.dat").string(),
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.self_attn.linear_q_lora_B_list.2.weight.dat").string(),
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.self_attn.linear_q_lora_B_list.3.weight.dat").string(),
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.self_attn.linear_q_lora_B_list.4.weight.dat").string(),
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.self_attn.linear_q_lora_B_list.5.weight.dat").string()
+		},
+		{
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.self_attn.linear_k_lora_A_list.0.weight.dat").string(),
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.self_attn.linear_k_lora_A_list.1.weight.dat").string(),
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.self_attn.linear_k_lora_A_list.2.weight.dat").string(),
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.self_attn.linear_k_lora_A_list.3.weight.dat").string(),
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.self_attn.linear_k_lora_A_list.4.weight.dat").string(),
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.self_attn.linear_k_lora_A_list.5.weight.dat").string()
+		},
+		{
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.self_attn.linear_k_lora_B_list.0.weight.dat").string(),
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.self_attn.linear_k_lora_B_list.1.weight.dat").string(),
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.self_attn.linear_k_lora_B_list.2.weight.dat").string(),
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.self_attn.linear_k_lora_B_list.3.weight.dat").string(),
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.self_attn.linear_k_lora_B_list.4.weight.dat").string(),
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.self_attn.linear_k_lora_B_list.5.weight.dat").string()
+		},
+		{
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.self_attn.linear_v_lora_A_list.0.weight.dat").string(),
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.self_attn.linear_v_lora_A_list.1.weight.dat").string(),
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.self_attn.linear_v_lora_A_list.2.weight.dat").string(),
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.self_attn.linear_v_lora_A_list.3.weight.dat").string(),
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.self_attn.linear_v_lora_A_list.4.weight.dat").string(),
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.self_attn.linear_v_lora_A_list.5.weight.dat").string()
+		},
+		{
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.self_attn.linear_v_lora_B_list.0.weight.dat").string(),
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.self_attn.linear_v_lora_B_list.1.weight.dat").string(),
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.self_attn.linear_v_lora_B_list.2.weight.dat").string(),
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.self_attn.linear_v_lora_B_list.3.weight.dat").string(),
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.self_attn.linear_v_lora_B_list.4.weight.dat").string(),
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.self_attn.linear_v_lora_B_list.5.weight.dat").string()
+		},
+		(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.feed_forward.linear_fc1.weight.dat").string(),
+		(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.feed_forward.linear_fc2.weight.dat").string(),
+		{
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.feed_forward.linear_fc1_lora_A_list.0.weight.dat").string(),
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.feed_forward.linear_fc1_lora_A_list.1.weight.dat").string(),
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.feed_forward.linear_fc1_lora_A_list.2.weight.dat").string(),
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.feed_forward.linear_fc1_lora_A_list.3.weight.dat").string(),
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.feed_forward.linear_fc1_lora_A_list.4.weight.dat").string(),
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.feed_forward.linear_fc1_lora_A_list.5.weight.dat").string()
+		},
+		{
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.feed_forward.linear_fc1_lora_B_list.0.weight.dat").string(),
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.feed_forward.linear_fc1_lora_B_list.1.weight.dat").string(),
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.feed_forward.linear_fc1_lora_B_list.2.weight.dat").string(),
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.feed_forward.linear_fc1_lora_B_list.3.weight.dat").string(),
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.feed_forward.linear_fc1_lora_B_list.4.weight.dat").string(),
+			(path / "zamba2model_attndecoder.zamba2attentiondecoderlayer.feed_forward.linear_fc1_lora_B_list.5.weight.dat").string()
+		}
+	);
+
+	const int hdim = 128;
+	const int fwd_layer_idx = 0;
+	const int rope_base = 10000;
+	float32 rms_norm_eps = 1e-5f;
+
+	auto d_hidden_states = h_hidden_states.copy_to_cuda();
+	auto d_orig_hidden_states = h_orig_hidden_states.copy_to_cuda();
+	auto d_attn_mask = h_attn_mask.copy_to_cuda();
+	auto d_pos_ids = h_pos_ids.copy_to_cuda();
+
+	auto act_dy_cuda = tensor_zamba_attention_decoder(
+		ad_weights,
+		kv_cache,
+		d_hidden_states,
+		d_orig_hidden_states,
+		d_attn_mask,
+		d_pos_ids,
+		hdim,
+		fwd_layer_idx,
+		rope_base,
+		rms_norm_eps
+	);
+
+	auto act_hy_cuda = act_dy_cuda.copy_to_host();
+
+	// compare
+	auto cmp = [&](const Tensor<float32, CPU>& expected, const Tensor<float32, CPU>& actual)
+		{
+			bool eq = elementwise_compatible(expected, actual);  // checks the sizes
+			eq = eq && compare_data_buffers(actual, expected);
+			return eq;
+		};
+
+	// test cuda
+	bool eq = cmp(exp_hy, act_hy_cuda);
+	std::cout << "TestCase [test_zamba2_model_attndecoder - CUDA]: " << (eq ? "PASSED" : "FAILED") << "\n";
 }
