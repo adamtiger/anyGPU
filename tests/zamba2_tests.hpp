@@ -9,6 +9,8 @@ void external_test_zamba2_attndeco_attn();
 
 void external_test_zamba2_model_attndecoder();
 
+void external_test_mamba2_layer_causal_conv1d();
+
 void test_zamba2_glu();
 
 #endif  // __EXT_ZAMBA2_TESTS__

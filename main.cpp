@@ -47,13 +47,15 @@ int main()
 	//external_test_transpose_fwd_f32();
 	//external_test_sdp_masked_scaled_fwd_f32();
 	//external_test_concat_fwd_f32();
+	//external_test_causal_conv1d_fwd_f32();
 
 	//external_test_zamba2_model_rmsnorm();
 	//external_test_zamba2_attndeco_attn();
 	//external_test_zamba2_attndeco_mlp();
 	//external_test_zamba2_attn_rotary();
 	//external_test_zamba2_attn_sdp();
-	external_test_zamba2_model_attndecoder();
+	//external_test_zamba2_model_attndecoder();
+	external_test_mamba2_layer_causal_conv1d();
 	//test_zamba2_glu();
 
 	//run_vk_compute();

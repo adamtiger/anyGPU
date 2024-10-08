@@ -52,6 +52,21 @@ set (CORE_HEADERS
 
 source_group("core" FILES ${CORE_HEADERS} ${CORE_SRCS})
 
+# fused
+
+set(FUSED_DIR ${ANYGPU_ROOT}/srcs/fused)
+
+set (FUSED_SRCS
+    ${FUSED_DIR}/causal_conv1d.cu
+)
+
+set (FUSED_HEADERS
+    ${FUSED_DIR}/causal_conv1d.cuh
+	${FUSED_DIR}/causal_conv1d.hpp
+)
+
+source_group("fused" FILES ${FUSED_HEADERS} ${FUSED_SRCS})
+
 # io
 
 set(IO_DIR ${ANYGPU_ROOT}/srcs/io)
@@ -171,28 +186,30 @@ source_group("apps" FILES ${ANYGPU_ROOT}/main.cpp)
 # set all sources
 set (SOURCES
     ${ANYGPU_ROOT}/main.cpp
-	${ZAM2_SRCS}
+    ${ZAM2_SRCS}
     ${TRF_SRCS}
-	${CORE_SRCS}
-	${IO_SRCS}
-	${TEST_SRCS}
-	${OPS_SRCS}
+    ${CORE_SRCS}
+    ${FUSED_SRCS}
+    ${IO_SRCS}
+    ${TEST_SRCS}
+    ${OPS_SRCS}
 )
 
 set (HEADERS
     ${ZAM2_HEADERS}
     ${TRF_HEADERS}
-	${CORE_HEADERS}
-	${IO_HEADERS}
-	${TEST_HEADERS}
-	${OPS_HEADERS}
+    ${CORE_HEADERS}
+    ${FUSED_HEADERS}
+    ${IO_HEADERS}
+    ${TEST_HEADERS}
+    ${OPS_HEADERS}
 )
 
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
 
 add_executable(anygpu ${SOURCES} ${HEADERS})
-target_include_directories(anygpu PUBLIC ${Vulkan_INCLUDE_DIR} ${TRF_DIR} ${CORE_DIR} ${IO_DIR} ${TEST_DIR} ${OPS_DIR} ${ZAM2_DIR})
+target_include_directories(anygpu PUBLIC ${Vulkan_INCLUDE_DIR} ${TRF_DIR} ${CORE_DIR} ${IO_DIR} ${TEST_DIR} ${OPS_DIR} ${ZAM2_DIR} ${FUSED_DIR})
 #target_compile_options(anygpu PUBLIC $<$<COMPILE_LANGUAGE:CUDA>:--keep>)
 target_link_options(anygpu PUBLIC "/NODEFAULTLIB:libcmt.lib") 
 target_link_libraries(anygpu PUBLIC ${Vulkan_LIBRARIES})

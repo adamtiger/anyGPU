@@ -1,6 +1,7 @@
 from sdp_test_cases import * 
 from sf_test_cases import *
 from ops_test_cases import *
+from fused_test_cases import *
 
 if __name__ == '__main__':
 
@@ -21,4 +22,6 @@ if __name__ == '__main__':
     # generate_alt_rotary_embedding_fwd_f32(path, "test_alt_rotary_embedding_fwd_f32")
     # generate_linear_fwd_f32(path, "test_linear_fwd_f32")
     # generate_transpose_fwd_f32(path, "test_transpose_fwd_f32")
-    generate_concat_fwd_f32(path, "test_concat_fwd_f32")
+    # generate_concat_fwd_f32(path, "test_concat_fwd_f32")
+
+    generate_causal_conv1d_fwd_f32(path, "test_causal_conv1d_fwd_f32")

@@ -1,4 +1,4 @@
-#include "math_ops.cuh"
+#include "zamba_glu.cuh"
 
 __global__ void cu_tensor_zamba_glu_f32_kernel(
 	const int n,

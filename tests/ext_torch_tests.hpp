@@ -23,4 +23,6 @@ void external_test_transpose_fwd_f32();
 
 void external_test_concat_fwd_f32();
 
+void external_test_causal_conv1d_fwd_f32();
+
 #endif  // __EXT_TORCH_TESTS__

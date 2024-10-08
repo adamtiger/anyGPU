@@ -10,6 +10,7 @@
 #include "zamba_rotary.hpp"
 #include "zamba_sdpa.hpp"
 #include "zamba_attn_decoder.hpp"
+#include "causal_conv1d.hpp"
 #include "sdp.hpp"
 
 
@@ -415,4 +416,39 @@ void external_test_zamba2_model_attndecoder()
 	// test cuda
 	bool eq = cmp(exp_hy, act_hy_cuda);
 	std::cout << "TestCase [test_zamba2_model_attndecoder - CUDA]: " << (eq ? "PASSED" : "FAILED") << "\n";
+}
+
+
+void external_test_mamba2_layer_causal_conv1d()
+{
+	auto path = artifact_folder_path / "test_mamba2layer_causal_conv1d_fn";
+
+	// read tensors from files
+	auto hx = load_tensor((path / "in_0.dat").string());
+	auto hw = load_tensor((path / "in_1.dat").string());
+	auto hb = load_tensor((path / "in_bias.dat").string());
+	auto exp_hy = load_tensor((path / "out_0.dat").string());
+
+	auto act_hy_cpu = tensor_causal_conv1d(hx, hw, hb);
+
+	auto dx = hx.copy_to_cuda();
+	auto dw = hw.copy_to_cuda();
+	auto db = hb.copy_to_cuda();
+	auto act_dy_cuda = tensor_causal_conv1d(dx, dw, db);
+	auto act_hy_cuda = act_dy_cuda.copy_to_host();
+
+	// compare
+	auto cmp = [&](const Tensor<float32, CPU>& expected, const Tensor<float32, CPU>& actual)
+		{
+			bool eq = elementwise_compatible(expected, actual);  // checks the sizes
+			eq = eq && compare_data_buffers(actual, expected);
+			return eq;
+		};
+
+	// test cuda
+	bool eq = cmp(exp_hy, act_hy_cpu);
+	std::cout << "TestCase [external_test_mamba2_layer_causal_conv1d - CPU]: " << (eq ? "PASSED" : "FAILED") << "\n";
+
+	eq = cmp(exp_hy, act_hy_cuda);
+	std::cout << "TestCase [external_test_mamba2_layer_causal_conv1d - CUDA]: " << (eq ? "PASSED" : "FAILED") << "\n";
 }
