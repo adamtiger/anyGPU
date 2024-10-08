@@ -2,7 +2,6 @@
 
 #include <iostream>
 #include <sstream>
-#include <vector>
 
 
 // helper function to get the error immediately
@@ -157,7 +156,133 @@ void create_logical_device(Context& ctx)
 	CHECK_RESULT(vkCreateDevice(ctx.phys_device, &logical_device_crt_info, 0, &ctx.device));
 }
 
+VTensor create_tensor(const Context& ctx, const std::vector<int>& shape)
+{
+	// calculate the required buffer size (bytes)
+	int buffer_size = 1;
+	for (int s : shape)
+	{
+		buffer_size *= s;
+	}
 
+	buffer_size *= sizeof(float);
+
+	// create the tensor
+	VTensor tensor = {};
+	tensor.shape = shape;
+	tensor.buffer_size = buffer_size;
+
+	VkBufferCreateInfo buffer_ci = {};
+	buffer_ci.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+	buffer_ci.size = buffer_size;
+
+	vkCreateBuffer(ctx.device, &buffer_ci, 0, &tensor.buffer);
+
+	return tensor;
+}
+
+void calculate_relu(const Context& ctx, const VTensor& x, VTensor& y)
+{
+	// create descriptor sets and accompanying structures
+
+	VkDescriptorSetLayoutBinding ds_layout_bind_x = {};
+	ds_layout_bind_x.binding = 0;
+	ds_layout_bind_x.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+	ds_layout_bind_x.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+	ds_layout_bind_x.descriptorCount = 1;
+
+	VkDescriptorSetLayoutBinding ds_layout_bind_y = {};
+	ds_layout_bind_y.binding = 1;
+	ds_layout_bind_y.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+	ds_layout_bind_y.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+	ds_layout_bind_y.descriptorCount = 1;
+
+	std::vector<VkDescriptorSetLayoutBinding> ds_layout_binds = { 
+		ds_layout_bind_x, 
+		ds_layout_bind_y 
+	};
+
+
+	VkDescriptorSetLayoutCreateInfo ds_layout_info = {};
+	ds_layout_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+	ds_layout_info.bindingCount = 2;  // two tensors
+	ds_layout_info.pBindings = ds_layout_binds.data();
+
+	VkDescriptorSetLayout descr_set_layout;
+	vkCreateDescriptorSetLayout(
+		ctx.device,
+		&ds_layout_info,
+		0,
+		&descr_set_layout
+	);
+
+
+	VkDescriptorPoolSize descr_pool_size = {};
+	descr_pool_size.type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+	descr_pool_size.descriptorCount = 2;
+
+	VkDescriptorPoolCreateInfo descr_pool_crt_info = {};
+	descr_pool_crt_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+	descr_pool_crt_info.maxSets = 2;
+	descr_pool_crt_info.poolSizeCount = 1;
+	descr_pool_crt_info.pPoolSizes = &descr_pool_size;
+
+	VkDescriptorPool descr_pool;
+	vkCreateDescriptorPool(ctx.device, &descr_pool_crt_info, 0, &descr_pool);
+
+
+	VkDescriptorSetAllocateInfo descr_set_alloc_info = {};
+	descr_set_alloc_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+	descr_set_alloc_info.descriptorPool = descr_pool;
+	descr_set_alloc_info.descriptorSetCount = 1;
+	descr_set_alloc_info.pSetLayouts = &descr_set_layout;
+	
+
+	VkDescriptorSet descr_set;
+	vkAllocateDescriptorSets(ctx.device, &descr_set_alloc_info, &descr_set);
+
+
+	VkWriteDescriptorSet wr_descr_set_x = {};
+	wr_descr_set_x.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+	wr_descr_set_x.dstBinding = 0;
+	wr_descr_set_x.descriptorCount = 1;
+	wr_descr_set_x.dstSet = descr_set;
+	wr_descr_set_x.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+	VkDescriptorBufferInfo buf_info_x = {};
+	{
+		buf_info_x.buffer = x.buffer;
+		buf_info_x.range = x.buffer_size;
+		buf_info_x.offset = 0;
+	}
+	wr_descr_set_x.pBufferInfo = &buf_info_x;
+
+	VkWriteDescriptorSet wr_descr_set_y = {};
+	wr_descr_set_y.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+	wr_descr_set_y.dstBinding = 1;
+	wr_descr_set_y.descriptorCount = 1;
+	wr_descr_set_y.dstSet = descr_set;
+	wr_descr_set_y.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+	VkDescriptorBufferInfo buf_info_y = {};
+	{
+		buf_info_y.buffer = y.buffer;
+		buf_info_y.range = y.buffer_size;
+		buf_info_y.offset = 0;
+	}
+	wr_descr_set_y.pBufferInfo = &buf_info_y;
+
+	std::vector<VkWriteDescriptorSet> wr_descr_sets = {
+		wr_descr_set_x,
+		wr_descr_set_y
+	};
+
+
+	vkUpdateDescriptorSets(ctx.device, 2, wr_descr_sets.data(), 0, 0);
+
+
+
+	// create compute pipeline
+
+}
 
 
 void destroy_context(Context& ctx)
