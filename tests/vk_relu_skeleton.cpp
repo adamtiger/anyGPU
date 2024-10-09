@@ -282,6 +282,47 @@ void calculate_relu(const Context& ctx, const VTensor& x, VTensor& y)
 
 	// create compute pipeline
 
+	VkPipelineLayoutCreateInfo pipeline_layout_ci = {};
+	pipeline_layout_ci.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+	pipeline_layout_ci.setLayoutCount = 1;
+	pipeline_layout_ci.pSetLayouts = &descr_set_layout;
+
+	VkPipelineLayout pipeline_layout;
+	vkCreatePipelineLayout(ctx.device, &pipeline_layout_ci, 0, &pipeline_layout);
+
+	VkShaderModuleCreateInfo shader_mod_ci = {};
+	shader_mod_ci.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+	shader_mod_ci.codeSize = 0;  // TODO: read these with specified function
+	shader_mod_ci.pCode = 0;
+
+	VkShaderModule shader_module;
+	vkCreateShaderModule(ctx.device, &shader_mod_ci, 0, &shader_module);
+
+	VkPipelineShaderStageCreateInfo pipeline_shader_stage_ci = {};
+	pipeline_shader_stage_ci.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+	pipeline_shader_stage_ci.module = shader_module;
+	pipeline_shader_stage_ci.pName = "main";  // the name of the function in the correpsonding shader
+	pipeline_shader_stage_ci.stage = VK_SHADER_STAGE_COMPUTE_BIT;
+
+	VkComputePipelineCreateInfo comp_pipeline_ci = {};
+	comp_pipeline_ci.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
+	comp_pipeline_ci.stage = pipeline_shader_stage_ci;
+	comp_pipeline_ci.layout = pipeline_layout;
+
+	VkPipeline compute_pipeline;
+	vkCreateComputePipelines(
+		ctx.device, 
+		VK_NULL_HANDLE, 
+		1, 
+		&comp_pipeline_ci, 
+		0, 
+		&compute_pipeline
+	);
+
+
+
+	// create command buffer (to dispatch the compute pipeline)
+
 }
 
 
