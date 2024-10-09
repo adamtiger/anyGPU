@@ -10,6 +10,7 @@
 #include "zamba_rotary.hpp"
 #include "zamba_sdpa.hpp"
 #include "zamba_attn_decoder.hpp"
+#include "zamba_gated_rmsnorm.hpp"
 #include "causal_conv1d.hpp"
 #include "sdp.hpp"
 
@@ -451,4 +452,38 @@ void external_test_mamba2_layer_causal_conv1d()
 
 	eq = cmp(exp_hy, act_hy_cuda);
 	std::cout << "TestCase [external_test_mamba2_layer_causal_conv1d - CUDA]: " << (eq ? "PASSED" : "FAILED") << "\n";
+}
+
+
+void external_test_mamba2_layer_gated_rmsnorm()
+{
+	auto path = artifact_folder_path / "test_mamba2layer_gated_rmsnorm";
+
+	// constant params
+	const float32 eps = 1e-5f;
+	const int32 gsize = 4096;  // group size
+
+	// read tensors from files
+	auto hx = load_tensor((path / "in_0.dat").string());
+	auto hz = load_tensor((path / "in_1.dat").string());
+	auto hw = load_tensor((path / "mamba2layer_rmsnorm.rmsnorm.weight.dat").string());
+	auto exp_hy = load_tensor((path / "out_0.dat").string());
+
+	auto dx = hx.copy_to_cuda();
+	auto dz = hz.copy_to_cuda();
+	auto dw = hw.copy_to_cuda();
+	auto act_dy_cuda = tensor_zamba_gated_rmsnorm(dx, dz, dw, gsize, eps);
+	auto act_hy_cuda = act_dy_cuda.copy_to_host();
+
+	// compare
+	auto cmp = [&](const Tensor<float32, CPU>& expected, const Tensor<float32, CPU>& actual)
+		{
+			bool eq = elementwise_compatible(expected, actual);  // checks the sizes
+			eq = eq && compare_data_buffers(actual, expected);
+			return eq;
+		};
+
+	// test cuda
+	bool eq = cmp(exp_hy, act_hy_cuda);
+	std::cout << "TestCase [external_test_mamba2_layer_gated_rmsnorm - CUDA]: " << (eq ? "PASSED" : "FAILED") << "\n";
 }

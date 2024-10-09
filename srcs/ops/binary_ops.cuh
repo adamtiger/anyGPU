@@ -30,4 +30,11 @@ void cu_tensor_mul_i32(
 	const Tensor<int32, CUDA>& out);
 
 
+void cu_tensor_mul_f32(
+	const KernelParameters& kpms,
+	const Tensor<float32, CUDA>& lhs,
+	const Tensor<float32, CUDA>& rhs,
+	const Tensor<float32, CUDA>& out);
+
+
 #endif  // __BINARY_OPS_CUH__
