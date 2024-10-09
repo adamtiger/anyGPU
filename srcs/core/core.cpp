@@ -129,6 +129,7 @@ std::string print_cuda_device_props()
 	ss << "    sharedMemPerBlock:           " << device_props.sharedMemPerBlock << "\n";
 	ss << "    memoryBusWidth:              " << device_props.memoryBusWidth << "\n";
 	ss << "    totalGlobalMem:              " << device_props.totalGlobalMem << "\n";
+	ss << "    totalConstMem:               " << device_props.totalConstMem << "\n";
 	ss << "\n";
 
 	ss << "  Kernel launch info \n";

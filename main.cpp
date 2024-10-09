@@ -47,7 +47,7 @@ int main()
 	//external_test_transpose_fwd_f32();
 	//external_test_sdp_masked_scaled_fwd_f32();
 	//external_test_concat_fwd_f32();
-	//external_test_causal_conv1d_fwd_f32();
+	external_test_causal_conv1d_fwd_f32();
 
 	//external_test_zamba2_model_rmsnorm();
 	//external_test_zamba2_attndeco_attn();

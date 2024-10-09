@@ -27,6 +27,11 @@ static Tensor<dtype, CPU> tensor_causal_conv1d(
 	const Tensor<dtype, CPU>& wt, 
 	const Tensor<dtype, CPU>& bt)
 {
+	// checking input tensors sizes
+	ACASSERT(xt.dim == 3, "xt needs to be 3 dimensional");
+	ACASSERT(xt.shape[1] == wt.shape[0], "xt and wt need to have the same dims");
+	ACASSERT(wt.shape[0] == bt.shape[0], "wt and bt need to have the same dims");
+
 	// access the data arrays
 	int y_dim = xt.dim;
 	Shape y_shape = xt.shape;
@@ -88,6 +93,12 @@ static Tensor<dtype, CUDA> tensor_causal_conv1d(
 	const Tensor<dtype, CUDA>& wt,
 	const Tensor<dtype, CUDA>& bt)
 {
+	// checking input tensors sizes
+	ACASSERT(xt.dim == 3, "xt needs to be 3 dimensional");
+	ACASSERT(xt.shape[1] == wt.shape[0], "xt and wt need to have the same dims");
+	ACASSERT(wt.shape[0] == bt.shape[0], "wt and bt need to have the same dims");
+	ACASSERT(wt.shape[1] <= 4, "kernel width needs to be under 4");
+
 	// access the data arrays
 	int y_dim = xt.dim;
 	Shape y_shape = xt.shape;
