@@ -6,10 +6,10 @@
     mamba_chunk_scan_combined function.
 """
 
-from dnn_inspector.dnninspect.tensor import load_tensor
+from dnninspect.tensor import load_tensor
 from os.path import join as pjoin
 from einops import rearrange, repeat
-import torch.functional as F
+import torch.nn.functional as F
 import torch
 
 
@@ -126,15 +126,21 @@ def chunk_scan_ref(B, C, x, dt, dA_cumsum, prev_states, D=None, z=None):
     _, _, ngroups, dstate = B.shape
     assert B.shape == (batch, seqlen, ngroups, dstate)
     _, _, nchunks, chunk_size = dt.shape
-    assert seqlen == nchunks * chunk_size
+    assert seqlen <= nchunks * chunk_size
     assert C.shape == B.shape
+    if seqlen < nchunks * chunk_size:
+        x = F.pad(x, (0, 0, 0, 0, 0, nchunks * chunk_size - seqlen))
+        B = F.pad(B, (0, 0, 0, 0, 0, nchunks * chunk_size - seqlen))
+        C = F.pad(C, (0, 0, 0, 0, 0, nchunks * chunk_size - seqlen))
     B = repeat(B, "b l g d -> b l (g h) d", h=nheads // ngroups)
     C = repeat(C, "b l g d -> b l (g h) d", h=nheads // ngroups)
     CB = torch.einsum("bclhn,bcshn->bchls", rearrange(C, "b (c l) h n -> b c l h n", c=nchunks),
                       rearrange(B, "b (c s) h n -> b c s h n", c=nchunks))
+    print(B.shape, C.shape, CB.shape)
     # (batch, nheads, nchunks, chunksize, chunksize)
     dt_segment_sum = dA_cumsum[:, :, :, :, None] - dA_cumsum[:, :, :, None, :]
     decay = torch.exp(dt_segment_sum)
+    print(decay.shape)
     scores_decay = CB * rearrange(decay, "b h c l s -> b c h l s")
     causal_mask = torch.tril(torch.ones(chunk_size, chunk_size, device=x.device, dtype=bool), diagonal=0)
     scores_decay = scores_decay.masked_fill(~causal_mask, 0)
@@ -149,7 +155,7 @@ def chunk_scan_ref(B, C, x, dt, dA_cumsum, prev_states, D=None, z=None):
         if D.dim() == 1:
             D = rearrange(D, "h -> h 1")
         out = out + x * D
-    return out if z is None else out * F.silu(z)
+    return out[:, :seqlen, :, :]
 
 
 # mamba_chunk_scan_combined reference implementation
@@ -209,6 +215,33 @@ def mamba_chunk_scan_combined_ref(
 
 def test_mamba_chunk_scan_combined():
     path = r"C:\Data\AI\projects\anyGPU\artifacts\zamba2_tests\test_mamba2layer_chunk_scan_comb"
-    pjoin(path, )
     
-    pass
+    x = load_tensor(pjoin(path, "in_0.dat"))
+    dt = load_tensor(pjoin(path, "in_1.dat"))
+    A = load_tensor(pjoin(path, "in_2.dat"))
+    B = load_tensor(pjoin(path, "in_3.dat"))
+    C = load_tensor(pjoin(path, "in_4.dat"))
+    D = load_tensor(pjoin(path, "in_D.dat"))
+    dt_bias = load_tensor(pjoin(path, "in_dt_bias.dat"))
+    
+    out, fs = mamba_chunk_scan_combined_ref(x, dt, A, B, C, chunk_size=256, D=D, dt_bias=dt_bias, dt_softplus=True)
+
+    exp_out = load_tensor(pjoin(path, "out_0.dat"))
+    exp_fs = load_tensor(pjoin(path, "out_1.dat"))
+
+    is_out_correct = not torch.any(
+        torch.logical_and(torch.abs(out - exp_out) > 1e-3, torch.abs(out - exp_out) / (torch.abs(out) + torch.abs(exp_out) + 1e-5) * 2.0 > 1e-2)
+    )
+    is_fs_correct = torch.allclose(fs, exp_fs)  # unstable to calculate fs
+
+    print(f"Output (0): {is_out_correct}")
+    print(f"Output (1): {is_fs_correct}")
+
+    print("OUT")
+    print(exp_out.flatten()[:10])
+    print("Actual:")
+    print(out.flatten()[:10])
+
+
+if __name__ == '__main__':
+    test_mamba_chunk_scan_combined()
