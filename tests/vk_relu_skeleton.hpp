@@ -19,6 +19,7 @@ struct VTensor
 {
 	std::vector<int> shape;
 	VkBuffer buffer;
+	VkDeviceMemory memory;
 	// dtype is float32
 	int buffer_size;  // buffer size in bytes
 };
@@ -31,9 +32,25 @@ void create_instance(Context& ctx);
 void select_physical_device(Context& ctx);
 void create_logical_device(Context& ctx);
 
-VTensor create_tensor(const Context& ctx, const std::vector<int>& shape);
+int findMemoryProperties(
+	const VkPhysicalDeviceMemoryProperties* pMemoryProperties,
+	uint32_t memoryTypeBitsRequirement,
+	VkMemoryPropertyFlags requiredProperties
+);
 
-void calculate_relu(const Context& ctx, const VTensor& x, VTensor& y);
+VTensor create_tensor(
+	const Context& ctx, 
+	const std::vector<int>& shape, 
+	const std::vector<float>& data);
+
+std::vector<float> copy_tensor_data_to_host(
+	const Context& ctx, 
+	const VTensor& tensor);
+
+void calculate_relu(
+	const Context& ctx, 
+	const VTensor& x, 
+	VTensor& y);
 
 void destroy_context(Context& ctx);
 

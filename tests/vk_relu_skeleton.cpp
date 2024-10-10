@@ -156,7 +156,33 @@ void create_logical_device(Context& ctx)
 	CHECK_RESULT(vkCreateDevice(ctx.phys_device, &logical_device_crt_info, 0, &ctx.device));
 }
 
-VTensor create_tensor(const Context& ctx, const std::vector<int>& shape)
+int findMemoryProperties(
+	const VkPhysicalDeviceMemoryProperties* pMemoryProperties,
+	uint32_t memoryTypeBitsRequirement,
+	VkMemoryPropertyFlags requiredProperties)
+{
+	const uint32_t memoryCount = pMemoryProperties->memoryTypeCount;
+	for (uint32_t memoryIndex = 0; memoryIndex < memoryCount; ++memoryIndex) {
+		const uint32_t memoryTypeBits = (1 << memoryIndex);
+		const bool isRequiredMemoryType = memoryTypeBitsRequirement & memoryTypeBits;
+
+		const VkMemoryPropertyFlags properties =
+			pMemoryProperties->memoryTypes[memoryIndex].propertyFlags;
+		const bool hasRequiredProperties =
+			(properties & requiredProperties) == requiredProperties;
+
+		if (isRequiredMemoryType && hasRequiredProperties)
+			return static_cast<int32_t>(memoryIndex);
+	}
+
+	// failed to find memory type
+	return -1;
+}
+
+VTensor create_tensor(
+	const Context& ctx, 
+	const std::vector<int>& shape, 
+	const std::vector<float>& data)
 {
 	// calculate the required buffer size (bytes)
 	int buffer_size = 1;
@@ -172,13 +198,63 @@ VTensor create_tensor(const Context& ctx, const std::vector<int>& shape)
 	tensor.shape = shape;
 	tensor.buffer_size = buffer_size;
 
+	// create the vk buffer to hold the data
 	VkBufferCreateInfo buffer_ci = {};
 	buffer_ci.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+	buffer_ci.usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
 	buffer_ci.size = buffer_size;
 
 	vkCreateBuffer(ctx.device, &buffer_ci, 0, &tensor.buffer);
 
+	// allocate device memory
+	VkPhysicalDeviceMemoryProperties phys_device_mem_props;
+	vkGetPhysicalDeviceMemoryProperties(ctx.phys_device, &phys_device_mem_props);
+
+	int32_t memory_type_index = 0;
+	VkMemoryRequirements mem_req;
+	vkGetBufferMemoryRequirements(ctx.device, tensor.buffer, &mem_req);
+	memory_type_index = findMemoryProperties(
+		&phys_device_mem_props,
+		mem_req.memoryTypeBits,
+		VK_MEMORY_PROPERTY_HOST_COHERENT_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
+	);
+
+	VkMemoryAllocateInfo memory_info = {};
+	memory_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+	memory_info.allocationSize = mem_req.size;
+	memory_info.memoryTypeIndex = memory_type_index;
+	CHECK_RESULT(vkAllocateMemory(ctx.device, &memory_info, 0, &tensor.memory));
+	CHECK_RESULT(vkBindBufferMemory(ctx.device, tensor.buffer, tensor.memory, 0));
+
+	// copy data from host to the device (if any)
+	void* h_data = NULL;
+	vkMapMemory(ctx.device, tensor.memory, 0, VK_WHOLE_SIZE, 0, &h_data);
+	float* ph_data = (float*)h_data;
+	for (size_t iidx = 0; iidx < data.size(); ++iidx) {
+		ph_data[iidx] = data[iidx];
+	}
+	vkUnmapMemory(ctx.device, tensor.memory);
+
 	return tensor;
+}
+
+std::vector<float> copy_tensor_data_to_host(const Context& ctx, const VTensor& tensor)
+{
+	int element_num = 1;
+	for (int s : tensor.shape)  // TODO: simplify this!
+	{
+		element_num *= s;
+	}
+
+	std::vector<float> data(element_num);
+
+	void* h_data = NULL;
+	vkMapMemory(ctx.device, tensor.memory, 0, VK_WHOLE_SIZE, 0, &h_data);
+	float* ph_data = (float*)h_data;
+	for (int iidx = 0; iidx < element_num; ++iidx) {
+		data[iidx] = ph_data[iidx];
+	}
+	vkUnmapMemory(ctx.device, tensor.memory);
 }
 
 void calculate_relu(const Context& ctx, const VTensor& x, VTensor& y)
@@ -323,6 +399,59 @@ void calculate_relu(const Context& ctx, const VTensor& x, VTensor& y)
 
 	// create command buffer (to dispatch the compute pipeline)
 
+	VkCommandPoolCreateInfo cmd_pool_ci = {};
+	cmd_pool_ci.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+	cmd_pool_ci.queueFamilyIndex = ctx.queue_family_idx;
+	
+	VkCommandPool cmd_pool;
+	vkCreateCommandPool(ctx.device, &cmd_pool_ci, 0, &cmd_pool);
+
+	VkCommandBufferAllocateInfo cmd_buffer_ai = {};
+	cmd_buffer_ai.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+	cmd_buffer_ai.commandPool = cmd_pool;
+	cmd_buffer_ai.commandBufferCount = 1;
+	cmd_buffer_ai.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+
+	VkCommandBuffer cmd_buffer;
+	vkAllocateCommandBuffers(ctx.device, &cmd_buffer_ai, &cmd_buffer);
+
+	// begin command buffer recording
+
+	VkCommandBufferBeginInfo cmd_buffer_bi = {};
+	cmd_buffer_bi.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+
+	vkBeginCommandBuffer(cmd_buffer, &cmd_buffer_bi);
+
+	vkCmdBindDescriptorSets(cmd_buffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline_layout, 0, 1, &descr_set, 0, NULL);
+	vkCmdBindPipeline(cmd_buffer, VK_PIPELINE_BIND_POINT_COMPUTE, compute_pipeline);
+
+	vkCmdDispatch(cmd_buffer, 1, 1, 1);  // TODO: group size is fixed, this should be calculated
+
+	vkEndCommandBuffer(cmd_buffer);
+
+	// end command buffer recording
+
+
+
+	// create submit info
+	VkSubmitInfo submit_info = {};
+	submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	submit_info.commandBufferCount = 1;
+	submit_info.pCommandBuffers = &cmd_buffer;
+
+
+	// submitting buffers into the queue
+	VkQueue queue;
+	vkGetDeviceQueue(ctx.device, ctx.queue_family_idx, 0, &queue);
+
+	VkFence fence;
+	VkFenceCreateInfo fence_info = {};
+	fence_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+	fence_info.flags = 0;
+	vkCreateFence(ctx.device, &fence_info, 0, &fence);
+
+	CHECK_RESULT(vkQueueSubmit(queue, 1, &submit_info, fence));
+	CHECK_RESULT(vkWaitForFences(ctx.device, 1, &fence, VK_TRUE, 1000000000));
 }
 
 
