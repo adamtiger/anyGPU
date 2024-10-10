@@ -47,6 +47,32 @@ def get_dtype_index(tensor: torch.Tensor):
     return index
 
 
+def get_torch_dtype(dtype: int):
+    torch_dtypes = {
+        2: torch.int32,     # int32
+        3: torch.bfloat16,  # bfloat16
+        4: torch.float16,   # float16
+        5: torch.float32    # float32
+    }
+    torch_dtype = None
+    if dtype in torch_dtypes:
+        torch_dtype = torch_dtypes[dtype]
+    return torch_dtype
+
+
+def get_dtype_size(dtype: int):
+    dtype_sizes = {
+        2: 4,  # int32
+        3: 2,  # bfloat16
+        4: 2,  # float16
+        5: 4   # float32
+    }
+    size = None
+    if dtype in dtype_sizes:
+        size = dtype_sizes[dtype]
+    return size
+
+
 def save_tensor(tensor: torch.Tensor, file_path: str):
     """
         Save the torch tensor into a dat file (no compression).
@@ -101,21 +127,16 @@ def load_tensor(file_path: str) -> torch.Tensor:
 
         # read the shape
         shape = list()
-        for i in range(dim):
+        for _ in range(dim):
             shape.append(int.from_bytes(dat.read(int_size), sys.byteorder))
         
         # read the data type
         dtype = int.from_bytes(dat.read(int_size), sys.byteorder)
+        dtype_size = get_dtype_size(dtype)
+        torch_dtype = get_torch_dtype(dtype)
 
         # read the data buffer
-        buffer = dat.read(4 * functools.reduce(lambda x, y: x * y, shape))
-        #data_tensor = np.frombuffer(buffer, np.float32).reshape(shape)
-        tensor = torch.frombuffer(buffer, dtype=torch.float32).reshape(shape)
-    
-    print(dim)
-    print(shape)
-    print(dtype)
-
-    print(tensor)
+        buffer = dat.read(dtype_size * functools.reduce(lambda x, y: x * y, shape))
+        tensor = torch.frombuffer(buffer, dtype=torch_dtype).clone().reshape(shape)
 
     return tensor
