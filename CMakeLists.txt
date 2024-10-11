@@ -161,7 +161,7 @@ source_group("transformers" FILES ${TRF_HEADERS} ${TRF_SRCS})
 
 # model related (zamba2)
 
-set(ZAM2_DIR ${ANYGPU_ROOT}/srcs/zamba2)
+set(ZAM2_DIR ${ANYGPU_ROOT}/srcs/models/zamba2)
 
 set (ZAM2_SRCS
     ${ZAM2_DIR}/zamba_glu.cu
@@ -179,7 +179,20 @@ set (ZAM2_HEADERS
     ${ZAM2_DIR}/zamba_gated_rmsnorm.hpp
 )
 
-source_group("zamba2" FILES ${ZAM2_HEADERS} ${ZAM2_SRCS})
+source_group("mzamba2" FILES ${ZAM2_HEADERS} ${ZAM2_SRCS})
+
+# model related (gemma2)
+
+set(GEM2_DIR ${ANYGPU_ROOT}/srcs/models/gemma2)
+
+set (GEM2_SRCS
+)
+
+set (GEM2_HEADERS
+    #${GEM2_DIR}/zamba_gated_rmsnorm.hpp
+)
+
+source_group("mgemma2" FILES ${GEM2_HEADERS} ${GEM2_SRCS})
 
 # filter for main and similar files in visual studio
 source_group("apps" FILES ${ANYGPU_ROOT}/main.cpp)
@@ -188,6 +201,7 @@ source_group("apps" FILES ${ANYGPU_ROOT}/main.cpp)
 set (SOURCES
     ${ANYGPU_ROOT}/main.cpp
     ${ZAM2_SRCS}
+    ${GEM2_SRCS}
     ${TRF_SRCS}
     ${CORE_SRCS}
     ${FUSED_SRCS}
@@ -198,6 +212,7 @@ set (SOURCES
 
 set (HEADERS
     ${ZAM2_HEADERS}
+    ${GEM2_HEADERS}
     ${TRF_HEADERS}
     ${CORE_HEADERS}
     ${FUSED_HEADERS}
@@ -210,7 +225,12 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
 
 add_executable(anygpu ${SOURCES} ${HEADERS})
-target_include_directories(anygpu PUBLIC ${Vulkan_INCLUDE_DIR} ${TRF_DIR} ${CORE_DIR} ${IO_DIR} ${TEST_DIR} ${OPS_DIR} ${ZAM2_DIR} ${FUSED_DIR})
+target_include_directories(
+    anygpu PUBLIC ${Vulkan_INCLUDE_DIR} 
+	${TRF_DIR} ${CORE_DIR} ${IO_DIR} 
+	${TEST_DIR} ${OPS_DIR} ${FUSED_DIR}
+	${ZAM2_DIR} ${GEM2_DIR}
+)
 #target_compile_options(anygpu PUBLIC $<$<COMPILE_LANGUAGE:CUDA>:--keep>)
 target_link_options(anygpu PUBLIC "/NODEFAULTLIB:libcmt.lib") 
 target_link_libraries(anygpu PUBLIC ${Vulkan_LIBRARIES})
