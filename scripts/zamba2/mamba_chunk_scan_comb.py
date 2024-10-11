@@ -130,7 +130,7 @@ def chunk_scan_ref(B, C, x, dt, dA_cumsum, prev_states, D=None, z=None):
     _, _, nchunks, chunk_size = dt.shape
     assert seqlen <= nchunks * chunk_size
     assert C.shape == B.shape
-    if seqlen < nchunks * chunk_size:
+    if seqlen < nchunks * chunk_size:  # this was not in the original code, this is for fixing their error!
         x = F.pad(x, (0, 0, 0, 0, 0, nchunks * chunk_size - seqlen))
         B = F.pad(B, (0, 0, 0, 0, 0, nchunks * chunk_size - seqlen))
         C = F.pad(C, (0, 0, 0, 0, 0, nchunks * chunk_size - seqlen))
@@ -215,6 +215,117 @@ def mamba_chunk_scan_combined_ref(
     return out, final_states
 
 
+def test_mamba_combined_cumsum(path, chunk_size = 256):    
+    dt = load_tensor(pjoin(path, "in_0.dat"))
+    A = load_tensor(pjoin(path, "in_1.dat"))
+    dt_bias = load_tensor(pjoin(path, "in_dt_bias.dat"))
+    
+    dA_cumsum, dt = chunk_cumsum_ref(dt, A, chunk_size, dt_bias=dt_bias, dt_softplus=True)
+
+    exp_dA_cumsum = load_tensor(pjoin(path, "out_0.dat"))
+    exp_dt = load_tensor(pjoin(path, "out_1.dat"))
+
+    is_out_correct = not torch.any(
+        torch.logical_and(torch.abs(dA_cumsum - exp_dA_cumsum) > 1e-3, torch.abs(dA_cumsum - exp_dA_cumsum) / (torch.abs(dA_cumsum) + torch.abs(exp_dA_cumsum) + 1e-5) * 2.0 > 1e-2)
+    )
+    is_fs_correct = torch.allclose(dt, exp_dt)
+
+    print(f"Output (0): {is_out_correct}")
+    print(f"Output (1): {is_fs_correct}")
+
+    print("OUT")
+    print(exp_dA_cumsum.flatten()[:10])
+    print("Actual:")
+    print(dA_cumsum.flatten()[:10])
+
+
+def test_mamba_combined_chunkstate(path):    
+    B = load_tensor(pjoin(path, "in_0.dat"))
+    x = load_tensor(pjoin(path, "in_1.dat"))
+    dt = load_tensor(pjoin(path, "in_2.dat"))
+    dA_cumsum = load_tensor(pjoin(path, "in_3.dat"))
+    
+    states = chunk_state_ref(B, x, dt, dA_cumsum)
+
+    exp_states = load_tensor(pjoin(path, "out_0.dat"))
+
+    is_out_correct = not torch.any(
+        torch.logical_and(1e+2 > torch.abs(exp_states), 
+            torch.logical_and(
+                torch.abs(exp_states) > -1e-2, torch.abs(states - exp_states) / (torch.abs(states) + torch.abs(exp_states) + 1e-8) * 2.0 > 1e-2)
+        )
+    )
+
+    checks = torch.logical_and(1e+2 > torch.abs(exp_states), 
+        torch.logical_and(
+            torch.abs(exp_states) > -1e-2, torch.abs(states - exp_states) / (torch.abs(states) + torch.abs(exp_states) + 1e-8) * 2.0 > 2e-2)
+    ).flatten()
+
+    print(f"Output (0): {is_out_correct}")
+
+    print("OUT")
+    print(exp_states.flatten()[:10])
+    print("Actual:")
+    print(states.flatten()[:10])
+
+    print(checks[10000:10100])
+    print(torch.abs(states - exp_states).flatten()[10000:10100])
+    print(torch.sum(checks) / checks.size(0))
+
+
+def test_mamba_combined_statepass(path):    
+    states = load_tensor(pjoin(path, "in_0.dat"))
+    dA_chunk_cumsum = load_tensor(pjoin(path, "in_1.dat"))
+    
+    states, final_states = state_passing_ref(states, dA_chunk_cumsum, initial_states=None)
+
+    exp_states = load_tensor(pjoin(path, "out_0.dat"))
+    exp_fs = load_tensor(pjoin(path, "out_1.dat"))
+
+    is_out_correct = not torch.any(
+        torch.logical_and(torch.abs(states - exp_states) > 1e-3, torch.abs(states - exp_states) / (torch.abs(states) + torch.abs(exp_states) + 1e-5) * 2.0 > 1e-2)
+    )
+    is_fs_correct = torch.allclose(final_states, exp_fs)
+
+    print(f"Output (0): {is_out_correct}")
+    print(f"Output (1): {is_fs_correct}")
+
+    print("OUT")
+    print(exp_states.flatten()[:10])
+    print("Actual:")
+    print(states.flatten()[:10])
+
+    print(torch.min(final_states), torch.max(final_states))
+
+
+def test_mamba_combined_chunkscan(path):    
+    B = load_tensor(pjoin(path, "in_0.dat"))
+    C = load_tensor(pjoin(path, "in_1.dat"))
+    x = load_tensor(pjoin(path, "in_2.dat"))
+    dt = load_tensor(pjoin(path, "in_3.dat"))
+    dA_cumsum = load_tensor(pjoin(path, "in_4.dat"))
+    prev_states = load_tensor(pjoin(path, "in_5.dat"))
+    D = load_tensor(pjoin(path, "in_6.dat"))
+    
+    out = chunk_scan_ref(B, C, x, dt, dA_cumsum, prev_states, D=D, z=None)
+
+    exp_out = load_tensor(pjoin(path, "out_0.dat"))
+
+    checks = torch.logical_and(1e+5 > torch.abs(exp_out), 
+        torch.logical_and(
+            torch.abs(exp_out) > -1e-5, torch.abs(out - exp_out) / (torch.abs(out) + torch.abs(exp_out) + 1e-8) * 2.0 > 5e-2)
+    ).flatten()
+
+    print("OUT")
+    print(exp_out.flatten()[:10])
+    print("Actual:")
+    print(out.flatten()[:10])
+
+    print(checks[1000:1100])
+    print(torch.abs(out - exp_out).flatten()[1000:1100])
+    print(torch.sum(checks) / checks.size(0))
+
+
 def test_mamba_chunk_scan_combined():
     path = r"C:\Data\AI\projects\anyGPU\artifacts\zamba2_tests\test_mamba2layer_chunk_scan_comb"
     
@@ -239,10 +350,19 @@ def test_mamba_chunk_scan_combined():
     print(f"Output (0): {is_out_correct}")
     print(f"Output (1): {is_fs_correct}")
 
+    checks = torch.logical_and(1e+5 > torch.abs(exp_out), 
+        torch.logical_and(
+            torch.abs(exp_out) > -1e-5, torch.abs(out - exp_out) / (torch.abs(out) + torch.abs(exp_out) + 1e-8) * 2.0 > 5e-2)
+    ).flatten()
+
     print("OUT")
     print(exp_out.flatten()[:10])
     print("Actual:")
     print(out.flatten()[:10])
+
+    print(checks[1000:1100])
+    print(torch.abs(out - exp_out).flatten()[1000:1100])
+    print(torch.sum(checks) / checks.size(0))
 
 
 def _generate_mamba_chunk_scan_comb_test_case(
@@ -267,15 +387,15 @@ def _generate_mamba_chunk_scan_comb_test_case(
     from mamba_ssm.ops.triton.ssd_combined import mamba_chunk_scan_combined
 
     y, last_state = mamba_chunk_scan_combined(
-        x,
-        dt,
-        A,
-        B, 
-        C,
+        x.cuda(),
+        dt.cuda(),
+        A.cuda(),
+        B.cuda(), 
+        C.cuda(),
         chunk_size=chunk_size,
-        D=D,
+        D=D.cuda(),
         z=None,
-        dt_bias=dt_bias,
+        dt_bias=dt_bias.cuda(),
         dt_softplus=True,
         seq_idx=None,
         return_final_states=True
@@ -298,7 +418,7 @@ def generate_mamba_chunk_scan_comb_test_case_1(path: str):
 
     # parameters, sizes
     batch = 1
-    seqlen = 345
+    seqlen = 24
     nheads = 64 
     headdim = 128
     ngroups = 1
@@ -321,7 +441,7 @@ def generate_mamba_chunk_scan_comb_test_case_2(path: str):
 
     # parameters, sizes
     batch = 1
-    seqlen = 200
+    seqlen = 20
     nheads = 64 
     headdim = 64
     ngroups = 2
@@ -340,5 +460,47 @@ def generate_mamba_chunk_scan_comb_test_case_2(path: str):
     )
 
 
+def test_mamba_chunk_scan_combined_gens(path, chunk_size=256):
+    
+    x = load_tensor(pjoin(path, "x.dat"))
+    dt = load_tensor(pjoin(path, "dt.dat"))
+    A = load_tensor(pjoin(path, "A.dat"))
+    B = load_tensor(pjoin(path, "B.dat"))
+    C = load_tensor(pjoin(path, "C.dat"))
+    D = load_tensor(pjoin(path, "D.dat"))
+    dt_bias = load_tensor(pjoin(path, "dt_bias.dat"))
+    
+    out, fs = mamba_chunk_scan_combined_ref(x, dt, A, B, C, chunk_size=chunk_size, D=D, dt_bias=dt_bias, dt_softplus=True)
+
+    exp_out = load_tensor(pjoin(path, "y.dat"))
+    exp_fs = load_tensor(pjoin(path, "last_state.dat"))
+
+    is_out_correct = not torch.any(
+        torch.logical_and(torch.abs(out - exp_out) > 1e-3, torch.abs(out - exp_out) / (torch.abs(out) + torch.abs(exp_out) + 1e-5) * 2.0 > 1e-2)
+    )
+    is_fs_correct = torch.allclose(fs, exp_fs)  # unstable to calculate fs
+
+    print(f"Output (0): {is_out_correct}")
+    print(f"Output (1): {is_fs_correct}")
+
+    print("OUT")
+    print(exp_out.flatten()[:-10])
+    print("Actual:")
+    print(out.flatten()[:-10])
+
+
 if __name__ == '__main__':
-    test_mamba_chunk_scan_combined()
+    #test_mamba_chunk_scan_combined()
+    #generate_mamba_chunk_scan_comb_test_case_1("/home/ubuntu/zamba2_inspect")
+    #generate_mamba_chunk_scan_comb_test_case_2("/home/ubuntu/zamba2_inspect")
+    #test_mamba_chunk_scan_combined_gens(r"C:\Data\AI\projects\anyGPU\artifacts\zamba2_tests\zamba2_inspect\mamba_chunk_sc_1", chunk_size=256)
+    #test_mamba_chunk_scan_combined_gens(r"C:\Data\AI\projects\anyGPU\artifacts\zamba2_tests\zamba2_inspect\mamba_chunk_sc_2", chunk_size=128)
+    # test_mamba_combined_cumsum(
+    #     r"C:\Data\AI\projects\anyGPU\artifacts\zamba2_tests\zamba2_inspect\mamba_combined_cumsum_2", 
+    #     chunk_size = 128)
+    
+    test_mamba_combined_chunkstate(r"C:\Data\AI\projects\anyGPU\artifacts\zamba2_tests\zamba2_inspect\mamba_combined_chunkstate_1")
+
+    #test_mamba_combined_statepass(r"C:\Data\AI\projects\anyGPU\artifacts\zamba2_tests\zamba2_inspect\mamba_combined_statepass_1")
+
+    #test_mamba_combined_chunkscan(r"C:\Data\AI\projects\anyGPU\artifacts\zamba2_tests\zamba2_inspect\mamba_combined_chunkscan_2")
