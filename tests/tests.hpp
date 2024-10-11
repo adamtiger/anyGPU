@@ -3,6 +3,7 @@
 
 #include "ext_torch_tests.hpp"
 #include "zamba2_tests.hpp"
+#include "gemma2_tests.hpp"
 
 void test_binary_add_f32();
 void test_binary_add_i32();

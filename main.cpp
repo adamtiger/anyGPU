@@ -40,7 +40,8 @@ int main()
 	external_test_layer_norm_fwd_f32();
 	external_test_rms_norm_fwd_f32();*/
 	//external_test_silu_fwd_f32();
-	external_test_gelu_fwd_f32();
+	//external_test_gelu_fwd_f32();
+	//external_test_gelu_approx_fwd_f32();
 	//external_test_embedding_fwd_f32();
 	//external_test_rotary_embedding_fwd_f32();
 	//external_test_alt_rotary_embedding_fwd_f32();
@@ -59,6 +60,8 @@ int main()
 	//external_test_mamba2_layer_causal_conv1d();
 	//external_test_mamba2_layer_gated_rmsnorm();
 	//test_zamba2_glu();
+
+	external_test_gemma2_decoder_mlp();
 
 	//run_vk_compute();
 

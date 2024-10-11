@@ -11,6 +11,7 @@
 #include <string>
 #include <sstream>
 #include <cassert>
+#include <cmath>
 
 #ifdef __INTELLISENSE__  // to have intellisense help for wmma, threadIdx etc.
 #define __CUDACC__

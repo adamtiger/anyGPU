@@ -60,7 +60,7 @@ static Tensor<dtype, CUDA> tensor_silu(const Tensor<dtype, CUDA>& xt)
   @param xt: input tensor
 */
 template<PreciseFloatType dtype>
-static Tensor<dtype, CPU> tensor_gelu(const Tensor<dtype, CPU>& xt)
+static Tensor<dtype, CPU> tensor_gelu(const Tensor<dtype, CPU>& xt, const bool approx=false)
 {
 	// access the data arrays
 	Tensor<dtype, CPU> yt(xt.dim, xt.shape);
@@ -71,10 +71,22 @@ static Tensor<dtype, CPU> tensor_gelu(const Tensor<dtype, CPU>& xt)
 	// reliable (but slow)
 
 	const int length = xt.size();
-	for (int k = 0; k < length; ++k)
+
+	if (!approx)
 	{
-		dtype x = x_data[k];
-		y_data[k] = x * (dtype)0.5 * ((dtype)1.0 + erf(x / sqrt((dtype)2.0)));
+		for (int k = 0; k < length; ++k)
+		{
+			dtype x = x_data[k];
+			y_data[k] = x * (dtype)0.5 * ((dtype)1.0 + erf(x / sqrt((dtype)2.0)));
+		}
+	}
+	else
+	{
+		for (int k = 0; k < length; ++k)
+		{
+			dtype x = x_data[k];
+			y_data[k] = x * (dtype)0.5 * ((dtype)1.0 + tanh((dtype)sqrt(2.0 / 3.14159265358979323846) * (x + (dtype)0.044715 * x * x * x)));
+		}
 	}
 
 	return yt;
@@ -82,14 +94,14 @@ static Tensor<dtype, CPU> tensor_gelu(const Tensor<dtype, CPU>& xt)
 
 
 template<FloatingPointType dtype>
-static Tensor<dtype, CUDA> tensor_gelu(const Tensor<dtype, CUDA>& xt)
+static Tensor<dtype, CUDA> tensor_gelu(const Tensor<dtype, CUDA>& xt, const bool approx = false)
 {
 	// access the data arrays
 	Tensor<dtype, CUDA> yt(xt.dim, xt.shape);
 
 	if constexpr (std::is_same_v<dtype, float32>)
 	{
-		cu_tensor_gelu_f32(xt, yt);
+		cu_tensor_gelu_f32(xt, approx, yt);
 	}
 	else
 	{

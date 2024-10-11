@@ -36,7 +36,7 @@ static Tensor<dtype, device> tensor_gemma_mlp(
 	const Tensor<dtype, device>& x)
 {
 	auto gated_x = tensor_linear(x, mlp_weights.gate_proj_weight);
-	auto act_gated_x = tensor_gelu(gated_x);
+	auto act_gated_x = tensor_gelu(gated_x, true);
 
 	auto up_x = tensor_linear(x, mlp_weights.up_proj_weight);
 
