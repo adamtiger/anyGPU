@@ -189,7 +189,7 @@ set (GEM2_SRCS
 )
 
 set (GEM2_HEADERS
-    #${GEM2_DIR}/zamba_gated_rmsnorm.hpp
+    ${GEM2_DIR}/gemma_mlp.hpp
 )
 
 source_group("mgemma2" FILES ${GEM2_HEADERS} ${GEM2_SRCS})

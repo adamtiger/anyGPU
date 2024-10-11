@@ -54,4 +54,49 @@ static Tensor<dtype, CUDA> tensor_silu(const Tensor<dtype, CUDA>& xt)
 }
 
 
+/*
+  GeLU activation (elementwise op).
+  gelu(x) = x * 0.5 * (1 + erf(x / sqrt(2)))
+  @param xt: input tensor
+*/
+template<PreciseFloatType dtype>
+static Tensor<dtype, CPU> tensor_gelu(const Tensor<dtype, CPU>& xt)
+{
+	// access the data arrays
+	Tensor<dtype, CPU> yt(xt.dim, xt.shape);
+	dtype* y_data = yt.buffer();
+	dtype* x_data = xt.buffer();
+
+	// reference implementation
+	// reliable (but slow)
+
+	const int length = xt.size();
+	for (int k = 0; k < length; ++k)
+	{
+		dtype x = x_data[k];
+		y_data[k] = x * (dtype)0.5 * ((dtype)1.0 + erf(x / sqrt((dtype)2.0)));
+	}
+
+	return yt;
+}
+
+
+template<FloatingPointType dtype>
+static Tensor<dtype, CUDA> tensor_gelu(const Tensor<dtype, CUDA>& xt)
+{
+	// access the data arrays
+	Tensor<dtype, CUDA> yt(xt.dim, xt.shape);
+
+	if constexpr (std::is_same_v<dtype, float32>)
+	{
+		cu_tensor_gelu_f32(xt, yt);
+	}
+	else
+	{
+		static_assert(std::is_same_v<dtype, float32>, "Unsupported data types");
+	}
+
+	return yt;
+}
+
 #endif  // __MATH_OPS__

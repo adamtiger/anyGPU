@@ -17,6 +17,7 @@ if __name__ == '__main__':
     # generate_layer_norm_fwd_f32(path, "test_layer_norm_fwd_f32")
     # generate_rms_norm_fwd_f32(path, "test_rms_norm_fwd_f32")
     # generate_silu_fwd_f32(path, "test_silu_fwd_f32")
+    generate_gelu_fwd_f32(path, "test_gelu_fwd_f32")
     # generate_embedding_fwd_f32(path, "test_embedding_fwd_f32")
     # generate_rotary_embedding_fwd_f32(path, "test_rotary_embedding_fwd_f32")
     # generate_alt_rotary_embedding_fwd_f32(path, "test_alt_rotary_embedding_fwd_f32")
@@ -24,4 +25,4 @@ if __name__ == '__main__':
     # generate_transpose_fwd_f32(path, "test_transpose_fwd_f32")
     # generate_concat_fwd_f32(path, "test_concat_fwd_f32")
 
-    generate_causal_conv1d_fwd_f32(path, "test_causal_conv1d_fwd_f32")
+    #generate_causal_conv1d_fwd_f32(path, "test_causal_conv1d_fwd_f32")
