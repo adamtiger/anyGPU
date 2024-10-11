@@ -93,6 +93,8 @@ def save_function_calc(func: any, ckp_folder: str, *inputs, **kwargs):
 
             if x.dtype == torch.long:  # long is not supported yet
                 x = x.to(dtype=torch.int32)
+            elif x.dtype == torch.bfloat16:
+                x = x.to(dtype=torch.float32)
 
             save_tensor(x, pjoin(ckp_folder, f"{nm}.dat"))
             others[f"{nm}_shape"] = x.size()
@@ -106,6 +108,8 @@ def save_function_calc(func: any, ckp_folder: str, *inputs, **kwargs):
 
             if x.dtype == torch.int64:  # (int64) long is not supported yet
                 x = x.to(dtype=torch.int32)
+            elif x.dtype == torch.bfloat16:
+                x = x.to(dtype=torch.float32)
 
             save_tensor(x, pjoin(ckp_folder, f"{nm}.dat"))
             others[f"{nm}_shape"] = x.size()
@@ -124,6 +128,12 @@ def save_function_calc(func: any, ckp_folder: str, *inputs, **kwargs):
     for i, y in enumerate(iterable_outputs):
         nm = f"out_{i}"
         if isinstance(y, torch.Tensor):
+
+            if y.dtype == torch.int64:  # (int64) long is not supported yet
+                y = y.to(dtype=torch.int32)
+            elif y.dtype == torch.bfloat16:
+                y = y.to(dtype=torch.float32)
+
             save_tensor(y, pjoin(ckp_folder, f"{nm}.dat"))
             others[f"{nm}_shape"] = y.size()
             others[f"{nm}_type"] = str(y.dtype)
