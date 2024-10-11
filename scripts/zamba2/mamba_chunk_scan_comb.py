@@ -6,11 +6,13 @@
     mamba_chunk_scan_combined function.
 """
 
+from dnninspect.tensor import save_tensor
 from dnninspect.tensor import load_tensor
 from os.path import join as pjoin
 from einops import rearrange, repeat
 import torch.nn.functional as F
 import torch
+import os
 
 
 """
@@ -241,6 +243,101 @@ def test_mamba_chunk_scan_combined():
     print(exp_out.flatten()[:10])
     print("Actual:")
     print(out.flatten()[:10])
+
+
+def _generate_mamba_chunk_scan_comb_test_case(
+    mamba_chunk_fld, 
+    batch,
+    seqlen,
+    nheads, 
+    headdim,
+    ngroups,
+    dstate,
+    chunk_size):
+
+    x = torch.randn(batch, seqlen, nheads, headdim, dtype=torch.float32)
+    dt = torch.randn(batch, seqlen, nheads, dtype=torch.float32)
+    A = torch.randn(nheads, dtype=torch.float32)
+    B = torch.randn(batch, seqlen, ngroups, dstate, dtype=torch.float32)
+    C = torch.randn(batch, seqlen, ngroups, dstate, dtype=torch.float32)
+    D = torch.randn(nheads, dtype=torch.float32)
+    dt_bias = torch.randn(nheads, dtype=torch.float32)
+
+    # execute the ground truth
+    from mamba_ssm.ops.triton.ssd_combined import mamba_chunk_scan_combined
+
+    y, last_state = mamba_chunk_scan_combined(
+        x,
+        dt,
+        A,
+        B, 
+        C,
+        chunk_size=chunk_size,
+        D=D,
+        z=None,
+        dt_bias=dt_bias,
+        dt_softplus=True,
+        seq_idx=None,
+        return_final_states=True
+    )
+
+    # saving results
+
+    save_tensor(x, pjoin(mamba_chunk_fld, 'x.dat'))
+    save_tensor(dt, pjoin(mamba_chunk_fld, 'dt.dat'))
+    save_tensor(A, pjoin(mamba_chunk_fld, 'A.dat'))
+    save_tensor(B, pjoin(mamba_chunk_fld, 'B.dat'))
+    save_tensor(C, pjoin(mamba_chunk_fld, 'C.dat'))
+    save_tensor(D, pjoin(mamba_chunk_fld, 'D.dat'))
+    save_tensor(dt_bias, pjoin(mamba_chunk_fld, 'dt_bias.dat'))
+    save_tensor(y, pjoin(mamba_chunk_fld, 'y.dat'))
+    save_tensor(last_state, pjoin(mamba_chunk_fld, 'last_state.dat'))
+
+
+def generate_mamba_chunk_scan_comb_test_case_1(path: str):
+
+    # parameters, sizes
+    batch = 1
+    seqlen = 345
+    nheads = 64 
+    headdim = 128
+    ngroups = 1
+    dstate = 64
+
+    chunk_size = 256
+
+    mamba_chunk_fld = pjoin(path, "mamba_chunk_sc_1") 
+    os.mkdir(mamba_chunk_fld)
+
+    _generate_mamba_chunk_scan_comb_test_case(
+        mamba_chunk_fld,
+        batch, seqlen, nheads, 
+        headdim, ngroups, dstate,
+        chunk_size
+    )
+
+
+def generate_mamba_chunk_scan_comb_test_case_2(path: str):
+
+    # parameters, sizes
+    batch = 1
+    seqlen = 200
+    nheads = 64 
+    headdim = 64
+    ngroups = 2
+    dstate = 128
+
+    chunk_size = 128
+
+    mamba_chunk_fld = pjoin(path, "mamba_chunk_sc_2") 
+    os.mkdir(mamba_chunk_fld)
+
+    _generate_mamba_chunk_scan_comb_test_case(
+        mamba_chunk_fld,
+        batch, seqlen, nheads, 
+        headdim, ngroups, dstate,
+        chunk_size
+    )
 
 
 if __name__ == '__main__':
