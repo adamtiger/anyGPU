@@ -62,7 +62,8 @@ int main()
 	//test_zamba2_glu();
 
 	//external_test_gemma2_decoder_mlp();
-	external_test_gemma2_decoder_rmsn();
+	//external_test_gemma2_decoder_rmsn();
+	external_test_gemma2_attention_rotary();
 
 	//run_vk_compute();
 
