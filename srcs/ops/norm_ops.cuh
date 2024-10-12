@@ -15,6 +15,7 @@ void cu_tensor_rms_norm_f32(
 	const Tensor<float32, CUDA>& xt,
 	const Tensor<float32, CUDA> wt,
 	const float32 eps,
+	const bool zero_centered,
 	Tensor<float32, CUDA>& yt);
 
 #endif  // __NORM_OPS_CUH__

@@ -61,7 +61,8 @@ int main()
 	//external_test_mamba2_layer_gated_rmsnorm();
 	//test_zamba2_glu();
 
-	external_test_gemma2_decoder_mlp();
+	//external_test_gemma2_decoder_mlp();
+	external_test_gemma2_decoder_rmsn();
 
 	//run_vk_compute();
 

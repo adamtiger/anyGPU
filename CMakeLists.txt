@@ -192,6 +192,8 @@ set (GEM2_SRCS
 
 set (GEM2_HEADERS
     ${GEM2_DIR}/gemma_mlp.hpp
+    ${GEM2_DIR}/gemma_decoder.hpp
+    ${GEM2_DIR}/gemma_sdpa.hpp
 )
 
 source_group("mgemma2" FILES ${GEM2_HEADERS} ${GEM2_SRCS})

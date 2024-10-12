@@ -136,7 +136,8 @@ static Tensor<dtype, CPU> tensor_rms_norm(
 	const Tensor<dtype, CPU>& xt,
 	const int32 axis,
 	const Tensor<dtype, CPU> wt,
-	const dtype eps)
+	const dtype eps,
+	const bool zero_centered=false)
 {
 	// check and modify axis if needed
 	int32 dim = xt.dim;
@@ -148,6 +149,8 @@ static Tensor<dtype, CPU> tensor_rms_norm(
 	dtype* y_data = yt.buffer();
 	dtype* x_data = xt.buffer();
 	dtype* w_data = wt.buffer();
+
+	dtype delta = (zero_centered ? (dtype)1.0 : (dtype)0.0);
 
 	// reference implementation
 	// reliable (but slow)
@@ -181,7 +184,7 @@ static Tensor<dtype, CPU> tensor_rms_norm(
 		for (int32 ix = 0; ix < norm_region_size; ++ix)
 		{
 			dtype x = x_data[region_mem_offs + ix];
-			dtype w = w_data[ix];
+			dtype w = w_data[ix] + delta;
 			dtype y = (x / sqrt(mean_sum_square + eps)) * w;
 			y_data[region_mem_offs + ix] = y;
 		}
@@ -196,7 +199,8 @@ static Tensor<dtype, CUDA> tensor_rms_norm(
 	const Tensor<dtype, CUDA>& xt,
 	const int32 axis,
 	const Tensor<dtype, CUDA> wt,
-	const dtype eps)
+	const dtype eps,
+	const bool zero_centered = false)
 {
 	// check and modify axis if needed
 	int32 dim = xt.dim;
@@ -213,7 +217,7 @@ static Tensor<dtype, CUDA> tensor_rms_norm(
 
 	if constexpr (std::is_same_v<dtype, float32>)
 	{
-		cu_tensor_rms_norm_f32(xt, wt, eps, yt);
+		cu_tensor_rms_norm_f32(xt, wt, eps, zero_centered, yt);
 	}
 	else
 	{

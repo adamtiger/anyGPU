@@ -110,6 +110,7 @@ __global__ void cu_tensor_rms_norm_f32_kernel(
 	const float32* dx,
 	const float32* dw,
 	const float32 eps,
+	const float32 delta,
 	float32* dy)
 {
 	// mapping the y block index and thread index to the parallel regions
@@ -149,7 +150,7 @@ __global__ void cu_tensor_rms_norm_f32_kernel(
 			if (x_rel_offs < norm_region_size)
 			{
 				float32 x = dx[gmem_base_offs + x_rel_offs];
-				float32 w = dw[x_rel_offs];
+				float32 w = dw[x_rel_offs] + delta;
 				float32 y = (x * rsqrtf(mean_sum_sqr + eps)) * w;
 				dy[gmem_base_offs + x_rel_offs] = y;
 			}
@@ -161,6 +162,7 @@ void cu_tensor_rms_norm_f32(
 	const Tensor<float32, CUDA>& xt,
 	const Tensor<float32, CUDA> wt,
 	const float32 eps,
+	const bool zero_centered,
 	Tensor<float32, CUDA>& yt)
 {
 	// calc kernel arguments
@@ -171,10 +173,12 @@ void cu_tensor_rms_norm_f32(
 	auto* dw = wt.buffer();
 	auto* dy = yt.buffer();
 
+	float32 delta = (zero_centered ? 1.f : 0.f);
+
 	// kernel lauch params
 	dim3 bs = { 32, 8, 1 };
 	dim3 gs = { 1, calc_req_num_blocks(num_norm_regions, bs.y), 1 };
 
-	cu_tensor_rms_norm_f32_kernel<<<gs, bs>>>(num_norm_regions, norm_region_size, dx, dw, eps, dy);
+	cu_tensor_rms_norm_f32_kernel<<<gs, bs>>>(num_norm_regions, norm_region_size, dx, dw, eps, delta, dy);
 	CUDA_CHECK_LAST_ERROR();
 }
