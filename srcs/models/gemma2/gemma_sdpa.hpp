@@ -73,7 +73,7 @@ static Tensor<dtype, CUDA> tensor_gemma_sdpa(  // Zamba2SdpaAttention
 	auto v_plv_t = tensor_transp(v_proj_view, 1, 2);
 
 
-	// rotary embedding
+	// rotary embedding (without the transpose, the core alt. rotary can be used)
 	auto freq = tensor_zamba_precomp_rotary_embedding<dtype>(position_ids, hdim, rope_base);
 	auto query_states = tensor_apply_zamba_rotary_embedding(q_plv_t, freq);
 	auto key_states = tensor_apply_zamba_rotary_embedding(k_plv_t, freq);

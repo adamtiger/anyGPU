@@ -24,6 +24,7 @@ void external_test_linear_fwd_f32();
 void external_test_transpose_fwd_f32();
 
 void external_test_concat_fwd_f32();
+void external_test_repeat_fwd_f32();
 
 void external_test_causal_conv1d_fwd_f32();
 

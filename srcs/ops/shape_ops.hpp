@@ -114,4 +114,72 @@ static Tensor<dtype, device> tensor_concat(const Tensor<dtype, device>& x1, cons
 	return y;
 }
 
+/*
+  Repeating the tensor elements along a given axis.
+  The axis has to be in the range of [0, dim-1].
+  Assumes contigous memory.
+*/
+template<ArithmeticType dtype, Device device>
+static Tensor<dtype, device> tensor_repeat(const Tensor<dtype, device>& xt, const int axis, const int nreps)
+{
+	ACASSERT(0 <= axis && axis < xt.dim, "axis is out of valid range");
+
+	int ydim = xt.dim;
+	Shape y_shape = xt.shape;
+	y_shape[axis] *= nreps;
+	Tensor<dtype, device> yt(ydim, y_shape);
+
+	dtype* xt_data = xt.buffer();
+	dtype* yt_data = yt.buffer();
+
+	// calculate a 2 dimensional version of the tensor at axis
+	// axis0 - will be for outer loop
+	// axis1 - represents the group elements to be repeated (inner loop)
+
+	int size_ax0 = 1;
+	for (int ix = 0; ix <= axis; ++ix)
+	{
+		size_ax0 *= xt.shape[ix];
+	}
+
+	int size_ax1 = 1;
+	for (int ix = axis + 1; ix < ydim; ++ix)
+	{
+		size_ax1 *= xt.shape[ix];
+	}
+
+	size_t x_rep_size = (size_t)size_ax1;
+	size_t y_rep_size = (size_t)nreps * x_rep_size;
+
+	for (int ox = 0; ox < size_ax0; ++ox)
+	{
+		for (int rx = 0; rx < nreps; ++rx)
+		{
+			if constexpr (device == CPU)
+			{
+				memcpy(
+					yt_data + ox * y_rep_size + rx * x_rep_size,
+					xt_data + ox * x_rep_size,
+					x_rep_size * sizeof(dtype)
+				);
+			}
+			else if constexpr (device == CUDA)
+			{
+				cudaMemcpy(
+					yt_data + ox * y_rep_size + rx * x_rep_size,
+					xt_data + ox * x_rep_size,
+					x_rep_size * sizeof(dtype),
+					cudaMemcpyDeviceToDevice
+				);
+			}
+			else
+			{
+				static_assert(device == CUDA, "unknown device");
+			}
+		}
+	}
+
+	return yt;
+}
+
 #endif  // __SHAPE_OPS__
