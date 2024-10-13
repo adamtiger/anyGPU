@@ -74,6 +74,46 @@ void external_test_gemma2_decoder_rmsn()
 }
 
 
+void external_test_gemma2_decoder_attention()
+{
+	auto path = artifact_folder_path / "test_gemma2decoder_attention";
+
+	// read tensors from files
+	auto h_hs = load_tensor((path / "in_hidden_states.dat").string());
+	auto h_atten_mask = load_tensor((path / "in_attention_mask_sliced.dat").string());
+	auto h_pos_ids = load_tensor<int32>((path / "in_position_ids.dat").string());
+	auto exp_hy = load_tensor((path / "out_0.dat").string());
+
+	GemmaSDPAweights<float32> sdpa_weights;
+	sdpa_weights.load_weights(
+		(path / "gemma2decoder_attention.gemma2sdpaattention.q_proj.weight.dat").string(),
+		(path / "gemma2decoder_attention.gemma2sdpaattention.k_proj.weight.dat").string(),
+		(path / "gemma2decoder_attention.gemma2sdpaattention.v_proj.weight.dat").string(),
+		(path / "gemma2decoder_attention.gemma2sdpaattention.o_proj.weight.dat").string()
+	);
+
+	GemmaKVcache kv_cache = {};
+
+	auto d_hs = h_hs.copy_to_cuda();
+	auto d_atten_mask = h_atten_mask.copy_to_cuda();
+	auto d_pos_ids = h_pos_ids.copy_to_cuda();
+	auto act_dy_cuda = tensor_gemma_sdpa(sdpa_weights, kv_cache, d_hs, d_atten_mask, d_pos_ids, 256, 10000);
+	auto act_hy_cuda = act_dy_cuda.copy_to_host();
+
+	// compare
+	auto cmp = [&](const Tensor<float32, CPU>& expected, const Tensor<float32, CPU>& actual)
+		{
+			bool eq = elementwise_compatible(expected, actual);  // checks the sizes
+			eq = eq && compare_data_buffers(actual, expected);
+			return eq;
+		};
+
+	// test cuda
+	bool eq = cmp(exp_hy, act_hy_cuda);
+	std::cout << "TestCase [external_test_gemma2_decoder_attention - CUDA]: " << (eq ? "PASSED" : "FAILED") << "\n";
+}
+
+
 void external_test_gemma2_attention_rotary()
 {
 	auto path = artifact_folder_path / "test_gemma2attention_calcrotary";

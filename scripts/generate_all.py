@@ -25,6 +25,14 @@ if __name__ == '__main__':
     # generate_linear_fwd_f32(path, "test_linear_fwd_f32")
     # generate_transpose_fwd_f32(path, "test_transpose_fwd_f32")
     # generate_concat_fwd_f32(path, "test_concat_fwd_f32")
-    generate_repeat_fwd_f32(path, "test_repeat_fwd_f32")
+    # generate_repeat_fwd_f32(path, "test_repeat_fwd_f32")
 
     #generate_causal_conv1d_fwd_f32(path, "test_causal_conv1d_fwd_f32")
+
+    from dnninspect.tensor import load_tensor
+    from dnninspect.tensor import save_tensor
+
+    attn_mask = load_tensor(r"C:\Data\AI\projects\anyGPU\artifacts\xgemma2_tests\test_gemma2decoder_attention\in_attention_mask.dat")
+    attn_mask_sliced = attn_mask[:, :, :, :9]
+    save_tensor(attn_mask_sliced, r"C:\Data\AI\projects\anyGPU\artifacts\xgemma2_tests\test_gemma2decoder_attention\in_attention_mask_sliced.dat")
+

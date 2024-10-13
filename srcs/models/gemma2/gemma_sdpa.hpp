@@ -58,11 +58,11 @@ static Tensor<dtype, CUDA> tensor_gemma_sdpa(  // Zamba2SdpaAttention
 
 	// change shape of q, k, v for attention module
 
-	int bsz = hidden_states.shape[0];
-	int q_len = hidden_states.shape[1];
-	int hsize_2 = hidden_states.shape[2];  // 2 * hidden_size
-	int num_heads = sdpa_weights.q_proj_weight.shape[0] / hdim;
-	int num_key_value_heads = sdpa_weights.k_proj_weight.shape[0] / hdim;
+	int bsz = q_proj.shape[0];
+	int q_len = q_proj.shape[1];
+	int hidden_size = q_proj.shape[2];
+	int num_heads = sdpa_weights.q_proj_weight.shape[1] / hdim;
+	int num_key_value_heads = sdpa_weights.k_proj_weight.shape[1] / hdim;
 
 	auto q_proj_view = tensor_view(q_proj, { bsz, q_len, num_heads, hdim });
 	auto k_proj_view = tensor_view(k_proj, { bsz, q_len, num_key_value_heads, hdim });
@@ -76,14 +76,17 @@ static Tensor<dtype, CUDA> tensor_gemma_sdpa(  // Zamba2SdpaAttention
 	// rotary embedding (without the transpose, the core alt. rotary can be used)
 	auto freq = tensor_zamba_precomp_rotary_embedding<dtype>(position_ids, hdim, rope_base);
 	auto query_states = tensor_apply_zamba_rotary_embedding(q_plv_t, freq);
-	auto key_states = tensor_apply_zamba_rotary_embedding(k_plv_t, freq);
+	auto key_states_emb = tensor_apply_zamba_rotary_embedding(k_plv_t, freq);
 
-	auto& value_states = v_plv_t;
+
+	// repeat_kv
+	auto key_states = tensor_repeat(key_states_emb, 1, 2);
+	auto value_states = tensor_repeat(v_plv_t, 1, 2);
 
 
 	// scaled dot product attention
 
-	dtype sfmx_scale = static_cast<dtype>(1.f / sqrtf(static_cast<float32>(query_states.shape[query_states.dim - 1]) / 2.f));
+	dtype sfmx_scale = (dtype)0.0625;//static_cast<dtype>(1.f / sqrtf(static_cast<float32>(query_states.shape[query_states.dim - 1]) / 2.f));
 
 	auto attn_out = sdp_attention_masked_scaled_fwd(
 		query_states,
@@ -97,7 +100,7 @@ static Tensor<dtype, CUDA> tensor_gemma_sdpa(  // Zamba2SdpaAttention
 	// output projection
 
 	auto attn_out_t = tensor_transp(attn_out, 1, 2);
-	auto attn_out_tv = tensor_view(attn_out_t, { bsz, q_len, hsize_2 });
+	auto attn_out_tv = tensor_view(attn_out_t, { bsz, q_len, hidden_size });
 	auto y = tensor_linear(attn_out_tv, sdpa_weights.o_proj_weight);
 
 	return y;

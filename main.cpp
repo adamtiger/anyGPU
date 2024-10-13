@@ -49,7 +49,7 @@ int main()
 	//external_test_transpose_fwd_f32();
 	//external_test_sdp_masked_scaled_fwd_f32();
 	//external_test_concat_fwd_f32();
-	external_test_repeat_fwd_f32();
+	//external_test_repeat_fwd_f32();
 	//external_test_causal_conv1d_fwd_f32();
 
 	//external_test_zamba2_model_rmsnorm();
@@ -63,7 +63,8 @@ int main()
 	//test_zamba2_glu();
 
 	//external_test_gemma2_decoder_mlp();
-	//external_test_gemma2_decoder_rmsn();
+	//external_test_gemma2_decoder_rmsn
+	external_test_gemma2_decoder_attention();
 	//external_test_gemma2_attention_rotary();
 	//external_test_gemma2_model_decoder();
 
