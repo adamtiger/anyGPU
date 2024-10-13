@@ -47,7 +47,8 @@ static Tensor<dtype, CUDA> tensor_gemma_sdpa(  // Zamba2SdpaAttention
 	const Tensor<dtype, CUDA>& attention_mask,
 	const Tensor<int32, CUDA>& position_ids,
 	const int hdim,
-	const int rope_base)
+	const int rope_base,
+	const dtype sfmx_scale)
 {
 	// projection of hidden states
 
@@ -83,22 +84,20 @@ static Tensor<dtype, CUDA> tensor_gemma_sdpa(  // Zamba2SdpaAttention
 	auto key_states = tensor_repeat(key_states_emb, 1, 2);
 	auto value_states = tensor_repeat(v_plv_t, 1, 2);
 
+	// slicing attention mask
+	auto attention_mask_sliced = tensor_slice(attention_mask, 3, 0, key_states.shape[2]);
 
 	// scaled dot product attention
-
-	dtype sfmx_scale = (dtype)0.0625;//static_cast<dtype>(1.f / sqrtf(static_cast<float32>(query_states.shape[query_states.dim - 1]) / 2.f));
-
 	auto attn_out = sdp_attention_masked_scaled_fwd(
 		query_states,
 		key_states,
 		value_states,
-		attention_mask,
+		attention_mask_sliced,
 		sfmx_scale
 	);
 
 
 	// output projection
-
 	auto attn_out_t = tensor_transp(attn_out, 1, 2);
 	auto attn_out_tv = tensor_view(attn_out_t, { bsz, q_len, hidden_size });
 	auto y = tensor_linear(attn_out_tv, sdpa_weights.o_proj_weight);

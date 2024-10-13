@@ -26,13 +26,20 @@ if __name__ == '__main__':
     # generate_transpose_fwd_f32(path, "test_transpose_fwd_f32")
     # generate_concat_fwd_f32(path, "test_concat_fwd_f32")
     # generate_repeat_fwd_f32(path, "test_repeat_fwd_f32")
+    # generate_slice_fwd_f32(path, "test_slice_fwd_f32")
 
     #generate_causal_conv1d_fwd_f32(path, "test_causal_conv1d_fwd_f32")
 
     from dnninspect.tensor import load_tensor
     from dnninspect.tensor import save_tensor
+    import torch
 
-    attn_mask = load_tensor(r"C:\Data\AI\projects\anyGPU\artifacts\xgemma2_tests\test_gemma2decoder_attention\in_attention_mask.dat")
-    attn_mask_sliced = attn_mask[:, :, :, :9]
-    save_tensor(attn_mask_sliced, r"C:\Data\AI\projects\anyGPU\artifacts\xgemma2_tests\test_gemma2decoder_attention\in_attention_mask_sliced.dat")
+    attn_mask = load_tensor(r"C:\Data\AI\projects\anyGPU\artifacts\xgemma2_tests\test_gemma2model_decoder\in_attention_mask.dat")
 
+    min_dtype = torch.finfo(torch.float32).min
+    sliding_window_mask = torch.tril(
+        torch.ones_like(attn_mask, dtype=torch.bool), diagonal=-4096
+    )
+    attention_mask = torch.where(sliding_window_mask, min_dtype, attn_mask)
+
+    save_tensor(attention_mask, r"C:\Data\AI\projects\anyGPU\artifacts\xgemma2_tests\test_gemma2model_decoder\in_attention_mask_sliced.dat")

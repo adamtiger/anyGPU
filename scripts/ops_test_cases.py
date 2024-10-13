@@ -387,3 +387,30 @@ def generate_repeat_fwd_f32(path: str, test_name: str):
 
     # print sample
     print(f"Generated: {test_name}")
+
+
+def generate_slice_fwd_f32(path: str, test_name: str):
+    """
+        Slice test.
+    
+        path: The path to a folder where the test case folder will be stored. 
+        test_name: The name of the folder.
+    """
+    # generate random inputs
+    batch, num_key_value_heads, slen, head_dim = (20, 4, 12, 256)
+    nreps = 3
+
+    tensor_size = (1, 1, 9, 41)
+    x = torch.randn(tensor_size, dtype=torch.float32)
+    y = x[:, :, :, :9]
+
+    # create test folders
+    test_fld_name = pjoin(path, test_name)
+    os.mkdir(test_fld_name)
+
+    # save tensors
+    save_tensor(x, pjoin(test_fld_name, "x.dat"))
+    save_tensor(y, pjoin(test_fld_name, "y.dat"))
+
+    # print sample
+    print(f"Generated: {test_name}")

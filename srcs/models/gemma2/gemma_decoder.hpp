@@ -67,7 +67,8 @@ static Tensor<dtype, CUDA> tensor_gemma_decoder(  // Gemma2DecoderLayer
 	const Tensor<int32, CUDA>& position_ids,
 	const int hdim,
 	const int rope_base,
-	const dtype rms_norm_eps)
+	const dtype rms_norm_eps,
+	const dtype sfmx_scale)
 { 
 	// rms norm + attention + rms norm
 
@@ -75,7 +76,8 @@ static Tensor<dtype, CUDA> tensor_gemma_decoder(  // Gemma2DecoderLayer
 		hidden_states,
 		-1,
 		decoder_weights.input_rmsnorm_weight,
-		rms_norm_eps);
+		rms_norm_eps,
+		true);
 
 	auto hidden_states_sdpa = tensor_gemma_sdpa(
 		decoder_weights.sdpa_weights,
@@ -84,13 +86,15 @@ static Tensor<dtype, CUDA> tensor_gemma_decoder(  // Gemma2DecoderLayer
 		attention_mask,
 		position_ids,
 		hdim,
-		rope_base);
+		rope_base,
+		sfmx_scale);
 
 	auto hidden_states_post_attn = tensor_rms_norm(
 		hidden_states_sdpa,
 		-1,
 		decoder_weights.post_attn_rmsnorm_weight,
-		rms_norm_eps);
+		rms_norm_eps,
+		true);
 
 	auto hidden_states_after = tensor_add(hidden_states, hidden_states_post_attn);
 
@@ -100,7 +104,8 @@ static Tensor<dtype, CUDA> tensor_gemma_decoder(  // Gemma2DecoderLayer
 		hidden_states_after,
 		-1,
 		decoder_weights.preff_rmsnorm_weight,
-		rms_norm_eps);
+		rms_norm_eps,
+		true);
 
 	auto hidden_states_mlp = tensor_gemma_mlp(
 		decoder_weights.mlp_weights,
@@ -110,7 +115,8 @@ static Tensor<dtype, CUDA> tensor_gemma_decoder(  // Gemma2DecoderLayer
 		hidden_states_mlp,
 		-1,
 		decoder_weights.postf_rmsnorm_weight,
-		rms_norm_eps);
+		rms_norm_eps,
+		true);
 
 	auto y = tensor_add(hidden_states_after, hidden_states_postf);
 

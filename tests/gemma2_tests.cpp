@@ -80,7 +80,7 @@ void external_test_gemma2_decoder_attention()
 
 	// read tensors from files
 	auto h_hs = load_tensor((path / "in_hidden_states.dat").string());
-	auto h_atten_mask = load_tensor((path / "in_attention_mask_sliced.dat").string());
+	auto h_atten_mask = load_tensor((path / "in_attention_mask.dat").string());
 	auto h_pos_ids = load_tensor<int32>((path / "in_position_ids.dat").string());
 	auto exp_hy = load_tensor((path / "out_0.dat").string());
 
@@ -97,7 +97,7 @@ void external_test_gemma2_decoder_attention()
 	auto d_hs = h_hs.copy_to_cuda();
 	auto d_atten_mask = h_atten_mask.copy_to_cuda();
 	auto d_pos_ids = h_pos_ids.copy_to_cuda();
-	auto act_dy_cuda = tensor_gemma_sdpa(sdpa_weights, kv_cache, d_hs, d_atten_mask, d_pos_ids, 256, 10000);
+	auto act_dy_cuda = tensor_gemma_sdpa(sdpa_weights, kv_cache, d_hs, d_atten_mask, d_pos_ids, 256, 10000, 0.0625f);
 	auto act_hy_cuda = act_dy_cuda.copy_to_host();
 
 	// compare
@@ -185,6 +185,7 @@ void external_test_gemma2_model_decoder()
 	const int hdim = 256;
 	const int rope_base = 10000;
 	float32 rms_norm_eps = 1e-6f;
+	float32 sfmx_scale = 0.0625f;
 
 	auto d_hidden_states = h_hidden_states.copy_to_cuda();
 	auto d_attn_mask = h_attn_mask.copy_to_cuda();
@@ -198,7 +199,8 @@ void external_test_gemma2_model_decoder()
 		d_pos_ids,
 		hdim,
 		rope_base,
-		rms_norm_eps
+		rms_norm_eps,
+		sfmx_scale
 	);
 
 	auto act_hy_cuda = act_dy_cuda.copy_to_host();

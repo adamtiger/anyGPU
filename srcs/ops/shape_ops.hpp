@@ -182,4 +182,75 @@ static Tensor<dtype, device> tensor_repeat(const Tensor<dtype, device>& xt, cons
 	return yt;
 }
 
+/*
+  Slicing the tensor along a given axis
+  The axis has to be in the range of [0, dim-1].
+  Assumes contigous memory.
+*/
+template<ArithmeticType dtype, Device device>
+static Tensor<dtype, device> tensor_slice(
+	const Tensor<dtype, device>& xt, 
+	const int axis, 
+	const int low,   // inclusive
+	const int high)  // exclusive
+{
+	ACASSERT(0 <= axis && axis < xt.dim, "axis is out of valid range");
+
+	int ydim = xt.dim;
+	Shape y_shape = xt.shape;
+	y_shape[axis] = (high - low);
+	Tensor<dtype, device> yt(ydim, y_shape);
+
+	dtype* xt_data = xt.buffer();
+	dtype* yt_data = yt.buffer();
+
+	// calculate a 2 dimensional version of the tensor at axis
+	// axis0 - will be for outer loop
+	// axis1 - represents the group elements to be repeated (inner loop)
+
+	int size_ax0 = 1;
+	for (int ix = 0; ix < axis; ++ix)
+	{
+		size_ax0 *= xt.shape[ix];
+	}
+
+	int size_ax1 = 1;
+	for (int ix = axis + 1; ix < ydim; ++ix)
+	{
+		size_ax1 *= xt.shape[ix];
+	}
+
+	size_t x_low_offset = (size_t)(size_ax1 * low);
+	size_t x_slice_size = (size_t)(size_ax1 * (high - low)) * sizeof(dtype);
+	size_t x_stride = (size_t)(size_ax1 * xt.shape[axis]);
+	size_t y_stride = (size_t)(size_ax1 * yt.shape[axis]);
+
+	for (int ox = 0; ox < size_ax0; ++ox)
+	{
+		if constexpr (device == CPU)
+		{
+			memcpy(
+				yt_data + ox * y_stride,
+				xt_data + ox * x_stride + x_low_offset,
+				x_slice_size
+			);
+		}
+		else if constexpr (device == CUDA)
+		{
+			cudaMemcpy(
+				yt_data + ox * y_stride,
+				xt_data + ox * x_stride + x_low_offset,
+				x_slice_size,
+				cudaMemcpyDeviceToDevice
+			);
+		}
+		else
+		{
+			static_assert(device == CUDA, "unknown device");
+		}
+	}
+
+	return yt;
+}
+
 #endif  // __SHAPE_OPS__
