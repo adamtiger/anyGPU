@@ -124,6 +124,8 @@ def save_function_calc(func: any, ckp_folder: str, *inputs, **kwargs):
     iterable_outputs = outputs
     if isinstance(outputs, torch.Tensor):
         iterable_outputs = [outputs]  # create a list from it
+    elif type(outputs) is dict:
+        iterable_outputs = outputs.values()
 
     for i, y in enumerate(iterable_outputs):
         nm = f"out_{i}"
