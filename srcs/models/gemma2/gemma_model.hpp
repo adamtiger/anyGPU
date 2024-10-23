@@ -29,28 +29,20 @@ static Tensor<dtype, CUDA> tensor_gemma_model(  // Gemma2Model
 	const Tensor<int32, CUDA>& input_ids,
 	const Tensor<dtype, CUDA>& attention_mask,
 	const Tensor<int32, CUDA>& position_ids,
-	const int hdim,  // TODO: are these the same for all the decoder layers?
+	const int hdim,
+	const int hidden_size,
 	const int rope_base,
 	const dtype rms_norm_eps,
 	const dtype sfmx_scale)
 {
-	// TODO: set ouput_attentions and output_hidden_states (how it is happening?)
-
 	// embed the input ids (calculated from tokenizer)
 	auto inp_embeds = tensor_embedding(input_ids, model_weights.embedding_data);
-
-
-	// TODO: kv_cache creation if not exists (is it created here?)
-
-	// TODO: cache_position creation if not exists (???)
-
-	// TODO: position ids creation if not exists (???)
 
 	// TODO: update_causal mask (can require implementation)
 
 
 	// normalize hidden states
-	dtype norm_factor = 1.0;  // TODO: calculate this! can require a config param (should config params be a separate struct?)
+	dtype norm_factor = static_cast<dtype>(powf(static_cast<float32>(hidden_size), 0.5f));
 	auto hidden_states = tensor_mul(inp_embeds, norm_factor);
 
 	// execute the decoder layers (one after each other)

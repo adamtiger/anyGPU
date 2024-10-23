@@ -78,7 +78,7 @@ def save_torch_module_weights(m: nn.Module, weight_folder: str, prefix: str = No
         save_tensor(pm, pjoin(weight_folder, f"{nm}.dat"))
 
 
-def save_function_calc(func: any, ckp_folder: str, *inputs, **kwargs):
+def save_function_calc(func: any, ckp_folder: str, dict_out: bool, *inputs, **kwargs):
     """
     Saves the inputs and outputs of the function call.
         ckp_folder: the folder to save the model weights in
@@ -124,7 +124,7 @@ def save_function_calc(func: any, ckp_folder: str, *inputs, **kwargs):
     iterable_outputs = outputs
     if isinstance(outputs, torch.Tensor):
         iterable_outputs = [outputs]  # create a list from it
-    elif type(outputs) is dict:
+    elif dict_out:
         iterable_outputs = outputs.values()
 
     for i, y in enumerate(iterable_outputs):
@@ -148,14 +148,14 @@ def save_function_calc(func: any, ckp_folder: str, *inputs, **kwargs):
     return outputs
 
 
-def save_torch_module_calc(m: nn.Module, ckp_folder: str, *inputs, **kwargs):
+def save_torch_module_calc(m: nn.Module, ckp_folder: str, dict_out: bool, *inputs, **kwargs):
     """
     Saves the inputs and outputs of the module call (forward function).
         ckp_folder: the folder to save the model weights in
         *inputs: inputs enlisted
         **kwargs: key-value named arguments enlisted
     """
-    return save_function_calc(m.forward, ckp_folder, *inputs, **kwargs)
+    return save_function_calc(m.forward, ckp_folder, dict_out, *inputs, **kwargs)
 
 
 def set_inspection_output_folder(path: str):
@@ -167,7 +167,7 @@ def set_inspection_output_folder(path: str):
     path_inspection_output_folder = path
 
 
-def inspect_torch_module(m: nn.Module, name: str) -> any:
+def inspect_torch_module(m: nn.Module, name: str, dict_out: bool = False) -> any:
     """
     Inspects a torch module. Returns a module executor function
     therefore the inspection and execution can be done in a single line.
@@ -197,7 +197,7 @@ def inspect_torch_module(m: nn.Module, name: str) -> any:
     def execute_module(*inputs, **kwargs):
         y = None
         if save_module_data:
-            y = save_torch_module_calc(m, io_ckpt_path, *inputs, **kwargs)
+            y = save_torch_module_calc(m, io_ckpt_path, dict_out, *inputs, **kwargs)
         else:
             y = m.forward(*inputs, **kwargs)
         return y
@@ -245,7 +245,7 @@ def inspect_torch_tensor(t: torch.Tensor, location: str, name: str) -> any:
             json.dump(m_info, js)
 
 
-def inspect_function(func: any, name: str) -> any:
+def inspect_function(func: any, name: str, dict_out: bool = False) -> any:
     """
     Inspects a function. Returns a function executor function
     therefore the inspection and execution can be done in a single line.
@@ -262,7 +262,7 @@ def inspect_function(func: any, name: str) -> any:
     def execute_module(*inputs, **kwargs):
         y = None
         if save_function_call_data:
-            y = save_function_calc(func, output_path, *inputs, **kwargs)
+            y = save_function_calc(func, output_path, dict_out, *inputs, **kwargs)
         else:
             y = func(*inputs, **kwargs)
         return y
