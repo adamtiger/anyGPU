@@ -7,6 +7,7 @@
 
 #include "gemma_mlp.hpp"
 #include "gemma_decoder.hpp"
+#include "gemma_model.hpp"
 #include "zamba_rotary.hpp"
 
 
@@ -217,3 +218,4 @@ void external_test_gemma2_model_decoder()
 	bool eq = cmp(exp_hy, act_hy_cuda);
 	std::cout << "TestCase [external_test_gemma2_model_decoder - CUDA]: " << (eq ? "PASSED" : "FAILED") << "\n";
 }
+

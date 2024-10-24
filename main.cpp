@@ -65,7 +65,7 @@ int main()
 
 	//external_test_gemma2_decoder_mlp();
 	//external_test_gemma2_decoder_rmsn
-	external_test_gemma2_decoder_attention();
+	//external_test_gemma2_decoder_attention();
 	//external_test_gemma2_attention_rotary();
 	external_test_gemma2_model_decoder();
 

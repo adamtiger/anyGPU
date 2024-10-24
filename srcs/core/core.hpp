@@ -6,12 +6,14 @@
 #include <array>
 #include <functional>
 #include <algorithm>
+#include <filesystem>
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <sstream>
 #include <cassert>
 #include <cmath>
+#include <regex>
 
 #ifdef __INTELLISENSE__  // to have intellisense help for wmma, threadIdx etc.
 #define __CUDACC__
