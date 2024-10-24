@@ -174,7 +174,7 @@ static Tensor<dtype, CUDA> tensor_gemma_model(  // Gemma2Model
 	// embed the input ids (calculated from tokenizer)
 	auto inp_embeds = tensor_embedding(input_ids, model_weights.embedding_data);
 
-	// TODO: update_causal mask (can require implementation)
+	// TODO: update_causal mask (requires implementation!)
 
 
 	// normalize hidden states

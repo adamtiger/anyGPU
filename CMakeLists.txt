@@ -195,6 +195,7 @@ set (GEM2_HEADERS
     ${GEM2_DIR}/gemma_decoder.hpp
     ${GEM2_DIR}/gemma_sdpa.hpp
     ${GEM2_DIR}/gemma_model.hpp
+    ${GEM2_DIR}/gemma_causallm.hpp
 )
 
 source_group("mgemma2" FILES ${GEM2_HEADERS} ${GEM2_SRCS})
