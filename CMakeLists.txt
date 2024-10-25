@@ -189,6 +189,7 @@ source_group("mzamba2" FILES ${ZAM2_HEADERS} ${ZAM2_SRCS})
 set(GEM2_DIR ${ANYGPU_ROOT}/srcs/models/gemma2)
 
 set (GEM2_SRCS
+    ${GEM2_DIR}/gemma_linsoftcap.cu
 )
 
 set (GEM2_HEADERS
@@ -197,6 +198,8 @@ set (GEM2_HEADERS
     ${GEM2_DIR}/gemma_sdpa.hpp
     ${GEM2_DIR}/gemma_model.hpp
     ${GEM2_DIR}/gemma_causallm.hpp
+    ${GEM2_DIR}/gemma_linsoftcap.cuh
+    ${GEM2_DIR}/gemma_linsoftcap.hpp
 )
 
 source_group("mgemma2" FILES ${GEM2_HEADERS} ${GEM2_SRCS})

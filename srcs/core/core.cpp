@@ -159,9 +159,9 @@ int GlobalUUIDGenerator::generate_id()
 }
 
 
-int calc_default_size(const std::vector<int>& shape)
+int64 calc_default_size(const std::vector<int>& shape)
 {
-	int tensor_size = 1;
+	int64 tensor_size = 1;
 	for (int s : shape)
 	{
 		tensor_size *= s;
@@ -169,9 +169,9 @@ int calc_default_size(const std::vector<int>& shape)
 	return tensor_size;
 }
 
-int calc_default_size(const int dim, const DimArray& shape)
+int64 calc_default_size(const int dim, const DimArray& shape)
 {
-	int tensor_size = 1;
+	int64 tensor_size = 1;
 	for (int dix = 0; dix < dim; ++dix)
 	{
 		tensor_size *= shape[dix];

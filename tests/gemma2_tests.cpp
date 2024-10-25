@@ -8,6 +8,8 @@
 #include "gemma_mlp.hpp"
 #include "gemma_decoder.hpp"
 #include "gemma_model.hpp"
+#include "gemma_causallm.hpp"
+#include "gemma_linsoftcap.hpp"
 #include "zamba_rotary.hpp"
 
 
@@ -219,3 +221,31 @@ void external_test_gemma2_model_decoder()
 	std::cout << "TestCase [external_test_gemma2_model_decoder - CUDA]: " << (eq ? "PASSED" : "FAILED") << "\n";
 }
 
+
+void external_test_gemma2_lmhead_softcap()
+{
+	auto path = artifact_folder_path / "test_gemma2_lmhead_softcap";
+
+	// read tensors from files
+	// hw is tied to the embedding weights
+	auto hx = load_tensor((path / "in_0.dat").string());
+	auto hw = load_tensor((path / "gemma2_causal_lm.gemma2forcausallm.model.embed_tokens.weight.dat").string());
+	auto exp_hy = load_tensor((path / "out_0.dat").string());
+
+	auto dx = hx.copy_to_cuda();
+	auto dw = hw.copy_to_cuda();
+	auto act_dy_cuda = tensor_gemma_linear_softcap(dx, dw, 30.f);
+	auto act_hy_cuda = act_dy_cuda.copy_to_host();
+
+	// compare
+	auto cmp = [&](const Tensor<float32, CPU>& expected, const Tensor<float32, CPU>& actual)
+		{
+			bool eq = elementwise_compatible(expected, actual);  // checks the sizes
+			eq = eq && compare_data_buffers(actual, expected);
+			return eq;
+		};
+
+	// test cuda
+	bool eq = cmp(exp_hy, act_hy_cuda);
+	std::cout << "TestCase [external_test_gemma2_lmhead_softcap - CUDA]: " << (eq ? "PASSED" : "FAILED") << "\n";
+}

@@ -64,10 +64,21 @@ static Tensor<T, CPU> load_tensor(const std::string& file_path)
         ACASSERT(dtype == 2, "Data type in tensor data file expected to be int32");
     }
 
-	// read the data
-	int num_elements = calc_default_size(shape);
-	std::vector<T> tensor_data(num_elements);
-	tensor_file.read(reinterpret_cast<char*>(tensor_data.data()), sizeof(T) * num_elements);
+	// read the data into a tensor
+	Tensor<T, CPU> tensor(shape);
+
+	int64 num_elements = calc_default_size(shape);
+	size_t data_size = sizeof(T) * num_elements;
+	size_t block_size = sizeof(T) * 2e6;
+
+	//   read the data in chunks
+	int64 offset = 0;
+	while (offset < data_size)
+	{
+		size_t chunk_size = std::min(block_size, (size_t)((int64)data_size - offset));
+		tensor_file.read(reinterpret_cast<char*>(tensor.buffer()) + offset, chunk_size);
+		offset += chunk_size;
+	}
 
 	if (!tensor_file)
 	{
@@ -75,7 +86,6 @@ static Tensor<T, CPU> load_tensor(const std::string& file_path)
 		log_error(msg.c_str());
 	}
 
-	Tensor<T, CPU> tensor(shape, tensor_data);
 	return tensor;
 }
 

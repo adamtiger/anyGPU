@@ -20,11 +20,11 @@ template<Device device>
 struct MemoryBuffer
 {
 	int id;
-	int capacity;
+	int64 capacity;
 	char* buffer;
 
 	explicit MemoryBuffer();
-	explicit MemoryBuffer(const int capacity);
+	explicit MemoryBuffer(const int64 capacity);
 	explicit MemoryBuffer(const int data_bit_size, const std::vector<int>& shape);
 	explicit MemoryBuffer(const int data_bit_size, const int dim, const Shape& shape);
 	~MemoryBuffer();
@@ -38,14 +38,14 @@ MemoryBuffer<device>::MemoryBuffer() : capacity(0)
 }
 
 template<Device device>
-MemoryBuffer<device>::MemoryBuffer(const int capacity) : capacity(capacity)
+MemoryBuffer<device>::MemoryBuffer(const int64 capacity) : capacity(capacity)
 {
 	id = GlobalUUIDGenerator::generate_id();
 	buffer = nullptr;
 
 	if constexpr (device == Device::CPU)
 	{
-		int n_align = (capacity >> ALIGNMENT_EXP);
+		int64 n_align = (capacity >> ALIGNMENT_EXP);
 		n_align += ((capacity & (ALIGNMENT_SIZE - 1)) == 0 ? 0 : 1);
 		auto* temp = new AlignedType[n_align];
 		buffer = reinterpret_cast<char*>(temp);
@@ -63,7 +63,7 @@ MemoryBuffer<device>::MemoryBuffer(const int data_bit_size, const std::vector<in
 {
 	id = GlobalUUIDGenerator::generate_id();
 
-	int bitsize = calc_default_size(shape) * data_bit_size;
+	int64 bitsize = calc_default_size(shape) * data_bit_size;
 	capacity = (bitsize >> BYTE_EXP);
 	capacity += ((bitsize & (BYTE_SIZE - 1)) == 0 ? 0 : 1);
 
@@ -71,7 +71,7 @@ MemoryBuffer<device>::MemoryBuffer(const int data_bit_size, const std::vector<in
 
 	if constexpr (device == Device::CPU)
 	{
-		int n_align = (capacity >> ALIGNMENT_EXP);
+		int64 n_align = (capacity >> ALIGNMENT_EXP);
 		n_align += ((capacity & (ALIGNMENT_SIZE - 1)) == 0 ? 0 : 1);
 		auto* temp = new AlignedType[n_align];
 		buffer = reinterpret_cast<char*>(temp);
@@ -89,13 +89,13 @@ MemoryBuffer<device>::MemoryBuffer(const int data_bit_size, const int dim, const
 {
 	id = GlobalUUIDGenerator::generate_id();
 
-	int bitsize = calc_default_size(dim, shape) * data_bit_size;
+	int64 bitsize = calc_default_size(dim, shape) * data_bit_size;
 	capacity = (bitsize >> BYTE_EXP);
 	capacity += ((bitsize & (BYTE_SIZE - 1)) == 0 ? 0 : 1);
 
 	if constexpr (device == Device::CPU)
 	{
-		int n_align = (capacity >> ALIGNMENT_EXP);
+		int64 n_align = (capacity >> ALIGNMENT_EXP);
 		n_align += ((capacity & (ALIGNMENT_SIZE - 1)) == 0 ? 0 : 1);
 		auto* temp = new AlignedType[n_align];
 		buffer = reinterpret_cast<char*>(temp);
@@ -185,7 +185,7 @@ struct Tensor
 	}
 
 	// total size of the underlying memory (bytes)
-	int capacity() const
+	int64 capacity() const
 	{
 		return mem_buffer->capacity;
 	}
@@ -224,7 +224,7 @@ struct Tensor
 		alignment = 1;
 	}
 
-	explicit Tensor(const int capacity)
+	explicit Tensor(const int64 capacity)
 	{
 		id = GlobalUUIDGenerator::generate_id();
 		dim = 0;
@@ -333,7 +333,7 @@ Tensor<dtype, device>::Tensor(const std::vector<int>& shape, const std::vector<d
 template<typename dtype, Device device>
 Tensor<dtype, CPU> Tensor<dtype, device>::copy_to_host() const
 {
-	int capacity = this->mem_buffer->capacity;
+	int64 capacity = this->mem_buffer->capacity;
 
 	Tensor<dtype, CPU> tensor(capacity);
 	tensor.dim = this->dim;
@@ -359,7 +359,7 @@ Tensor<dtype, CPU> Tensor<dtype, device>::copy_to_host() const
 template<typename dtype, Device device>
 Tensor<dtype, CUDA> Tensor<dtype, device>::copy_to_cuda() const
 {
-	int capacity = this->mem_buffer->capacity;
+	int64 capacity = this->mem_buffer->capacity;
 
 	Tensor<dtype, CUDA> tensor(capacity);
 	tensor.dim = this->dim;

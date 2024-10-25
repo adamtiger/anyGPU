@@ -68,8 +68,9 @@ int main()
 	//external_test_gemma2_decoder_attention();
 	//external_test_gemma2_attention_rotary();
 	//external_test_gemma2_model_decoder();
+	external_test_gemma2_lmhead_softcap();
 
-	run_vk_compute();
+	//run_vk_compute();
 
 	/* performance measurement (cuda) */
 

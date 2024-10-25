@@ -76,6 +76,7 @@ static int bytesize_of_datatypes[] = {
 using int8 = char;
 using int16 = short signed int;
 using int32 = signed int;
+using int64 = long long;
 using bfloat16 = nv_bfloat16;
 using float16 = half;
 using float32 = float;
@@ -317,14 +318,14 @@ struct alignas(ALIGNMENT_SIZE) AlignedType
   this function returns the number of elements in the tensor.
   Default alignment means the byte size of 1 tensor element.
 */
-int calc_default_size(const std::vector<int>& shape);
+int64 calc_default_size(const std::vector<int>& shape);
 
 /*
   If the alignment is the default for the given data type,
   this function returns the number of elements in the tensor.
   Default alignment means the byte size of 1 tensor element.
 */
-int calc_default_size(const int dim, const DimArray& shape);
+int64 calc_default_size(const int dim, const DimArray& shape);
 
 /*
   Calculates the default stride from the given shape.
