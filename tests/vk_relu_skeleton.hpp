@@ -3,6 +3,7 @@
 
 #include <vulkan/vulkan.h>
 #include <vector>
+#include <string>
 
 struct Context
 {
@@ -37,6 +38,9 @@ int findMemoryProperties(
 	uint32_t memoryTypeBitsRequirement,
 	VkMemoryPropertyFlags requiredProperties
 );
+
+std::vector<char> load_shader_file(
+	const std::string& path_to_shader);
 
 VTensor create_tensor(
 	const Context& ctx, 

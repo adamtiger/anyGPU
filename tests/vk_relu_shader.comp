@@ -1,0 +1,26 @@
+#version 450
+
+layout(std430, set = 0, binding = 0) buffer inbuffer 
+{
+    float idata[];
+}inpData;
+
+layout (local_size_x = 32) in;
+
+layout(std430, set = 0, binding = 1) buffer obuffer 
+{
+    float odata[];
+}outData;
+
+void main() {
+    int index = int(gl_GlobalInvocationID.x);
+    if(index >= 8)
+        return;
+	
+	float v = inpData.idata[index];
+	if (v < 0.0) {
+	    v = 0.0;
+	}
+	
+	outData.odata[index] = v;
+}

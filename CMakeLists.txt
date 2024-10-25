@@ -103,6 +103,7 @@ set (TEST_HEADERS
     ${TEST_DIR}/ext_torch_tests.hpp
 	${TEST_DIR}/performance.hpp
 	${TEST_DIR}/vk_relu_skeleton.hpp
+    ${TEST_DIR}/vk_relu_shader.comp
 )
 
 source_group("tests" FILES ${TEST_HEADERS} ${TEST_SRCS})

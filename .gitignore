@@ -11,6 +11,9 @@ build/**
 *.cubin
 *.fatbin
 
+# vulkan SPIR-V 
+*.spv
+
 # Python related
 **/__pycache__/*
 *.egg-info*

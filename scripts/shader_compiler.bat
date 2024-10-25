@@ -1,0 +1,1 @@
+C:/VulkanSDK/1.3.268.0/Bin/glslc.exe ../tests/vk_relu_shader.comp -o ../shaders/vk_relu_shader.comp.spv

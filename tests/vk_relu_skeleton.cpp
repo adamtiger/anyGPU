@@ -1,6 +1,7 @@
 #include "vk_relu_skeleton.hpp"
 
 #include <iostream>
+#include <fstream>
 #include <sstream>
 
 
@@ -179,6 +180,19 @@ int findMemoryProperties(
 	return -1;
 }
 
+std::vector<char> load_shader_file(const std::string& path_to_shader)
+{
+	std::ifstream shader_file(path_to_shader, std::ios::ate | std::ios::binary);
+
+	size_t file_size = (size_t)shader_file.tellg();  // opened as 'append to the end'
+	std::vector<char> buffer(file_size);
+	shader_file.seekg(0);
+	shader_file.read(buffer.data(), file_size);
+	shader_file.close();
+
+	return buffer;
+}
+
 VTensor create_tensor(
 	const Context& ctx, 
 	const std::vector<int>& shape, 
@@ -255,6 +269,8 @@ std::vector<float> copy_tensor_data_to_host(const Context& ctx, const VTensor& t
 		data[iidx] = ph_data[iidx];
 	}
 	vkUnmapMemory(ctx.device, tensor.memory);
+
+	return data;
 }
 
 void calculate_relu(const Context& ctx, const VTensor& x, VTensor& y)
@@ -366,10 +382,11 @@ void calculate_relu(const Context& ctx, const VTensor& x, VTensor& y)
 	VkPipelineLayout pipeline_layout;
 	vkCreatePipelineLayout(ctx.device, &pipeline_layout_ci, 0, &pipeline_layout);
 
+	std::vector<char> shader_code = load_shader_file("C:\\Data\\AI\\projects\\anyGPU\\shaders\\vk_relu_shader.comp.spv");
 	VkShaderModuleCreateInfo shader_mod_ci = {};
 	shader_mod_ci.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-	shader_mod_ci.codeSize = 0;  // TODO: read these with specified function
-	shader_mod_ci.pCode = 0;
+	shader_mod_ci.codeSize = shader_code.size();
+	shader_mod_ci.pCode = reinterpret_cast<uint32_t*>(shader_code.data());
 
 	VkShaderModule shader_module;
 	vkCreateShaderModule(ctx.device, &shader_mod_ci, 0, &shader_module);
@@ -451,14 +468,14 @@ void calculate_relu(const Context& ctx, const VTensor& x, VTensor& y)
 	vkCreateFence(ctx.device, &fence_info, 0, &fence);
 
 	CHECK_RESULT(vkQueueSubmit(queue, 1, &submit_info, fence));
-	CHECK_RESULT(vkWaitForFences(ctx.device, 1, &fence, VK_TRUE, 1000000000));
+	CHECK_RESULT(vkWaitForFences(ctx.device, 1, &fence, VK_TRUE, 100000000));  // nanoseconds
 }
 
 
 void destroy_context(Context& ctx)
 {
+	// TODO: destroy elements
 	vkDestroyDevice(ctx.device, 0);
-	
 }
 
 
@@ -467,7 +484,7 @@ void run_vk_compute()
 {
 	Context ctx;
 
-	// verions
+	// versions
 	infer_vk_loader_version(ctx);
 	print_vk_loader_version(ctx);
 
@@ -477,7 +494,17 @@ void run_vk_compute()
 	select_physical_device(ctx);
 	create_logical_device(ctx);
 
+	// calculate relu
+	auto x = create_tensor(ctx, { 2, 4 }, { 2.f, -2.f, 1.f, -3.f, 0.f, 4.f, 5.f, -7.f });
+	auto y = create_tensor(ctx, { 2, 4 }, { 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f });
 
+	calculate_relu(ctx, x, y);
+
+	auto result = copy_tensor_data_to_host(ctx, y);
+	for (float r : result)
+	{
+		std::cout << r << std::endl;
+	}
 
 	// clean up
 	destroy_context(ctx);
