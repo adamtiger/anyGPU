@@ -7,6 +7,7 @@
 #include "ops.hpp"
 
 #include "gemma_model.hpp"
+#include "gemma_linsoftcap.hpp"
 
 
 template<FloatingPointType dtype>
@@ -36,9 +37,10 @@ static Tensor<dtype, CUDA> tensor_gemma_causallm(  // Gemma2ForCausalLM
 	const int hidden_size,
 	const int rope_base,
 	const dtype rms_norm_eps,
-	const dtype sfmx_scale)
+	const dtype sfmx_scale, 
+	const dtype final_softcapping)
 {
-	// TODO: execute model
+	// execute model
 	auto hidden_states = tensor_gemma_model(
 		model_weights.gemma_model,
 		kv_cache, 
@@ -52,13 +54,13 @@ static Tensor<dtype, CUDA> tensor_gemma_causallm(  // Gemma2ForCausalLM
 		sfmx_scale
 	);
 
-	// TODO: execute lm_head on sliced hidden_state
+	// lm_head (slicing can save computation)
+	auto yt = tensor_gemma_linear_softcap(
+		hidden_states, 
+		model_weights.get_lm_head_weight(), 
+		final_softcapping);
 
-
-	// TODO: calculate logits with soft capping (is this necessary?)
-
-
-	return {};
+	return yt;
 }
 
 #endif // __GEMMA_CAUSAL_LM__
