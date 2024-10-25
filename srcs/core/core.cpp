@@ -1,18 +1,18 @@
 #include "core.hpp"
 
-bool equal(const int dim, const DimArray& lhs, const DimArray& rhs)
+bool equal(const int64 dim, const DimArray& lhs, const DimArray& rhs)
 {
 	bool eq = true;
-	for (int idx = 0; idx < dim; ++idx)
+	for (int64 idx = 0; idx < dim; ++idx)
 	{
 		eq = eq && (lhs[idx] == rhs[idx]);
 	}
 	return eq;
 }
 
-void increment_index(const int dim, const Shape& shape, Index& index)
+void increment_index(const int64 dim, const Shape& shape, Index& index)
 {
-	for (int dix = dim - 1; dix >= 0; --dix)
+	for (int64 dix = dim - 1; dix >= 0; --dix)
 	{
 		if (index[dix] >= shape[dix] - 1)
 		{
@@ -26,10 +26,10 @@ void increment_index(const int dim, const Shape& shape, Index& index)
 	}
 }
 
-int calculate_offset(const int dim, const Stride& strides, const Index& index)
+int64 calculate_offset(const int64 dim, const Stride& strides, const Index& index)
 {
-	int offset = 0;
-	for (int ix = 0; ix < dim; ++ix)
+	int64 offset = 0;
+	for (int64 ix = 0; ix < dim; ++ix)
 	{
 		offset += strides[ix] * index[ix];
 	}
@@ -43,6 +43,7 @@ std::string represent_datatype(const DataType dtype)
 		"INT8",
 	    "INT16",
 	    "INT32",
+		"INT64",
 	    "BFLOAT16",
 	    "FLOAT16",
 	    "FLOAT32",
@@ -51,7 +52,7 @@ std::string represent_datatype(const DataType dtype)
 		"FP8E5M2"
 	};
 
-	ACASSERT((int)dtype < 9, "Unknown data type");
+	ACASSERT((int)dtype < 10, "Unknown data type");
 
 	return names[(unsigned int)dtype];
 }
@@ -81,12 +82,12 @@ std::ostream& operator<<(std::ostream& os, const Device device)
 	return os;
 }
 
-std::string represent_array(const int dim, const DimArray& arr)
+std::string represent_array(const int64 dim, const DimArray& arr)
 {
 	std::stringstream ss;
 
 	ss << "[";
-	for (int ix = 0; ix < dim - 1; ++ix)
+	for (int64 ix = 0; ix < dim - 1; ++ix)
 	{
 		ss << arr[ix] << ", ";
 	}
@@ -149,17 +150,17 @@ std::string print_cuda_device_props()
 }
 
 
-int GlobalUUIDGenerator::next_id = 0;
+int64 GlobalUUIDGenerator::next_id = 0;
 
-int GlobalUUIDGenerator::generate_id()
+int64 GlobalUUIDGenerator::generate_id()
 {
-	int temp = next_id;
+	int64 temp = next_id;
 	next_id += 1;
 	return temp;
 }
 
 
-int64 calc_default_size(const std::vector<int>& shape)
+int64 calc_default_size(const std::vector<int64>& shape)
 {
 	int64 tensor_size = 1;
 	for (int s : shape)
@@ -169,20 +170,20 @@ int64 calc_default_size(const std::vector<int>& shape)
 	return tensor_size;
 }
 
-int64 calc_default_size(const int dim, const DimArray& shape)
+int64 calc_default_size(const int64 dim, const DimArray& shape)
 {
 	int64 tensor_size = 1;
-	for (int dix = 0; dix < dim; ++dix)
+	for (int64 dix = 0; dix < dim; ++dix)
 	{
 		tensor_size *= shape[dix];
 	}
 	return tensor_size;
 }
 
-std::vector<int> calc_default_stride(const std::vector<int>& shape)
+std::vector<int64> calc_default_stride(const std::vector<int64>& shape)
 {
-	int dim = calc_dim(shape);
-	std::vector<int> stride(dim);
+	int64 dim = calc_dim(shape);
+	std::vector<int64> stride(dim);
 	stride[dim - 1] = 1;
 	for (int dix = dim - 2; dix >= 0; --dix)
 	{
@@ -191,39 +192,39 @@ std::vector<int> calc_default_stride(const std::vector<int>& shape)
 	return stride;
 }
 
-DimArray calc_default_stride(const int dim, const DimArray& shape)
+DimArray calc_default_stride(const int64 dim, const DimArray& shape)
 {
 	DimArray stride = {};
 	stride[dim - 1] = 1;
-	for (int dix = dim - 2; dix >= 0; --dix)
+	for (int64 dix = dim - 2; dix >= 0; --dix)
 	{
 		stride[dix] = stride[dix + 1] * shape[dix + 1];
 	}
 	return stride;
 }
 
-DimArray cvt_vector2array(const std::vector<int>& v)
+DimArray cvt_vector2array(const std::vector<int64>& v)
 {
 	DimArray arr = {};
-	int dim = calc_dim(v);
-	for (int dix = 0; dix < dim; ++dix)
+	int64 dim = calc_dim(v);
+	for (int64 dix = 0; dix < dim; ++dix)
 	{
 		arr[dix] = v[dix];
 	}
 	return arr;
 }
 
-std::vector<int> cvt_array2vector(const int dim, const DimArray& arr)
+std::vector<int64> cvt_array2vector(const int64 dim, const DimArray& arr)
 {
-	std::vector<int> v(dim);
-	for (int dix = 0; dix < dim; ++dix)
+	std::vector<int64> v(dim);
+	for (int64 dix = 0; dix < dim; ++dix)
 	{
 		v[dix] = arr[dix];
 	}
 	return v;
 }
 
-int calc_dim(const std::vector<int>& v)
+int64 calc_dim(const std::vector<int64>& v)
 {
-	return static_cast<int>(v.size());
+	return static_cast<int64>(v.size());
 }

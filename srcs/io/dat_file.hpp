@@ -42,8 +42,8 @@ static Tensor<T, CPU> load_tensor(const std::string& file_path)
 	tensor_file.read(reinterpret_cast<char*>(&dim), sizeof(int32));
 
 	// read the shape
-	std::vector<int> shape(dim);
-	for (int ix = 0; ix < dim; ++ix)
+	std::vector<int64> shape(dim);
+	for (int64 ix = 0; ix < dim; ++ix)
 	{
 		int axis_size;
 		tensor_file.read(reinterpret_cast<char*>(&axis_size), sizeof(int32));

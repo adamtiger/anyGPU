@@ -17,12 +17,12 @@ Tensor<dtype, CPU> tensor_softmax(const Tensor<dtype, CPU>& x)
 {
 	ACASSERT(x.dim == 2, "softmax expects 2 dimensional tensors");
 
-	int m = x.shape[0];
-	int n = x.shape[1];
+	int64 m = x.shape[0];
+	int64 n = x.shape[1];
 
 	dtype* x_data = x.buffer();
 
-	std::vector<int> y_shape({ m, n });
+	std::vector<int64> y_shape({ m, n });
 	Tensor<dtype, CPU> y(y_shape);
 	dtype* y_data = y.buffer();
 
@@ -89,7 +89,7 @@ Tensor<dtype, CUDA> tensor_softmax(const Tensor<dtype, CUDA>& x)
 
 	int m = x.shape[0];
 	int n = x.shape[1];
-	std::vector<int> y_shape({ m, n });
+	std::vector<int64> y_shape({ m, n });
 	Tensor<dtype, CUDA> y(y_shape);
 
 	if constexpr (std::is_same_v<dtype, float32>)
@@ -121,13 +121,13 @@ Tensor<dtype, CPU> tensor_softmax_bwd(const Tensor<dtype, CPU>& x, const Tensor<
 	ACASSERT(x.dim == 2, "softmax bwd expects 2 dimensional x tensor");
 	ACASSERT(grad_y.dim == 2, "softmax bwd expects 2 dimensional grad y tensor");
 
-	int m = x.shape[0];
-	int n = x.shape[1];
+	int64 m = x.shape[0];
+	int64 n = x.shape[1];
 
 	dtype* x_data = x.buffer();
 	dtype* gy_data = grad_y.buffer();
 
-	std::vector<int> y_shape({ m, n });
+	std::vector<int64> y_shape({ m, n });
 	Tensor<dtype, CPU> y(y_shape);
 	dtype* y_data = y.buffer();
 
@@ -178,9 +178,9 @@ Tensor<dtype, CUDA> tensor_softmax_bwd(const Tensor<dtype, CUDA>& x, const Tenso
 	ACASSERT(x.dim == 2, "softmax bwd expects 2 dimensional x tensor");
 	ACASSERT(grad_y.dim == 2, "softmax bwd expects 2 dimensional grad y tensor");
 
-	int m = x.shape[0];
-	int n = x.shape[1];
-	std::vector<int> grad_x_shape({ m, n });
+	int64 m = x.shape[0];
+	int64 n = x.shape[1];
+	std::vector<int64> grad_x_shape({ m, n });
 	Tensor<dtype, CUDA> grad_x(grad_x_shape);
 
 	if constexpr (std::is_same_v<dtype, float32>)

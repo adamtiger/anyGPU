@@ -40,7 +40,7 @@ struct GemmaSDPAweights
 };
 
 template<FloatingPointType dtype>
-static Tensor<dtype, CUDA> tensor_gemma_sdpa(  // Zamba2SdpaAttention
+static Tensor<dtype, CUDA> tensor_gemma_sdpa(
 	const GemmaSDPAweights<dtype>& sdpa_weights,
 	const GemmaKVcache& kv_cache,
 	const Tensor<dtype, CUDA>& hidden_states,

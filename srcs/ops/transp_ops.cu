@@ -76,8 +76,8 @@ void cu_tensor_transp_i8(
 
 /* transpose with swapping two elements */
 
-__constant__ int x_stride[MAX_TENSOR_DIM];
-__constant__ int y_sw_stride[MAX_TENSOR_DIM];  // swapped at ax1, ax2 for easier calc.
+__constant__ int64 x_stride[MAX_TENSOR_DIM];
+__constant__ int64 y_sw_stride[MAX_TENSOR_DIM];  // swapped at ax1, ax2 for easier calc.
 
 __global__ void cu_tensor_transp_swap_f32_kernel(
 	const int length, 
@@ -113,8 +113,8 @@ void cu_tensor_transp_swap_f32(
 	const int32 ax2,
 	Tensor<float32, CUDA>& y)
 {
-	int length = x.numel();
-	int dim = x.dim;
+	int64 length = x.numel();
+	int64 dim = x.dim;
 
 	float32* dx = x.buffer();
 	float32* dy = y.buffer();

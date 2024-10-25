@@ -19,14 +19,14 @@
 template<Device device>
 struct MemoryBuffer
 {
-	int id;
+	int64 id;
 	int64 capacity;
 	char* buffer;
 
 	explicit MemoryBuffer();
 	explicit MemoryBuffer(const int64 capacity);
-	explicit MemoryBuffer(const int data_bit_size, const std::vector<int>& shape);
-	explicit MemoryBuffer(const int data_bit_size, const int dim, const Shape& shape);
+	explicit MemoryBuffer(const int64 data_bit_size, const std::vector<int64>& shape);
+	explicit MemoryBuffer(const int64 data_bit_size, const int64 dim, const Shape& shape);
 	~MemoryBuffer();
 };
 
@@ -59,7 +59,7 @@ MemoryBuffer<device>::MemoryBuffer(const int64 capacity) : capacity(capacity)
 }
 
 template<Device device>
-MemoryBuffer<device>::MemoryBuffer(const int data_bit_size, const std::vector<int>& shape)
+MemoryBuffer<device>::MemoryBuffer(const int64 data_bit_size, const std::vector<int64>& shape)
 {
 	id = GlobalUUIDGenerator::generate_id();
 
@@ -85,7 +85,7 @@ MemoryBuffer<device>::MemoryBuffer(const int data_bit_size, const std::vector<in
 }
 
 template<Device device>
-MemoryBuffer<device>::MemoryBuffer(const int data_bit_size, const int dim, const Shape& shape)
+MemoryBuffer<device>::MemoryBuffer(const int64 data_bit_size, const int64 dim, const Shape& shape)
 {
 	id = GlobalUUIDGenerator::generate_id();
 
@@ -147,10 +147,10 @@ MemoryBuffer<device>::~MemoryBuffer()
 template<typename dtype, Device device=Device::CUDA>
 struct Tensor
 {
-	int id;
-	int dim;
-	int offset;     // in bytes
-	int alignment;  // in bytes
+	int64 id;
+	int64 dim;
+	int64 offset;     // in bytes
+	int64 alignment;  // in bytes
 	Shape shape;
 	Stride stride;
 	std::string name;
@@ -172,14 +172,14 @@ struct Tensor
 	// number of elements in tensor
 	//  no padding is included
 	//  like the tensor stride is default
-	int numel() const
+	int64 numel() const
 	{
 		return calc_default_size(dim, shape);
 	}
 
 	// number of elements in tensor
 	//  includes the padding too (due to stride)
-	int size() const
+	int64 size() const
 	{
 		return shape[0] * stride[0];
 	}
@@ -190,7 +190,7 @@ struct Tensor
 		return mem_buffer->capacity;
 	}
 
-	int buffer_id() const
+	int64 buffer_id() const
 	{
 		return mem_buffer->id;
 	}
@@ -239,30 +239,30 @@ struct Tensor
 	/*
 	*  Creates a tensor with default strides and alignment (1 tensor element).
 	*/
-	explicit Tensor(const std::vector<int>& shape);
+	explicit Tensor(const std::vector<int64>& shape);
 	
 	/*
 	*  Creates a tensor with default stride and alignment (1 tensor element).
 	*/
-	explicit Tensor(const int dim, const Shape& shape);
+	explicit Tensor(const int64 dim, const Shape& shape);
 
 	/*
 	*  Creates a tensor with default alignment (1 tensor element).
 	*/
-	explicit Tensor(const int dim, const Shape& shape, const Stride& stride);
+	explicit Tensor(const int64 dim, const Shape& shape, const Stride& stride);
 
 	/*
 	*  Creates a tensor with default strides and alignment.
 	*  Also uses the tensor values given on the host.
 	*/
-	explicit Tensor(const std::vector<int>& shape, const std::vector<dtype>& hdata);
+	explicit Tensor(const std::vector<int64>& shape, const std::vector<dtype>& hdata);
 
 private:
 	std::shared_ptr<MemoryBuffer<device>> mem_buffer;
 };
 
 template<typename dtype, Device device>
-Tensor<dtype, device>::Tensor(const std::vector<int>& shape)
+Tensor<dtype, device>::Tensor(const std::vector<int64>& shape)
 {
 	id = GlobalUUIDGenerator::generate_id();
 	dim = calc_dim(shape);
@@ -279,7 +279,7 @@ Tensor<dtype, device>::Tensor(const std::vector<int>& shape)
 }
 
 template<typename dtype, Device device>
-Tensor<dtype, device>::Tensor(const int dim, const Shape& shape)
+Tensor<dtype, device>::Tensor(const int64 dim, const Shape& shape)
 {
 	id = GlobalUUIDGenerator::generate_id();
 	this->dim = dim;
@@ -295,7 +295,7 @@ Tensor<dtype, device>::Tensor(const int dim, const Shape& shape)
 }
 
 template<typename dtype, Device device>
-Tensor<dtype, device>::Tensor(const int dim, const Shape& shape, const Stride& stride)
+Tensor<dtype, device>::Tensor(const int64 dim, const Shape& shape, const Stride& stride)
 {
 	id = GlobalUUIDGenerator::generate_id();
 	this->dim = dim;
@@ -303,7 +303,7 @@ Tensor<dtype, device>::Tensor(const int dim, const Shape& shape, const Stride& s
 	alignment = 1;
 	offset = 0;
 
-	int capacity = sizeof(dtype) * shape[0] * stride[0];
+	int64 capacity = sizeof(dtype) * shape[0] * stride[0];
 	mem_buffer = std::make_shared<MemoryBuffer<device>>(capacity);
 
 	// calculating default stride
@@ -312,7 +312,7 @@ Tensor<dtype, device>::Tensor(const int dim, const Shape& shape, const Stride& s
 }
 
 template<typename dtype, Device device>
-Tensor<dtype, device>::Tensor(const std::vector<int>& shape, const std::vector<dtype>& hdata) : Tensor(shape)
+Tensor<dtype, device>::Tensor(const std::vector<int64>& shape, const std::vector<dtype>& hdata) : Tensor(shape)
 {
 	// copy the data
 	size_t data_size = sizeof(dtype) * hdata.size();
@@ -388,11 +388,11 @@ Tensor<trg_dtype, CPU> cvt_tensor_datatype(const Tensor<src_dtype, CPU>& tensor)
 {
 	Tensor<trg_dtype, CPU> converted(tensor.dim, tensor.shape, tensor.stride);
 
-	const int n = tensor.size();
+	const int64 n = tensor.size();
 	src_dtype* tsr_data = tensor.buffer();
 	trg_dtype* cvt_data = converted.buffer();
 
-	for (int ix = 0; ix < n; ++ix)
+	for (int64 ix = 0; ix < n; ++ix)
 	{
 		if constexpr (std::is_same_v<trg_dtype, float32>)
 		{
@@ -417,7 +417,7 @@ Tensor<trg_dtype, CPU> cvt_tensor_datatype(const Tensor<src_dtype, CPU>& tensor)
   @param head: the number of elements to print from the buffer (from the head of the buffer)
 */
 template<typename dtype>
-static std::string represent_tensor(const Tensor<dtype, CPU>& tensor, const int head=5)
+static std::string represent_tensor(const Tensor<dtype, CPU>& tensor, const int64 head=5)
 {
 	std::stringstream ss;
 
@@ -435,11 +435,11 @@ static std::string represent_tensor(const Tensor<dtype, CPU>& tensor, const int 
 	ss << "  buffer content: \n";
 	ss << "      [";
 
-	int num_tensor_elements = tensor.size();
-	int num_data_to_print = std::min(head, num_tensor_elements);
+	int64 num_tensor_elements = tensor.size();
+	int64 num_data_to_print = std::min(head, num_tensor_elements);
 
 	dtype* data = tensor.buffer();
-	for (int ix = 0; ix < num_data_to_print - 1; ++ix)
+	for (int64 ix = 0; ix < num_data_to_print - 1; ++ix)
 	{
 		ss << cvt_any_to_float32(data[ix]) << ", ";
 	}
@@ -461,14 +461,14 @@ static std::string represent_tensor(const Tensor<dtype, CPU>& tensor, const int 
   from the range (0, 10).
 */
 template<typename dtype, Device device>
-static Tensor<dtype, device> crt_random_tensor(const std::vector<int>& shape, const int seed=10)
+static Tensor<dtype, device> crt_random_tensor(const std::vector<int64>& shape, const int64 seed=10)
 {
 	std::default_random_engine eng(seed);
 	std::uniform_int_distribution<int> uni_dist(0, 10);
 
-	int length = calc_default_size(shape);
+	int64 length = calc_default_size(shape);
 	std::vector<int> host_data(length);
-	for (int ix = 0; ix < length; ++ix)
+	for (int64 ix = 0; ix < length; ++ix)
 	{
 		host_data[ix] = uni_dist(eng);
 	}
@@ -486,14 +486,14 @@ static Tensor<dtype, device> crt_random_tensor(const std::vector<int>& shape, co
   with 0 mean and 1 variance.
 */
 template<typename dtype, Device device>
-static Tensor<dtype, device> crt_random_normal_tensor(const std::vector<int>& shape, const int seed = 10)
+static Tensor<dtype, device> crt_random_normal_tensor(const std::vector<int64>& shape, const int64 seed = 10)
 {
 	std::default_random_engine eng(seed);
 	std::normal_distribution<float32> norm_dist(0.f, 1.f);
 
-	int length = calc_default_size(shape);
+	int64 length = calc_default_size(shape);
 	std::vector<dtype> host_data(length);
-	for (int ix = 0; ix < length; ++ix)
+	for (int64 ix = 0; ix < length; ++ix)
 	{
 		host_data[ix] = (dtype)(norm_dist(eng));
 	}
@@ -510,11 +510,11 @@ static Tensor<dtype, device> crt_random_normal_tensor(const std::vector<int>& sh
   tensors can be easily reproduced.
 */
 template<typename dtype, Device device>
-static Tensor<dtype, device> crt_pattern_tensor(const std::vector<int>& shape)
+static Tensor<dtype, device> crt_pattern_tensor(const std::vector<int64>& shape)
 {
-	int length = calc_default_size(shape);
+	int64 length = calc_default_size(shape);
 	std::vector<int> host_data(length);
-	for (int ix = 0; ix < length; ++ix)
+	for (int64 ix = 0; ix < length; ++ix)
 	{
 		host_data[ix] = ix % 10;
 	}
@@ -529,11 +529,11 @@ static Tensor<dtype, device> crt_pattern_tensor(const std::vector<int>& shape)
   Creates a tensor filled with ones.
 */
 template<typename dtype, Device device>
-static Tensor<dtype, device> crt_ones_tensor(const std::vector<int>& shape)
+static Tensor<dtype, device> crt_ones_tensor(const std::vector<int64>& shape)
 {
-	int length = calc_default_size(shape);
+	int64 length = calc_default_size(shape);
 	std::vector<int> host_data(length);
-	for (int ix = 0; ix < length; ++ix)
+	for (int64 ix = 0; ix < length; ++ix)
 	{
 		host_data[ix] = 1;
 	}
@@ -585,7 +585,7 @@ static bool matmul_compatible(const Tensor<dtype, device>& lhs, const Tensor<dty
 template<typename dtype, Device device>
 static KernelParameters calc_kernel_prms_pointwise(const Tensor<dtype, device>& tensor)
 {
-	int num_operations = tensor.size();
+	unsigned int num_operations = (unsigned int)tensor.size();
 	unsigned int threads_per_block = 32 * 8;
 
 	unsigned int num_grids = num_operations / threads_per_block;

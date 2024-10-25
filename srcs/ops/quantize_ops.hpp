@@ -126,12 +126,12 @@ static Tensor<lp_dtype, CPU> tensor_qmm(
 {
 	assert(matmul_compatible(a, b));
 
-	int m = a.shape[0];
-	int n = b.shape[1];
-	int k = a.shape[1];
+	int64 m = a.shape[0];
+	int64 n = b.shape[1];
+	int64 k = a.shape[1];
 
 	// access the data arrays
-	std::vector<int> y_shape({ m, n });
+	std::vector<int64> y_shape({ m, n });
 	Tensor<lp_dtype, CPU> y(y_shape);
     lp_dtype* y_data = y.buffer();
 	lp_dtype* a_data = a.buffer();
@@ -178,12 +178,12 @@ static Tensor<lp_dtype, CUDA> tensor_qmm(
 {
 	assert(matmul_compatible(a, b));
 
-	int m = a.shape[0];
-	int n = b.shape[1];
-	int k = a.shape[1];
+	int64 m = a.shape[0];
+	int64 n = b.shape[1];
+	int64 k = a.shape[1];
 
 	// access the data arrays
-	std::vector<int> y_shape({ m, n });
+	std::vector<int64> y_shape({ m, n });
 	Tensor<lp_dtype, CUDA> y(y_shape);
 
 	if constexpr (std::is_same_v<lp_dtype, int8> && std::is_same_v<hp_dtype, float32>)

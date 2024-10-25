@@ -19,7 +19,7 @@ Tensor<dtype, CPU> tensor_transp(const Tensor<dtype, CPU>& x)
 
 	dtype* x_data = x.buffer();
 
-	std::vector<int> y_shape({ n, m });
+	std::vector<int64> y_shape({ n, m });
 	Tensor<dtype, CPU> y(y_shape);
 	dtype* y_data = y.buffer();
 
@@ -54,7 +54,7 @@ Tensor<dtype, CUDA> tensor_transp(const Tensor<dtype, CUDA>& x)
 
 	int m = x.shape[0];
 	int n = x.shape[1];
-	std::vector<int> y_shape({ n, m });
+	std::vector<int64> y_shape({ n, m });
 	Tensor<dtype, CUDA> y(y_shape);
 
 	if constexpr (std::is_same_v<dtype, float32>)
@@ -114,7 +114,7 @@ Tensor<dtype, CPU> tensor_transp(const Tensor<dtype, CPU>& x, const int32 ax1, c
 template<typename dtype>
 Tensor<dtype, CUDA> tensor_transp(const Tensor<dtype, CUDA>& xt, const int32 ax1, const int32 ax2)
 {
-	int32 dim = xt.dim;
+	int64 dim = xt.dim;
 	Shape y_shape = xt.shape;
 	std::swap(y_shape[ax1], y_shape[ax2]);
 	Tensor<dtype, CUDA> yt(dim, y_shape);

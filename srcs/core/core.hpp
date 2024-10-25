@@ -27,51 +27,7 @@
 #include <mma.h>  // for tensor cores
 
 
-/* Shape related */
-
-const int MAX_TENSOR_DIM = 8;
-
-using DimArray = std::array<int, MAX_TENSOR_DIM>;
-using Shape = DimArray;
-using Stride = DimArray;
-using Index = DimArray;
-
-bool equal(const int dim, const DimArray& lhs, const DimArray& rhs);
-void increment_index(const int dim, const Shape& shape, Index& index);
-int calculate_offset(const int dim, const Stride& strides, const Index& index);
-
-/* Enums */
-
-enum Device
-{
-	CPU,
-	CUDA
-};
-
-enum DataType
-{
-	INT8,
-	INT16,
-	INT32,
-	BFLOAT16,
-	FLOAT16,
-	FLOAT32,
-	FLOAT64,
-	FP8E4M3,
-	FP8E5M2
-};
-
-
-/* Data type related */
-
-static int bitsize_of_datatypes[] = {
-	8, 16, 32, 16, 16, 32, 64, 8, 8
-};
-
-// int4 is 0.5 bytes long, from alignment perspective it is handled like 1
-static int bytesize_of_datatypes[] = {
-	1, 2, 4, 2, 2, 4, 8, 1, 1
-};
+/* data type related */
 
 using int8 = char;
 using int16 = short signed int;
@@ -84,13 +40,58 @@ using float64 = double;
 using fp8e4m3 = __nv_fp8_e4m3;
 using fp8e5m2 = __nv_fp8_e5m2;
 
+static long long bitsize_of_datatypes[] = {
+	8, 16, 32, 64, 16, 16, 32, 64, 8, 8
+};
+
+// int4 is 0.5 bytes long, from alignment perspective it is handled like 1
+static long long bytesize_of_datatypes[] = {
+	1, 2, 4, 8, 2, 2, 4, 8, 1, 1
+};
+
 /*
   Returns the bitsize of the data type
 */
-template<typename T> static int get_bitsize()
+template<typename T> static int64 get_bitsize()
 {
-	return sizeof(T) * 8;
+	return static_cast<int64>(sizeof(T) * 8);
 }
+
+/* Shape related */
+
+const int MAX_TENSOR_DIM = 8;
+
+using DimArray = std::array<int64, MAX_TENSOR_DIM>;
+using Shape = DimArray;
+using Stride = DimArray;
+using Index = DimArray;
+
+bool equal(const int64 dim, const DimArray& lhs, const DimArray& rhs);
+void increment_index(const int64 dim, const Shape& shape, Index& index);
+int64 calculate_offset(const int64 dim, const Stride& strides, const Index& index);
+
+/* Enums */
+
+enum Device
+{
+	CPU,
+	CUDA
+};
+
+enum DataType
+{
+    INT8,
+    INT16,
+    INT32,
+    INT64,
+    BFLOAT16,
+    FLOAT16,
+    FLOAT32,
+    FLOAT64,
+    FP8E4M3,
+    FP8E5M2
+};
+
 
 /*
   Returns the enum type of a data type.
@@ -126,6 +127,10 @@ template<typename T> static DataType get_datatype_enum()
 	else if constexpr (std::is_same_v<T, int32>)
 	{
 		return DataType::INT32;
+	}
+	else if constexpr (std::is_same_v<T, int64>)
+	{
+		return DataType::INT64;
 	}
 	else if constexpr (std::is_same_v<T, int16>)
 	{
@@ -173,7 +178,7 @@ std::ostream& operator<<(std::ostream& os, const Device device);
   It will be in the form of [d1, d2, d3] for 3 dimension.
   No new line character at the end.
 */
-std::string represent_array(const int dim, const DimArray& arr);
+std::string represent_array(const int64 dim, const DimArray& arr);
 
 /*
   Converting the int vector into any target data type.
@@ -289,18 +294,18 @@ static float32 cvt_any_to_float32<fp8e5m2>(const fp8e5m2 value)
 class GlobalUUIDGenerator
 {
 public:
-	static int generate_id();
+	static int64 generate_id();
 
 private:
-	static int next_id;
+	static int64 next_id;
 };
 
 
-constexpr unsigned int BYTE_EXP = 3;
-constexpr unsigned int BYTE_SIZE = 8;
+constexpr int64 BYTE_EXP = 3;
+constexpr int64 BYTE_SIZE = 8;
 
-constexpr unsigned int ALIGNMENT_EXP = 8;
-constexpr unsigned int ALIGNMENT_SIZE = 256;
+constexpr int64 ALIGNMENT_EXP = 8;
+constexpr int64 ALIGNMENT_SIZE = 256;
 
 /*
   Data type for 256 bytes aligned allocation.
@@ -318,41 +323,41 @@ struct alignas(ALIGNMENT_SIZE) AlignedType
   this function returns the number of elements in the tensor.
   Default alignment means the byte size of 1 tensor element.
 */
-int64 calc_default_size(const std::vector<int>& shape);
+int64 calc_default_size(const std::vector<int64>& shape);
 
 /*
   If the alignment is the default for the given data type,
   this function returns the number of elements in the tensor.
   Default alignment means the byte size of 1 tensor element.
 */
-int64 calc_default_size(const int dim, const DimArray& shape);
+int64 calc_default_size(const int64 dim, const DimArray& shape);
 
 /*
   Calculates the default stride from the given shape.
 */
-std::vector<int> calc_default_stride(const std::vector<int>& shape);
+std::vector<int64> calc_default_stride(const std::vector<int64>& shape);
 
 /*
   Calculates the default stride from the given shape.
 */
-DimArray calc_default_stride(const int dim, const DimArray& shape);
+DimArray calc_default_stride(const int64 dim, const DimArray& shape);
 
 /*
   Transforms int vector to array.
   Vector can be shape or stride.
 */
-DimArray cvt_vector2array(const std::vector<int>& v);
+DimArray cvt_vector2array(const std::vector<int64>& v);
 
 /*
   Transforms int array to vector.
   Vector can be shape or stride.
 */
-std::vector<int> cvt_array2vector(const int dim, const DimArray& arr);
+std::vector<int64> cvt_array2vector(const int64 dim, const DimArray& arr);
 
 /*
   Dimension from vector.
 */
-int calc_dim(const std::vector<int>& v);
+int64 calc_dim(const std::vector<int64>& v);
 
 
 /* logger, assert */

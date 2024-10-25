@@ -513,7 +513,7 @@ void external_test_transpose_fwd_f32()
 
 	// test cuda
 	eq = cmp(exp_hy, act_hy_cuda);
-	std::cout << "TestCase [external_test_linear_fwd_f32 - CUDA]: " << (eq ? "PASSED" : "FAILED") << "\n";
+	std::cout << "TestCase [external_test_transpose_fwd_f32 - CUDA]: " << (eq ? "PASSED" : "FAILED") << "\n";
 }
 
 

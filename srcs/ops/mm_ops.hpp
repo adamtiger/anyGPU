@@ -77,7 +77,7 @@ static Tensor<dtype, CPU> tensor_mm(const Tensor<dtype, CPU>& lhs, const Tensor<
 	int m = lhs.shape[0];
 	int n = rhs.shape[1];
 
-	std::vector<int> res_shape({m, n});
+	std::vector<int64> res_shape({m, n});
 	Tensor<dtype, CPU> res(res_shape);
 	tensor_mm(lhs, rhs, res);
 	return res;
@@ -90,7 +90,7 @@ static Tensor<dtype, CUDA> tensor_mm(const Tensor<dtype, CUDA>& lhs, const Tenso
 	int m = lhs.shape[0];
 	int n = rhs.shape[1];
 
-	std::vector<int> res_shape({ m, n });
+	std::vector<int64> res_shape({ m, n });
 	Tensor<dtype, CUDA> res(res_shape);
 	tensor_mm(lhs, rhs, res);
 	return res;
@@ -108,15 +108,15 @@ static Tensor<dtype, CPU> tensor_gemm(
 	ACASSERT(matmul_compatible(xt, wt) == true, "matrix multiplication requires compatible matrices");
 	ACASSERT(wt.shape[1] == bt.shape[0], "incorrect bias shape");
 
-	int m = xt.shape[0];
-	int n = wt.shape[1];
-	int k = xt.shape[1];
+	int64 m = xt.shape[0];
+	int64 n = wt.shape[1];
+	int64 k = xt.shape[1];
 
 	dtype* xt_data = xt.buffer();
 	dtype* wt_data = wt.buffer();
 	dtype* bt_data = bt.buffer();
 
-	std::vector<int> res_shape({ m, n });
+	std::vector<int64> res_shape({ m, n });
 	Tensor<dtype, CPU> res(res_shape);
 	dtype* res_data = res.buffer();
 
@@ -152,9 +152,9 @@ static Tensor<dtype, CUDA> tensor_gemm(
 {
 	ACASSERT(matmul_compatible(xt, wt) == true, "matrix multiplication requires compatible matrices");
 
-	int m = xt.shape[0];
-	int n = wt.shape[1];
-	std::vector<int> res_shape({ m, n });
+	int64 m = xt.shape[0];
+	int64 n = wt.shape[1];
+	std::vector<int64> res_shape({ m, n });
 	Tensor<dtype, CUDA> res(res_shape);
 
 	if constexpr (std::is_same_v<dtype, float32>)
@@ -180,9 +180,9 @@ static Tensor<dtype, device> tensor_linear(
 	const Tensor<dtype, device>& bt)  // (out_features)
 {
 	// view xt as a 2d matrix
-	int d = xt.dim;
-	int cols = xt.shape[d - 1];
-	int rows = xt.numel() / cols;
+	int64 d = xt.dim;
+	int64 cols = xt.shape[d - 1];
+	int64 rows = xt.numel() / cols;
 	Tensor<dtype, device> x_as_mtx = tensor_view(xt, { rows, cols });
 	
 	// linear transformation
@@ -190,8 +190,8 @@ static Tensor<dtype, device> tensor_linear(
 
 	// result should have the same head shape as the input
 	// (head: ignoring the last dimension)
-	std::vector<int> y_shape(d);
-	for (int ix = 0; ix < d - 1; ++ix)
+	std::vector<int64> y_shape(d);
+	for (int64 ix = 0; ix < d - 1; ++ix)
 	{
 		y_shape[ix] = xt.shape[ix];
 	}
@@ -209,9 +209,9 @@ static Tensor<dtype, device> tensor_linear(
 	const Tensor<dtype, device>& wt)  // (in_features, out_features)
 {
 	// view xt as a 2d matrix
-	int d = xt.dim;
-	int cols = xt.shape[d - 1];
-	int rows = xt.numel() / cols;
+	int64 d = xt.dim;
+	int64 cols = xt.shape[d - 1];
+	int64 rows = xt.numel() / cols;
 	Tensor<dtype, device> x_as_mtx = tensor_view(xt, { rows, cols });
 
 	// linear transformation
@@ -219,8 +219,8 @@ static Tensor<dtype, device> tensor_linear(
 
 	// result should have the same head shape as the input
 	// (head: ignoring the last dimension)
-	std::vector<int> y_shape(d);
-	for (int ix = 0; ix < d - 1; ++ix)
+	std::vector<int64> y_shape(d);
+	for (int64 ix = 0; ix < d - 1; ++ix)
 	{
 		y_shape[ix] = xt.shape[ix];
 	}

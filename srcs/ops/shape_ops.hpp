@@ -8,7 +8,7 @@
   View into the given buffer with a new tensor.
 */
 template<ArithmeticType dtype, Device device>
-static Tensor<dtype, device> tensor_view(const Tensor<dtype, device>& x, const std::vector<int>& new_shape)
+static Tensor<dtype, device> tensor_view(const Tensor<dtype, device>& x, const std::vector<int64>& new_shape)
 {
 	Tensor<dtype, device> y = x;
 	y.id = GlobalUUIDGenerator::generate_id();
@@ -23,7 +23,7 @@ static Tensor<dtype, device> tensor_view(const Tensor<dtype, device>& x, const s
   Splitting over the first dimension into equal pieces.
 */
 template<ArithmeticType dtype, Device device>
-static std::vector<Tensor<dtype, device>> tensor_split(const Tensor<dtype, device>& x, const int32 splits)
+static std::vector<Tensor<dtype, device>> tensor_split(const Tensor<dtype, device>& x, const int64 splits)
 {
 	std::vector<Tensor<dtype, device>> ys(splits);
 	for (size_t ix = 0; ix < ys.size(); ++ix)
@@ -49,11 +49,11 @@ static Tensor<dtype, device> tensor_concat(const Tensor<dtype, device>& x1, cons
 {
 	ACASSERT(x1.dim == x2.dim, "dimensions have to be equal");
 
-	int y_dim = x1.dim;
+	int64 y_dim = x1.dim;
 
 	ACASSERT(y_dim >= 2, "tensor needs to be at least 2 dim");
 
-	for (int ix = 0; ix < y_dim - 1; ++ix)
+	for (int64 ix = 0; ix < y_dim - 1; ++ix)
 	{
 		ACASSERT(x1.shape[ix] == x2.shape[ix], "non concatenated axis should have the same length");
 	}
@@ -120,11 +120,11 @@ static Tensor<dtype, device> tensor_concat(const Tensor<dtype, device>& x1, cons
   Assumes contigous memory.
 */
 template<ArithmeticType dtype, Device device>
-static Tensor<dtype, device> tensor_repeat(const Tensor<dtype, device>& xt, const int axis, const int nreps)
+static Tensor<dtype, device> tensor_repeat(const Tensor<dtype, device>& xt, const int64 axis, const int64 nreps)
 {
 	ACASSERT(0 <= axis && axis < xt.dim, "axis is out of valid range");
 
-	int ydim = xt.dim;
+	int64 ydim = xt.dim;
 	Shape y_shape = xt.shape;
 	y_shape[axis] *= nreps;
 	Tensor<dtype, device> yt(ydim, y_shape);
@@ -136,14 +136,14 @@ static Tensor<dtype, device> tensor_repeat(const Tensor<dtype, device>& xt, cons
 	// axis0 - will be for outer loop
 	// axis1 - represents the group elements to be repeated (inner loop)
 
-	int size_ax0 = 1;
-	for (int ix = 0; ix <= axis; ++ix)
+	int64 size_ax0 = 1;
+	for (int64 ix = 0; ix <= axis; ++ix)
 	{
 		size_ax0 *= xt.shape[ix];
 	}
 
-	int size_ax1 = 1;
-	for (int ix = axis + 1; ix < ydim; ++ix)
+	int64 size_ax1 = 1;
+	for (int64 ix = axis + 1; ix < ydim; ++ix)
 	{
 		size_ax1 *= xt.shape[ix];
 	}
@@ -151,9 +151,9 @@ static Tensor<dtype, device> tensor_repeat(const Tensor<dtype, device>& xt, cons
 	size_t x_rep_size = (size_t)size_ax1;
 	size_t y_rep_size = (size_t)nreps * x_rep_size;
 
-	for (int ox = 0; ox < size_ax0; ++ox)
+	for (int64 ox = 0; ox < size_ax0; ++ox)
 	{
-		for (int rx = 0; rx < nreps; ++rx)
+		for (int64 rx = 0; rx < nreps; ++rx)
 		{
 			if constexpr (device == CPU)
 			{
@@ -190,13 +190,13 @@ static Tensor<dtype, device> tensor_repeat(const Tensor<dtype, device>& xt, cons
 template<ArithmeticType dtype, Device device>
 static Tensor<dtype, device> tensor_slice(
 	const Tensor<dtype, device>& xt, 
-	const int axis, 
-	const int low,   // inclusive
-	const int high)  // exclusive
+	const int64 axis, 
+	const int64 low,   // inclusive
+	const int64 high)  // exclusive
 {
 	ACASSERT(0 <= axis && axis < xt.dim, "axis is out of valid range");
 
-	int ydim = xt.dim;
+	int64 ydim = xt.dim;
 	Shape y_shape = xt.shape;
 	y_shape[axis] = (high - low);
 	Tensor<dtype, device> yt(ydim, y_shape);
@@ -208,14 +208,14 @@ static Tensor<dtype, device> tensor_slice(
 	// axis0 - will be for outer loop
 	// axis1 - represents the group elements to be repeated (inner loop)
 
-	int size_ax0 = 1;
-	for (int ix = 0; ix < axis; ++ix)
+	int64 size_ax0 = 1;
+	for (int64 ix = 0; ix < axis; ++ix)
 	{
 		size_ax0 *= xt.shape[ix];
 	}
 
-	int size_ax1 = 1;
-	for (int ix = axis + 1; ix < ydim; ++ix)
+	int64 size_ax1 = 1;
+	for (int64 ix = axis + 1; ix < ydim; ++ix)
 	{
 		size_ax1 *= xt.shape[ix];
 	}
@@ -225,7 +225,7 @@ static Tensor<dtype, device> tensor_slice(
 	size_t x_stride = (size_t)(size_ax1 * xt.shape[axis]);
 	size_t y_stride = (size_t)(size_ax1 * yt.shape[axis]);
 
-	for (int ox = 0; ox < size_ax0; ++ox)
+	for (int64 ox = 0; ox < size_ax0; ++ox)
 	{
 		if constexpr (device == CPU)
 		{

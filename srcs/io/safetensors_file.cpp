@@ -40,7 +40,7 @@ DataType extract_data_type(const std::string& header_content, size_t& cindex)
 	return sf_dtype_map.at(sf_dtype_name);
 }
 
-std::vector<int> extract_list(const std::string& header_content, size_t& cindex)
+std::vector<int64> extract_list(const std::string& header_content, size_t& cindex)
 {
 	size_t first = header_content.find_first_of(LEFT_RECT, cindex);
 	size_t second = header_content.find_first_of(RIGHT_RECT, first + 1);
@@ -48,7 +48,7 @@ std::vector<int> extract_list(const std::string& header_content, size_t& cindex)
 	cindex = second + 1;
 
 	std::string snum = "";
-	std::vector<int> shape;
+	std::vector<int64> shape;
 	int cix = first + 1;
 
 	while (cix <= second)
@@ -62,7 +62,7 @@ std::vector<int> extract_list(const std::string& header_content, size_t& cindex)
 		{
 			if (!snum.empty())
 			{
-				shape.push_back(std::atoi(snum.c_str()));
+				shape.push_back(std::atoll(snum.c_str()));
 				snum.clear();
 			}
 		}
