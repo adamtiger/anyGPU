@@ -190,6 +190,7 @@ set(GEM2_DIR ${ANYGPU_ROOT}/srcs/models/gemma2)
 
 set (GEM2_SRCS
     ${GEM2_DIR}/gemma_linsoftcap.cu
+    ${GEM2_DIR}/gemma_update_mask.cu
 )
 
 set (GEM2_HEADERS
@@ -200,6 +201,8 @@ set (GEM2_HEADERS
     ${GEM2_DIR}/gemma_causallm.hpp
     ${GEM2_DIR}/gemma_linsoftcap.cuh
     ${GEM2_DIR}/gemma_linsoftcap.hpp
+    ${GEM2_DIR}/gemma_update_mask.cuh
+    ${GEM2_DIR}/gemma_update_mask.hpp
 )
 
 source_group("mgemma2" FILES ${GEM2_HEADERS} ${GEM2_SRCS})
