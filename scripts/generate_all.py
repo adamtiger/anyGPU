@@ -73,4 +73,3 @@ if __name__ == '__main__':
     print(torch.allclose(causal_mask, out))
 
     print(causal_mask.flatten()[:10])
-

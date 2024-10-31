@@ -8,9 +8,8 @@
 #include "binary_ops.hpp"
 #include "mm_ops.hpp"
 #include "sdp.hpp"
+#include "gemma_kv_cache.hpp"
 #include "zamba_rotary.hpp"
-
-struct GemmaKVcache {};  // TODO: introduce later, when more information is available
 
 
 template<FloatingPointType dtype>

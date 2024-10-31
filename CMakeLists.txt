@@ -194,6 +194,8 @@ set (GEM2_SRCS
 )
 
 set (GEM2_HEADERS
+    ${GEM2_DIR}/gemma_config.hpp
+    ${GEM2_DIR}/gemma_kv_cache.hpp
     ${GEM2_DIR}/gemma_mlp.hpp
     ${GEM2_DIR}/gemma_decoder.hpp
     ${GEM2_DIR}/gemma_sdpa.hpp
