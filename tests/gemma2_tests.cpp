@@ -11,6 +11,7 @@
 #include "gemma_causallm.hpp"
 #include "gemma_linsoftcap.hpp"
 #include "gemma_update_mask.hpp"
+#include "gemma_kv_cache.hpp"
 #include "zamba_rotary.hpp"
 
 
@@ -282,4 +283,76 @@ void external_test_gemma2_update_mask()
 	// test cuda
 	bool eq = cmp(exp_hy, act_hy_cuda);
 	std::cout << "TestCase [external_test_gemma2_update_mask - CUDA]: " << (eq ? "PASSED" : "FAILED") << "\n";
+}
+
+
+void external_test_gemma2_kvcache_update()
+{
+	auto path = artifact_folder_path / "test_gemma2kvcache_update";
+
+	GemmaConfig config;
+	config.head_dim = 256;
+	config.hidden_size = 2304;
+	config.num_attention_heads = 8;
+	config.num_hidden_layers = 26;
+	config.num_key_value_heads = 4;
+	config.sliding_window = 4096;
+
+	// initiate kv cache
+	GemmaKVcache kv_cache;
+	kv_cache.init_cache(
+		config,
+		1,
+		41
+	);
+
+	// compare
+	auto cmp = [&](const Tensor<float32, CPU>& expected, const Tensor<float32, CPU>& actual)
+		{
+			bool eq = elementwise_compatible(expected, actual);  // checks the sizes
+			eq = eq && compare_data_buffers(actual, expected);
+			return eq;
+		};
+
+	// test the cache in each state
+	bool correct = true;
+	for (int ix = 1; ix < 11; ++ix)
+	{
+		std::string fn = "io_ckpt_" + std::to_string(ix);
+		auto ckp_path = path / fn;
+
+		// read tensors from files
+	    // hw is tied to the embedding weights
+		auto h_k = load_tensor((ckp_path / "in_0.dat").string());
+		auto h_v = load_tensor((ckp_path / "in_1.dat").string());
+		auto h_cpos = load_tensor<int32>((ckp_path / "in_3.dat").string());
+		auto exp_hk = load_tensor((ckp_path / "out_0.dat").string());
+		auto exp_hv = load_tensor((ckp_path / "out_1.dat").string());
+
+		auto d_k = h_k.copy_to_cuda();
+		auto d_v = h_v.copy_to_cuda();
+		auto d_cpos = h_cpos.copy_to_cuda();
+		
+		int32 layer_idx = ix - 1;
+		int32 sliding_window = (layer_idx % 2 == 0 ? config.sliding_window : -1);
+
+		Tensor<float32, CUDA> act_dk_cuda;
+		Tensor<float32, CUDA> act_dv_cuda;
+		kv_cache.update_cache(
+			d_k, d_v, d_cpos, 
+			layer_idx, 
+			sliding_window,
+			act_dk_cuda, 
+			act_dv_cuda
+		);
+
+		auto act_hk_cuda = act_dk_cuda.copy_to_host();
+		auto act_hv_cuda = act_dv_cuda.copy_to_host();
+
+		// test cuda
+		correct = correct && cmp(exp_hk, act_hk_cuda);
+		correct = correct && cmp(exp_hv, act_hv_cuda);
+	}
+
+	std::cout << "TestCase [external_test_gemma2_kvcache_update - CUDA]: " << (correct ? "PASSED" : "FAILED") << "\n";
 }
