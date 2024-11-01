@@ -216,7 +216,7 @@ struct Tensor
 		}
 	}
 
-	explicit Tensor()
+	Tensor()
 	{
 		id = GlobalUUIDGenerator::generate_id();
 		dim = 0;
