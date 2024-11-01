@@ -268,3 +268,39 @@ def inspect_function(func: any, name: str, dict_out: bool = False) -> any:
         return y
 
     return execute_module
+
+
+def inspect_function_repeated(func: any, name: str, reps: int, dict_out: bool = False) -> any:
+    """
+    Inspects a function. Returns a function executor function
+    therefore the inspection and execution can be done in a single line.
+
+    The results are saved during several (reps) consecutive visits. 
+    """
+    # create output folder if needed
+    output_path = pjoin(path_inspection_output_folder, name)
+    is_main_not_folder_exist = not os.path.exists(output_path)
+
+    if is_main_not_folder_exist:
+        os.mkdir(output_path)
+    
+    # create the next checkpoint folder name
+    num_saved = len(os.listdir(output_path))
+    save_function_call_data = num_saved < reps
+
+    save_path = None
+    if save_function_call_data:
+        save_path = pjoin(output_path, f"{const.IO_CHECKPOINT}_{num_saved + 1}")
+        os.mkdir(save_path)
+
+    # create executor function
+    # save input and output if needed
+    def execute_module(*inputs, **kwargs):
+        y = None
+        if save_function_call_data:
+            y = save_function_calc(func, save_path, dict_out, *inputs, **kwargs)
+        else:
+            y = func(*inputs, **kwargs)
+        return y
+
+    return execute_module
