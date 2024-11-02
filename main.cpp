@@ -70,9 +70,9 @@ int main()
 	//external_test_gemma2_model_decoder();
 	//external_test_gemma2_lmhead_softcap();
 	//external_test_gemma2_update_mask();
-	external_test_gemma2_kvcache_update();
+	//external_test_gemma2_kvcache_update();
 
-	//run_vk_compute();
+	run_vk_compute();
 
 	/* performance measurement (cuda) */
 

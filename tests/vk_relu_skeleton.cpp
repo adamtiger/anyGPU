@@ -373,11 +373,17 @@ void calculate_relu(const Context& ctx, const VTensor& x, VTensor& y)
 
 
 	// create compute pipeline
+	VkPushConstantRange range = {};
+	range.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+	range.offset = 0;
+	range.size = 4;
 
 	VkPipelineLayoutCreateInfo pipeline_layout_ci = {};
 	pipeline_layout_ci.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 	pipeline_layout_ci.setLayoutCount = 1;
 	pipeline_layout_ci.pSetLayouts = &descr_set_layout;
+	pipeline_layout_ci.pushConstantRangeCount = 1;
+	pipeline_layout_ci.pPushConstantRanges = &range;
 
 	VkPipelineLayout pipeline_layout;
 	vkCreatePipelineLayout(ctx.device, &pipeline_layout_ci, 0, &pipeline_layout);
@@ -441,6 +447,9 @@ void calculate_relu(const Context& ctx, const VTensor& x, VTensor& y)
 
 	vkCmdBindDescriptorSets(cmd_buffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline_layout, 0, 1, &descr_set, 0, NULL);
 	vkCmdBindPipeline(cmd_buffer, VK_PIPELINE_BIND_POINT_COMPUTE, compute_pipeline);
+
+	int data[1] = { 8 };  // length of the x tensor
+	vkCmdPushConstants(cmd_buffer, pipeline_layout, VK_SHADER_STAGE_COMPUTE_BIT, 0, 4, data);
 
 	vkCmdDispatch(cmd_buffer, 1, 1, 1);  // TODO: group size is fixed, this should be calculated
 

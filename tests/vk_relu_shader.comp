@@ -12,9 +12,14 @@ layout(std430, set = 0, binding = 1) buffer obuffer
     float odata[];
 }outData;
 
+layout (push_constant, std430) uniform pc
+{
+    int max_length;
+};
+
 void main() {
     int index = int(gl_GlobalInvocationID.x);
-    if(index >= 8)
+    if(index >= max_length)
         return;
 	
 	float v = inpData.idata[index];
