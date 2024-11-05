@@ -40,14 +40,12 @@ struct GemmaSDPAweights
 
 template<FloatingPointType dtype>
 static Tensor<dtype, CUDA> tensor_gemma_sdpa(
+	const GemmaConfig& config,
 	const GemmaSDPAweights<dtype>& sdpa_weights,
-	const GemmaKVcache& kv_cache,
+	GemmaKVcache& kv_cache,
 	const Tensor<dtype, CUDA>& hidden_states,
 	const Tensor<dtype, CUDA>& attention_mask,
-	const Tensor<int32, CUDA>& position_ids,
-	const int hdim,
-	const int rope_base,
-	const dtype sfmx_scale)
+	const Tensor<int32, CUDA>& position_ids)
 {
 	// projection of hidden states
 
@@ -61,12 +59,12 @@ static Tensor<dtype, CUDA> tensor_gemma_sdpa(
 	int bsz = q_proj.shape[0];
 	int q_len = q_proj.shape[1];
 	int hidden_size = q_proj.shape[2];
-	int num_heads = sdpa_weights.q_proj_weight.shape[1] / hdim;
-	int num_key_value_heads = sdpa_weights.k_proj_weight.shape[1] / hdim;
+	int num_heads = sdpa_weights.q_proj_weight.shape[1] / config.head_dim;
+	int num_key_value_heads = sdpa_weights.k_proj_weight.shape[1] / config.head_dim;
 
-	auto q_proj_view = tensor_view(q_proj, { bsz, q_len, num_heads, hdim });
-	auto k_proj_view = tensor_view(k_proj, { bsz, q_len, num_key_value_heads, hdim });
-	auto v_proj_view = tensor_view(v_proj, { bsz, q_len, num_key_value_heads, hdim });
+	auto q_proj_view = tensor_view(q_proj, { bsz, q_len, num_heads, config.head_dim });
+	auto k_proj_view = tensor_view(k_proj, { bsz, q_len, num_key_value_heads, config.head_dim });
+	auto v_proj_view = tensor_view(v_proj, { bsz, q_len, num_key_value_heads, config.head_dim });
 
 	auto q_plv_t = tensor_transp(q_proj_view, 1, 2);
 	auto k_plv_t = tensor_transp(k_proj_view, 1, 2);
@@ -74,9 +72,23 @@ static Tensor<dtype, CUDA> tensor_gemma_sdpa(
 
 
 	// rotary embedding (without the transpose, the core alt. rotary can be used)
-	auto freq = tensor_zamba_precomp_rotary_embedding<dtype>(position_ids, hdim, rope_base);
+	auto freq = tensor_zamba_precomp_rotary_embedding<dtype>(position_ids, config.head_dim, config.rope_base);
 	auto query_states = tensor_apply_zamba_rotary_embedding(q_plv_t, freq);
 	auto key_states_emb = tensor_apply_zamba_rotary_embedding(k_plv_t, freq);
+
+
+	// updating the kv cache and getting the updated values back
+	/*Tensor<dtype, CUDA> k_from_cache;
+	Tensor<dtype, CUDA> v_from_cache;
+	kv_cache.update_cache(
+		key_states_emb, 
+		v_plv_t, 
+		cache_position, 
+		layer_idx, 
+		sliding_window, 
+		k_from_cache, 
+		v_from_cache
+	);*/
 
 
 	// repeat_kv
@@ -92,7 +104,7 @@ static Tensor<dtype, CUDA> tensor_gemma_sdpa(
 		key_states,
 		value_states,
 		attention_mask_sliced,
-		sfmx_scale
+		config.sfmx_scale
 	);
 
 

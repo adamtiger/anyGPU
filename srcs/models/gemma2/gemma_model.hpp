@@ -6,7 +6,9 @@
 #include "dat_file.hpp"
 #include "ops.hpp"
 
+#include "gemma_update_mask.hpp"
 #include "gemma_decoder.hpp"
+#include "gemma_config.hpp"
 
 
 template<FloatingPointType dtype>
@@ -160,46 +162,45 @@ struct GemmaModelweights
 
 template<FloatingPointType dtype>
 static Tensor<dtype, CUDA> tensor_gemma_model(  // Gemma2Model
+	const GemmaConfig& config,
 	const GemmaModelweights<dtype>& model_weights,
-	const GemmaKVcache& kv_cache,
+	GemmaKVcache& kv_cache,
 	const Tensor<int32, CUDA>& input_ids,
 	const Tensor<dtype, CUDA>& attention_mask,
-	const Tensor<int32, CUDA>& position_ids,
-	const int hdim,
-	const int hidden_size,
-	const int rope_base,
-	const dtype rms_norm_eps,
-	const dtype sfmx_scale)
+	const Tensor<int32, CUDA>& position_ids)
 {
 	// embed the input ids (calculated from tokenizer)
 	auto inp_embeds = tensor_embedding(input_ids, model_weights.embedding_data);
 
 	// TODO: update_causal mask (requires implementation!)
+	/*auto causal_mas = tensor_gemma_update_mask(
+		attention_mask,
+		inp_embeds,
+		cache_position,  ???
+		config.target_length
+	);*/
 
 
 	// normalize hidden states
-	dtype norm_factor = static_cast<dtype>(sqrtf(static_cast<float32>(hidden_size)));
+	dtype norm_factor = static_cast<dtype>(sqrtf(static_cast<float32>(config.hidden_size)));
 	auto hidden_states = tensor_mul(inp_embeds, norm_factor);
 
 	// execute the decoder layers (one after each other)
 	for (auto& decoder_weights : model_weights.decoder_layers)
 	{
 		auto layer_outputs = tensor_gemma_decoder(
+			config,
 			decoder_weights,
 			kv_cache,
 			hidden_states,
 			attention_mask,
-			position_ids,
-			hdim,
-			rope_base,
-			rms_norm_eps,
-			sfmx_scale);
+			position_ids);
 
 		hidden_states = layer_outputs;  // TODO: may be this will be a list to return more values! (or return on the argument!)
 	}
 
 	// calculate rms norm
-	auto y = tensor_rms_norm(hidden_states, -1, model_weights.pos_rmsnorm_weight, rms_norm_eps, true);
+	auto y = tensor_rms_norm(hidden_states, -1, model_weights.pos_rmsnorm_weight, config.rms_norm_eps, true);
 
 
 	// TODO: store required additional outputs (e.g. all hidden states, attentions etc.) (is this required???, what is the purpose? saving computation and memory?)

@@ -8,6 +8,7 @@
 
 #include "gemma_mlp.hpp"
 #include "gemma_sdpa.hpp"
+#include "gemma_config.hpp"
 
 
 template<FloatingPointType dtype>
@@ -60,15 +61,12 @@ struct GemmaDecoderweights
 
 template<FloatingPointType dtype>
 static Tensor<dtype, CUDA> tensor_gemma_decoder(  // Gemma2DecoderLayer
+	const GemmaConfig& config,
 	const GemmaDecoderweights<dtype>& decoder_weights,
-	const GemmaKVcache& kv_cache,
+	GemmaKVcache& kv_cache,
 	const Tensor<dtype, CUDA>& hidden_states,
 	const Tensor<dtype, CUDA>& attention_mask,
-	const Tensor<int32, CUDA>& position_ids,
-	const int hdim,
-	const int rope_base,
-	const dtype rms_norm_eps,
-	const dtype sfmx_scale)
+	const Tensor<int32, CUDA>& position_ids)
 { 
 	// rms norm + attention + rms norm
 
@@ -76,24 +74,22 @@ static Tensor<dtype, CUDA> tensor_gemma_decoder(  // Gemma2DecoderLayer
 		hidden_states,
 		-1,
 		decoder_weights.input_rmsnorm_weight,
-		rms_norm_eps,
+		config.rms_norm_eps,
 		true);
 
 	auto hidden_states_sdpa = tensor_gemma_sdpa(
+		config,
 		decoder_weights.sdpa_weights,
 		kv_cache,
 		hidden_states_inp,
 		attention_mask,
-		position_ids,
-		hdim,
-		rope_base,
-		sfmx_scale);
+		position_ids);
 
 	auto hidden_states_post_attn = tensor_rms_norm(
 		hidden_states_sdpa,
 		-1,
 		decoder_weights.post_attn_rmsnorm_weight,
-		rms_norm_eps,
+		config.rms_norm_eps,
 		true);
 
 	auto hidden_states_after = tensor_add(hidden_states, hidden_states_post_attn);
@@ -104,7 +100,7 @@ static Tensor<dtype, CUDA> tensor_gemma_decoder(  // Gemma2DecoderLayer
 		hidden_states_after,
 		-1,
 		decoder_weights.preff_rmsnorm_weight,
-		rms_norm_eps,
+		config.rms_norm_eps,
 		true);
 
 	auto hidden_states_mlp = tensor_gemma_mlp(
@@ -115,7 +111,7 @@ static Tensor<dtype, CUDA> tensor_gemma_decoder(  // Gemma2DecoderLayer
 		hidden_states_mlp,
 		-1,
 		decoder_weights.postf_rmsnorm_weight,
-		rms_norm_eps,
+		config.rms_norm_eps,
 		true);
 
 	auto y = tensor_add(hidden_states_after, hidden_states_postf);

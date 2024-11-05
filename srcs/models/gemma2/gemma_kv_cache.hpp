@@ -24,11 +24,10 @@ struct GemmaKVcache
 	// initializer
 	void init_cache(
 		const GemmaConfig& config,
-		const int32 max_batch_len,
-		const int32 max_cache_len)
+		const int32 max_batch_len)
 	{
 		this->max_batch_len = max_batch_len;
-		this->max_cache_len = max_cache_len;
+		max_cache_len = config.target_length;
 
 		int32 head_dim = config.head_dim;
 		if (config.head_dim < 0)  // not defined

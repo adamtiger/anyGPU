@@ -97,12 +97,13 @@ void external_test_gemma2_decoder_attention()
 		(path / "gemma2decoder_attention.gemma2sdpaattention.o_proj.weight.dat").string()
 	);
 
+	GemmaConfig config;
 	GemmaKVcache kv_cache = {};
 
 	auto d_hs = h_hs.copy_to_cuda();
 	auto d_atten_mask = h_atten_mask.copy_to_cuda();
 	auto d_pos_ids = h_pos_ids.copy_to_cuda();
-	auto act_dy_cuda = tensor_gemma_sdpa(sdpa_weights, kv_cache, d_hs, d_atten_mask, d_pos_ids, 256, 10000, 0.0625f);
+	auto act_dy_cuda = tensor_gemma_sdpa(config, sdpa_weights, kv_cache, d_hs, d_atten_mask, d_pos_ids);
 	auto act_hy_cuda = act_dy_cuda.copy_to_host();
 
 	// compare
@@ -168,6 +169,7 @@ void external_test_gemma2_model_decoder()
 
 	auto exp_hy = load_tensor((path / "out_0.dat").string());
 
+	GemmaConfig config;
 	GemmaKVcache kv_cache = {};
 
 	GemmaDecoderweights<float32> gd_weights;
@@ -187,25 +189,17 @@ void external_test_gemma2_model_decoder()
 		(path / "gemm2model_decoder.gemma2decoderlayer.mlp.down_proj.weight.dat").string()
 	);
 
-	const int hdim = 256;
-	const int rope_base = 10000;
-	float32 rms_norm_eps = 1e-6f;
-	float32 sfmx_scale = 0.0625f;
-
 	auto d_hidden_states = h_hidden_states.copy_to_cuda();
 	auto d_attn_mask = h_attn_mask.copy_to_cuda();
 	auto d_pos_ids = h_pos_ids.copy_to_cuda();
 
 	auto act_dy_cuda = tensor_gemma_decoder(
+		config,
 		gd_weights,
 		kv_cache,
 		d_hidden_states,
 		d_attn_mask,
-		d_pos_ids,
-		hdim,
-		rope_base,
-		rms_norm_eps,
-		sfmx_scale
+		d_pos_ids
 	);
 
 	auto act_hy_cuda = act_dy_cuda.copy_to_host();
@@ -291,20 +285,10 @@ void external_test_gemma2_kvcache_update()
 	auto path = artifact_folder_path / "test_gemma2kvcache_update";
 
 	GemmaConfig config;
-	config.head_dim = 256;
-	config.hidden_size = 2304;
-	config.num_attention_heads = 8;
-	config.num_hidden_layers = 26;
-	config.num_key_value_heads = 4;
-	config.sliding_window = 4096;
 
 	// initiate kv cache
 	GemmaKVcache kv_cache;
-	kv_cache.init_cache(
-		config,
-		1,
-		41
-	);
+	kv_cache.init_cache(config, 1);
 
 	// compare
 	auto cmp = [&](const Tensor<float32, CPU>& expected, const Tensor<float32, CPU>& actual)
