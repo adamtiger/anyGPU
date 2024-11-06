@@ -45,7 +45,10 @@ static Tensor<dtype, CUDA> tensor_gemma_sdpa(
 	GemmaKVcache& kv_cache,
 	const Tensor<dtype, CUDA>& hidden_states,
 	const Tensor<dtype, CUDA>& attention_mask,
-	const Tensor<int32, CUDA>& position_ids)
+	const Tensor<int32, CUDA>& position_ids,
+	const Tensor<int32, CUDA>& cache_position,
+	const int32 layer_idx,
+	const int32 sliding_window)
 {
 	// projection of hidden states
 
@@ -78,7 +81,7 @@ static Tensor<dtype, CUDA> tensor_gemma_sdpa(
 
 
 	// updating the kv cache and getting the updated values back
-	/*Tensor<dtype, CUDA> k_from_cache;
+	Tensor<dtype, CUDA> k_from_cache;
 	Tensor<dtype, CUDA> v_from_cache;
 	kv_cache.update_cache(
 		key_states_emb, 
@@ -88,12 +91,12 @@ static Tensor<dtype, CUDA> tensor_gemma_sdpa(
 		sliding_window, 
 		k_from_cache, 
 		v_from_cache
-	);*/
+	);
 
 
 	// repeat_kv
-	auto key_states = tensor_repeat(key_states_emb, 1, 2);
-	auto value_states = tensor_repeat(v_plv_t, 1, 2);
+	auto key_states = tensor_repeat(k_from_cache, 1, 2);
+	auto value_states = tensor_repeat(v_from_cache, 1, 2);
 
 	// slicing attention mask
 	auto attention_mask_sliced = tensor_slice(attention_mask, 3, 0, key_states.shape[2]);

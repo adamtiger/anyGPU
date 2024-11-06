@@ -66,7 +66,10 @@ static Tensor<dtype, CUDA> tensor_gemma_decoder(  // Gemma2DecoderLayer
 	GemmaKVcache& kv_cache,
 	const Tensor<dtype, CUDA>& hidden_states,
 	const Tensor<dtype, CUDA>& attention_mask,
-	const Tensor<int32, CUDA>& position_ids)
+	const Tensor<int32, CUDA>& position_ids,
+	const Tensor<int32, CUDA>& cache_position,
+	const int32 layer_idx,
+	const int32 sliding_window)
 { 
 	// rms norm + attention + rms norm
 
@@ -83,7 +86,10 @@ static Tensor<dtype, CUDA> tensor_gemma_decoder(  // Gemma2DecoderLayer
 		kv_cache,
 		hidden_states_inp,
 		attention_mask,
-		position_ids);
+		position_ids,
+		cache_position,
+		layer_idx,
+		sliding_window);
 
 	auto hidden_states_post_attn = tensor_rms_norm(
 		hidden_states_sdpa,

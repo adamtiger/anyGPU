@@ -167,18 +167,19 @@ static Tensor<dtype, CUDA> tensor_gemma_model(  // Gemma2Model
 	GemmaKVcache& kv_cache,
 	const Tensor<int32, CUDA>& input_ids,
 	const Tensor<dtype, CUDA>& attention_mask,
-	const Tensor<int32, CUDA>& position_ids)
+	const Tensor<int32, CUDA>& position_ids,
+	const Tensor<int32, CUDA>& cache_position)
 {
 	// embed the input ids (calculated from tokenizer)
 	auto inp_embeds = tensor_embedding(input_ids, model_weights.embedding_data);
 
-	// TODO: update_causal mask (requires implementation!)
-	/*auto causal_mas = tensor_gemma_update_mask(
+	// update_causal mask
+	auto causal_mask = tensor_gemma_update_mask(
 		attention_mask,
 		inp_embeds,
-		cache_position,  ???
+		cache_position,
 		config.target_length
-	);*/
+	);
 
 
 	// normalize hidden states
@@ -186,17 +187,25 @@ static Tensor<dtype, CUDA> tensor_gemma_model(  // Gemma2Model
 	auto hidden_states = tensor_mul(inp_embeds, norm_factor);
 
 	// execute the decoder layers (one after each other)
+	int32 layer_idx = 0;
 	for (auto& decoder_weights : model_weights.decoder_layers)
 	{
+		int32 sliding_window = (layer_idx % 2 == 0 ? config.sliding_window : -1);
+
 		auto layer_outputs = tensor_gemma_decoder(
 			config,
 			decoder_weights,
 			kv_cache,
 			hidden_states,
-			attention_mask,
-			position_ids);
+			causal_mask,
+			position_ids,
+			cache_position,
+			layer_idx,
+			sliding_window);
 
-		hidden_states = layer_outputs;  // TODO: may be this will be a list to return more values! (or return on the argument!)
+		hidden_states = layer_outputs;
+
+		layer_idx++;
 	}
 
 	// calculate rms norm

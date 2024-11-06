@@ -34,7 +34,8 @@ static Tensor<dtype, CUDA> tensor_gemma_causallm(  // Gemma2ForCausalLM
 	GemmaKVcache& kv_cache,
 	const Tensor<int32, CUDA>& input_ids,
 	const Tensor<dtype, CUDA>& attention_mask,
-	const Tensor<int32, CUDA>& position_ids)
+	const Tensor<int32, CUDA>& position_ids,
+	const Tensor<int32, CUDA>& cache_position)
 {
 	// execute model
 	auto hidden_states = tensor_gemma_model(
@@ -43,7 +44,8 @@ static Tensor<dtype, CUDA> tensor_gemma_causallm(  // Gemma2ForCausalLM
 		kv_cache, 
 		input_ids,
 		attention_mask,
-		position_ids
+		position_ids,
+		cache_position
 	);
 
 	// lm_head (slicing can save computation)

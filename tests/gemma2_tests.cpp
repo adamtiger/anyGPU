@@ -87,6 +87,7 @@ void external_test_gemma2_decoder_attention()
 	auto h_hs = load_tensor((path / "in_hidden_states.dat").string());
 	auto h_atten_mask = load_tensor((path / "in_attention_mask.dat").string());
 	auto h_pos_ids = load_tensor<int32>((path / "in_position_ids.dat").string());
+	auto h_cache_pos = load_tensor<int32>((path / "in_cache_position.dat").string());
 	auto exp_hy = load_tensor((path / "out_0.dat").string());
 
 	GemmaSDPAweights<float32> sdpa_weights;
@@ -98,12 +99,26 @@ void external_test_gemma2_decoder_attention()
 	);
 
 	GemmaConfig config;
-	GemmaKVcache kv_cache = {};
+
+	// initiate kv cache
+	GemmaKVcache kv_cache;
+	kv_cache.init_cache(config, 1);
 
 	auto d_hs = h_hs.copy_to_cuda();
 	auto d_atten_mask = h_atten_mask.copy_to_cuda();
 	auto d_pos_ids = h_pos_ids.copy_to_cuda();
-	auto act_dy_cuda = tensor_gemma_sdpa(config, sdpa_weights, kv_cache, d_hs, d_atten_mask, d_pos_ids);
+	auto d_cache_pos = h_cache_pos.copy_to_cuda();
+	auto act_dy_cuda = tensor_gemma_sdpa(
+		config, 
+		sdpa_weights, 
+		kv_cache, 
+		d_hs, 
+		d_atten_mask, 
+		d_pos_ids, 
+		d_cache_pos,
+		0, 
+		config.sliding_window);
+	
 	auto act_hy_cuda = act_dy_cuda.copy_to_host();
 
 	// compare
@@ -166,11 +181,15 @@ void external_test_gemma2_model_decoder()
 	auto h_hidden_states = load_tensor((path / "in_0.dat").string());
 	auto h_attn_mask = load_tensor((path / "in_attention_mask.dat").string());
 	auto h_pos_ids = load_tensor<int32>((path / "in_position_ids.dat").string());
+	auto h_cache_pos = load_tensor<int32>((path / "in_cache_position.dat").string());
 
 	auto exp_hy = load_tensor((path / "out_0.dat").string());
 
 	GemmaConfig config;
-	GemmaKVcache kv_cache = {};
+
+	// initiate kv cache
+	GemmaKVcache kv_cache;
+	kv_cache.init_cache(config, 1);
 
 	GemmaDecoderweights<float32> gd_weights;
 	gd_weights.load_weights(
@@ -192,6 +211,7 @@ void external_test_gemma2_model_decoder()
 	auto d_hidden_states = h_hidden_states.copy_to_cuda();
 	auto d_attn_mask = h_attn_mask.copy_to_cuda();
 	auto d_pos_ids = h_pos_ids.copy_to_cuda();
+	auto d_cache_pos = h_cache_pos.copy_to_cuda();
 
 	auto act_dy_cuda = tensor_gemma_decoder(
 		config,
@@ -199,7 +219,10 @@ void external_test_gemma2_model_decoder()
 		kv_cache,
 		d_hidden_states,
 		d_attn_mask,
-		d_pos_ids
+		d_pos_ids,
+		d_cache_pos,
+		0,
+		config.sliding_window
 	);
 
 	auto act_hy_cuda = act_dy_cuda.copy_to_host();
