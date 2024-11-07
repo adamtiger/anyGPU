@@ -241,15 +241,22 @@ if (MSVC OR CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
 endif()
 
+if (UNIX)
+    set(CUDA_HEADERS "/usr/local/cuda-12.6/include")  # temporary!
+endif()
+
 add_executable(anygpu ${SOURCES} ${HEADERS})
 target_include_directories(
-    anygpu PUBLIC ${Vulkan_INCLUDE_DIR} 
+    anygpu PUBLIC ${Vulkan_INCLUDE_DIR} ${CUDA_HEADERS}
 	${TRF_DIR} ${CORE_DIR} ${IO_DIR} 
 	${TEST_DIR} ${OPS_DIR} ${FUSED_DIR}
 	${ZAM2_DIR} ${GEM2_DIR}
 )
 #target_compile_options(anygpu PUBLIC $<$<COMPILE_LANGUAGE:CUDA>:--keep>)
-target_link_options(anygpu PUBLIC "/NODEFAULTLIB:libcmt.lib") 
+if (MSVC)
+    target_link_options(anygpu PUBLIC "/NODEFAULTLIB:libcmt.lib")
+endif()
+
 target_link_libraries(anygpu PUBLIC ${Vulkan_LIBRARIES})
 
 message("Finished")
