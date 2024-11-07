@@ -31,7 +31,7 @@ struct GemmaMLPweights
 };
 
 template<FloatingPointType dtype, Device device>
-static Tensor<dtype, device> tensor_gemma_mlp(
+inline Tensor<dtype, device> tensor_gemma_mlp(
 	const GemmaMLPweights<dtype, device>& mlp_weights,
 	const Tensor<dtype, device>& x)
 {

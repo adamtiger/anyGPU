@@ -66,7 +66,7 @@ struct ZambaAttentionDecoderweights
 };
 
 template<FloatingPointType dtype>
-static Tensor<dtype, CUDA> tensor_zamba_attention_decoder(  // Zamba2AttentionDecoderLayer
+inline Tensor<dtype, CUDA> tensor_zamba_attention_decoder(  // Zamba2AttentionDecoderLayer
 	const ZambaAttentionDecoderweights<dtype>& ad_weights,
 	const ZambaKVcache& kv_cache,
 	const Tensor<dtype, CUDA>& hidden_states,

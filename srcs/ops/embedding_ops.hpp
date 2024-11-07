@@ -13,7 +13,7 @@
   @param wt: embedding weights
 */
 template<PreciseFloatType dtype>
-static Tensor<dtype, CPU> tensor_embedding(const Tensor<int32, CPU>& xt, const Tensor<dtype, CPU>& wt)
+inline Tensor<dtype, CPU> tensor_embedding(const Tensor<int32, CPU>& xt, const Tensor<dtype, CPU>& wt)
 {
 	// access the data arrays
 	const int length = xt.size();
@@ -40,7 +40,7 @@ static Tensor<dtype, CPU> tensor_embedding(const Tensor<int32, CPU>& xt, const T
 
 
 template<FloatingPointType dtype>
-static Tensor<dtype, CUDA> tensor_embedding(const Tensor<int32, CUDA>& xt, const Tensor<dtype, CUDA>& wt)
+inline Tensor<dtype, CUDA> tensor_embedding(const Tensor<int32, CUDA>& xt, const Tensor<dtype, CUDA>& wt)
 {
 	// access the data arrays
 	Shape y_shape = xt.shape;
@@ -72,7 +72,7 @@ static Tensor<dtype, CUDA> tensor_embedding(const Tensor<int32, CUDA>& xt, const
   @param base: the base for the geometric progression used to compute the rotation angles
 */
 template<PreciseFloatType dtype>
-static Tensor<dtype, CPU> tensor_precomp_rotary_embedding_cpu(
+inline Tensor<dtype, CPU> tensor_precomp_rotary_embedding_cpu(
 	const int32 max_seq_len, 
 	const int32 emb_size, 
 	const int32 base=10000)
@@ -113,7 +113,7 @@ static Tensor<dtype, CPU> tensor_precomp_rotary_embedding_cpu(
 
 
 template<FloatingPointType dtype>
-static Tensor<dtype, CUDA> tensor_precomp_rotary_embedding_cu(
+inline Tensor<dtype, CUDA> tensor_precomp_rotary_embedding_cu(
 	const int32 max_seq_len,
 	const int32 emb_size,
 	const int32 base = 10000)
@@ -138,7 +138,7 @@ static Tensor<dtype, CUDA> tensor_precomp_rotary_embedding_cu(
 
 
 template<FloatingPointType dtype, Device device>
-static Tensor<dtype, device> tensor_precomp_rotary_embedding(
+inline Tensor<dtype, device> tensor_precomp_rotary_embedding(
 	const int32 max_seq_len,
 	const int32 emb_size,
 	const int32 base = 10000)
@@ -165,7 +165,7 @@ static Tensor<dtype, device> tensor_precomp_rotary_embedding(
   @param ft: angles for rotations (embedding tensor)
 */
 template<PreciseFloatType dtype>
-static Tensor<dtype, CPU> tensor_apply_rotary_embedding(
+inline Tensor<dtype, CPU> tensor_apply_rotary_embedding(
 	const Tensor<dtype, CPU>& xt,
 	const Tensor<int32, CPU>& pt,
 	const Tensor<dtype, CPU>& ft)
@@ -221,7 +221,7 @@ static Tensor<dtype, CPU> tensor_apply_rotary_embedding(
 
 
 template<FloatingPointType dtype>
-static Tensor<dtype, CUDA> tensor_apply_rotary_embedding(
+inline Tensor<dtype, CUDA> tensor_apply_rotary_embedding(
 	const Tensor<dtype, CUDA>& xt,
 	const Tensor<int32, CUDA>& pt,
 	const Tensor<dtype, CUDA>& ft)
@@ -253,7 +253,7 @@ static Tensor<dtype, CUDA> tensor_apply_rotary_embedding(
   @param ft: angles for rotations (embedding tensor)
 */
 template<PreciseFloatType dtype>
-static Tensor<dtype, CPU> tensor_apply_alt_rotary_embedding(
+inline Tensor<dtype, CPU> tensor_apply_alt_rotary_embedding(
 	const Tensor<dtype, CPU>& xt,
 	const Tensor<int32, CPU>& pt,
 	const Tensor<dtype, CPU>& ft)
@@ -309,7 +309,7 @@ static Tensor<dtype, CPU> tensor_apply_alt_rotary_embedding(
 
 
 template<FloatingPointType dtype>
-static Tensor<dtype, CUDA> tensor_apply_alt_rotary_embedding(
+inline Tensor<dtype, CUDA> tensor_apply_alt_rotary_embedding(
 	const Tensor<dtype, CUDA>& xt,
 	const Tensor<int32, CUDA>& pt,
 	const Tensor<dtype, CUDA>& ft)

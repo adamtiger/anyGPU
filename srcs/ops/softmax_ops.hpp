@@ -13,7 +13,7 @@
 *  (Otherwise it is recommended to use a reshape.)
 */
 template<PreciseFloatType dtype>
-Tensor<dtype, CPU> tensor_softmax(const Tensor<dtype, CPU>& x)
+inline Tensor<dtype, CPU> tensor_softmax(const Tensor<dtype, CPU>& x)
 {
 	ACASSERT(x.dim == 2, "softmax expects 2 dimensional tensors");
 
@@ -83,7 +83,7 @@ Tensor<dtype, CPU> tensor_softmax(const Tensor<dtype, CPU>& x)
 
 
 template<typename dtype>
-Tensor<dtype, CUDA> tensor_softmax(const Tensor<dtype, CUDA>& x)
+inline Tensor<dtype, CUDA> tensor_softmax(const Tensor<dtype, CUDA>& x)
 {
 	ACASSERT(x.dim == 2, "softmax expects 2 dimensional tensors");
 
@@ -116,7 +116,7 @@ Tensor<dtype, CUDA> tensor_softmax(const Tensor<dtype, CUDA>& x)
 *  param grad_y - the derivative according to the output
 */
 template<PreciseFloatType dtype>
-Tensor<dtype, CPU> tensor_softmax_bwd(const Tensor<dtype, CPU>& x, const Tensor<dtype, CPU>& grad_y)
+inline Tensor<dtype, CPU> tensor_softmax_bwd(const Tensor<dtype, CPU>& x, const Tensor<dtype, CPU>& grad_y)
 {
 	ACASSERT(x.dim == 2, "softmax bwd expects 2 dimensional x tensor");
 	ACASSERT(grad_y.dim == 2, "softmax bwd expects 2 dimensional grad y tensor");
@@ -173,7 +173,7 @@ Tensor<dtype, CPU> tensor_softmax_bwd(const Tensor<dtype, CPU>& x, const Tensor<
 
 
 template<typename dtype>
-Tensor<dtype, CUDA> tensor_softmax_bwd(const Tensor<dtype, CUDA>& x, const Tensor<dtype, CUDA>& grad_y)
+inline Tensor<dtype, CUDA> tensor_softmax_bwd(const Tensor<dtype, CUDA>& x, const Tensor<dtype, CUDA>& grad_y)
 {
 	ACASSERT(x.dim == 2, "softmax bwd expects 2 dimensional x tensor");
 	ACASSERT(grad_y.dim == 2, "softmax bwd expects 2 dimensional grad y tensor");

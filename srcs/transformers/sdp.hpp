@@ -11,7 +11,7 @@
 /* forward implementation */
 
 template<PreciseFloatType dtype>
-Tensor<dtype, CPU> sdp_attention_fwd_cpu_precise_float(
+inline Tensor<dtype, CPU> sdp_attention_fwd_cpu_precise_float(
 	const Tensor<dtype, CPU>& qw,
 	const Tensor<dtype, CPU>& kw,
 	const Tensor<dtype, CPU>& vw)
@@ -28,7 +28,7 @@ Tensor<dtype, CPU> sdp_attention_fwd_cpu_precise_float(
 
 
 template<FloatingPointType dtype>
-Tensor<dtype, CUDA> sdp_attention_fwd_cuda_basic(
+inline Tensor<dtype, CUDA> sdp_attention_fwd_cuda_basic(
 	const Tensor<dtype, CUDA>& qw,
 	const Tensor<dtype, CUDA>& kw,
 	const Tensor<dtype, CUDA>& vw)
@@ -61,7 +61,7 @@ struct SDPGradient
 /* backward implementation */
 
 template<PreciseFloatType dtype>
-static SDPGradient<dtype, CPU> sdp_attention_bwd_cpu_precise_float(
+inline SDPGradient<dtype, CPU> sdp_attention_bwd_cpu_precise_float(
 	const Tensor<dtype, CPU>& qw,
 	const Tensor<dtype, CPU>& kw,
 	const Tensor<dtype, CPU>& vw,
@@ -91,7 +91,7 @@ static SDPGradient<dtype, CPU> sdp_attention_bwd_cpu_precise_float(
 
 
 template<FloatingPointType dtype>
-static SDPGradient<dtype, CUDA> sdp_attention_bwd_cuda_basic(
+inline SDPGradient<dtype, CUDA> sdp_attention_bwd_cuda_basic(
 	const Tensor<dtype, CUDA>& qw,
 	const Tensor<dtype, CUDA>& kw,
 	const Tensor<dtype, CUDA>& vw,
@@ -123,7 +123,7 @@ static SDPGradient<dtype, CUDA> sdp_attention_bwd_cuda_basic(
 /* qunatized forward implementation */
 
 template<PreciseFloatType dtype>
-static Tensor<int8, CPU> quant_sdp_attention_fwd_cpu_precise_i8(
+inline Tensor<int8, CPU> quant_sdp_attention_fwd_cpu_precise_i8(
 	const Tensor<int8, CPU>& qw,
 	const Tensor<int8, CPU>& kw,
 	const Tensor<int8, CPU>& vw,
@@ -177,7 +177,7 @@ static Tensor<int8, CUDA> quant_sdp_attention_fwd_cuda_basic_f32_i8(
 /* SDP with masking and scaling, shape is general */
 
 template<FloatingPointType dtype, Device device>
-Tensor<dtype, device> sdp_attention_masked_scaled_fwd(
+inline Tensor<dtype, device> sdp_attention_masked_scaled_fwd(
 	const Tensor<dtype, device>& qw,
 	const Tensor<dtype, device>& kw,
 	const Tensor<dtype, device>& vw,

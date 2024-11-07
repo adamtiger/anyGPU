@@ -10,7 +10,7 @@
 /* update causal mask */
 
 template<FloatingPointType dtype>
-static Tensor<dtype, CUDA> tensor_gemma_update_mask(
+inline Tensor<dtype, CUDA> tensor_gemma_update_mask(
 	const Tensor<int32, CUDA>& attention_mask,  // [batch, seq_len(?)]
 	const Tensor<dtype, CUDA>& input_tensor,    // [batch, seq_len, hidden_size]
 	const Tensor<int32, CUDA>& cache_position,  // [seq_len]

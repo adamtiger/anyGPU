@@ -14,7 +14,7 @@
   @param xt: input tensor
 */
 template<PreciseFloatType dtype>
-static Tensor<dtype, CPU> tensor_silu(const Tensor<dtype, CPU>& xt)
+inline Tensor<dtype, CPU> tensor_silu(const Tensor<dtype, CPU>& xt)
 {
 	// access the data arrays
 	Tensor<dtype, CPU> yt(xt.dim, xt.shape);
@@ -36,7 +36,7 @@ static Tensor<dtype, CPU> tensor_silu(const Tensor<dtype, CPU>& xt)
 
 
 template<FloatingPointType dtype>
-static Tensor<dtype, CUDA> tensor_silu(const Tensor<dtype, CUDA>& xt)
+inline Tensor<dtype, CUDA> tensor_silu(const Tensor<dtype, CUDA>& xt)
 {
 	// access the data arrays
 	Tensor<dtype, CUDA> yt(xt.dim, xt.shape);
@@ -60,7 +60,7 @@ static Tensor<dtype, CUDA> tensor_silu(const Tensor<dtype, CUDA>& xt)
   @param xt: input tensor
 */
 template<PreciseFloatType dtype>
-static Tensor<dtype, CPU> tensor_gelu(const Tensor<dtype, CPU>& xt, const bool approx=false)
+inline Tensor<dtype, CPU> tensor_gelu(const Tensor<dtype, CPU>& xt, const bool approx=false)
 {
 	// access the data arrays
 	Tensor<dtype, CPU> yt(xt.dim, xt.shape);
@@ -94,7 +94,7 @@ static Tensor<dtype, CPU> tensor_gelu(const Tensor<dtype, CPU>& xt, const bool a
 
 
 template<FloatingPointType dtype>
-static Tensor<dtype, CUDA> tensor_gelu(const Tensor<dtype, CUDA>& xt, const bool approx = false)
+inline Tensor<dtype, CUDA> tensor_gelu(const Tensor<dtype, CUDA>& xt, const bool approx = false)
 {
 	// access the data arrays
 	Tensor<dtype, CUDA> yt(xt.dim, xt.shape);

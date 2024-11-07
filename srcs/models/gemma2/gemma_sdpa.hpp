@@ -39,7 +39,7 @@ struct GemmaSDPAweights
 };
 
 template<FloatingPointType dtype>
-static Tensor<dtype, CUDA> tensor_gemma_sdpa(
+inline Tensor<dtype, CUDA> tensor_gemma_sdpa(
 	const GemmaConfig& config,
 	const GemmaSDPAweights<dtype>& sdpa_weights,
 	GemmaKVcache& kv_cache,

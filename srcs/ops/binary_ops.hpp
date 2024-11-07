@@ -9,7 +9,7 @@
 /* binary add (tensor, tensor) */
 
 template<NotHalfFloatType dtype>
-Tensor<dtype, CPU> tensor_add(const Tensor<dtype, CPU>& lhs, const Tensor<dtype, CPU>& rhs)
+inline Tensor<dtype, CPU> tensor_add(const Tensor<dtype, CPU>& lhs, const Tensor<dtype, CPU>& rhs)
 {
 	ACASSERT(elementwise_compatible(lhs, rhs) == true, "tensors are not elementwise compatible");
 
@@ -30,7 +30,7 @@ Tensor<dtype, CPU> tensor_add(const Tensor<dtype, CPU>& lhs, const Tensor<dtype,
 
 
 template<typename dtype>
-Tensor<dtype, CUDA> tensor_add(const Tensor<dtype, CUDA>& lhs, const Tensor<dtype, CUDA>& rhs)
+inline Tensor<dtype, CUDA> tensor_add(const Tensor<dtype, CUDA>& lhs, const Tensor<dtype, CUDA>& rhs)
 {
 	ACASSERT(elementwise_compatible(lhs, rhs) == true, "tensors are not elementwise compatible");
 
@@ -59,7 +59,7 @@ Tensor<dtype, CUDA> tensor_add(const Tensor<dtype, CUDA>& lhs, const Tensor<dtyp
 /* binary mul (tensor, scalar) */
 
 template<NotHalfFloatType dtype>
-Tensor<dtype, CPU> tensor_mul(const Tensor<dtype, CPU>& lhs, const dtype rhs)
+inline Tensor<dtype, CPU> tensor_mul(const Tensor<dtype, CPU>& lhs, const dtype rhs)
 {
 	int length = lhs.size();
 	dtype* lhs_data = lhs.buffer();
@@ -77,7 +77,7 @@ Tensor<dtype, CPU> tensor_mul(const Tensor<dtype, CPU>& lhs, const dtype rhs)
 
 
 template<typename dtype>
-Tensor<dtype, CUDA> tensor_mul(const Tensor<dtype, CUDA>& lhs, const dtype rhs)
+inline Tensor<dtype, CUDA> tensor_mul(const Tensor<dtype, CUDA>& lhs, const dtype rhs)
 {
 	int length = lhs.size();
 	auto kpms = calc_kernel_prms_pointwise(lhs);
@@ -101,7 +101,7 @@ Tensor<dtype, CUDA> tensor_mul(const Tensor<dtype, CUDA>& lhs, const dtype rhs)
 /* binary mul (tensor, tensor) */
 
 template<NotHalfFloatType dtype>
-Tensor<dtype, CPU> tensor_mul(const Tensor<dtype, CPU>& lhs, const Tensor<dtype, CPU>& rhs)
+inline Tensor<dtype, CPU> tensor_mul(const Tensor<dtype, CPU>& lhs, const Tensor<dtype, CPU>& rhs)
 {
 	ACASSERT(elementwise_compatible(lhs, rhs) == true, "tensors are not elementwise compatible");
 
@@ -122,7 +122,7 @@ Tensor<dtype, CPU> tensor_mul(const Tensor<dtype, CPU>& lhs, const Tensor<dtype,
 
 
 template<typename dtype>
-Tensor<dtype, CUDA> tensor_mul(const Tensor<dtype, CUDA>& lhs, const Tensor<dtype, CUDA>& rhs)
+inline Tensor<dtype, CUDA> tensor_mul(const Tensor<dtype, CUDA>& lhs, const Tensor<dtype, CUDA>& rhs)
 {
 	ACASSERT(elementwise_compatible(lhs, rhs) == true, "tensors are not elementwise compatible");
 

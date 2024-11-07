@@ -10,7 +10,7 @@
 /* tranpose for 2d tensors */
 
 template<NotHalfFloatType dtype>
-Tensor<dtype, CPU> tensor_transp(const Tensor<dtype, CPU>& x)
+inline Tensor<dtype, CPU> tensor_transp(const Tensor<dtype, CPU>& x)
 {
 	ACASSERT(x.dim == 2, "transpose expects 2 dimensional tensors");
 
@@ -48,7 +48,7 @@ Tensor<dtype, CPU> tensor_transp(const Tensor<dtype, CPU>& x)
 
 
 template<typename dtype>
-Tensor<dtype, CUDA> tensor_transp(const Tensor<dtype, CUDA>& x)
+inline Tensor<dtype, CUDA> tensor_transp(const Tensor<dtype, CUDA>& x)
 {
 	ACASSERT(x.dim == 2, "transpose expects 2 dimensional tensors");
 
@@ -78,7 +78,7 @@ Tensor<dtype, CUDA> tensor_transp(const Tensor<dtype, CUDA>& x)
 /* tranpose nd tensors, by swapping two axes */
 
 template<NotHalfFloatType dtype>
-Tensor<dtype, CPU> tensor_transp(const Tensor<dtype, CPU>& x, const int32 ax1, const int32 ax2)
+inline Tensor<dtype, CPU> tensor_transp(const Tensor<dtype, CPU>& x, const int32 ax1, const int32 ax2)
 {
 	int32 dim = x.dim;
 	Shape y_shape = x.shape;
@@ -112,7 +112,7 @@ Tensor<dtype, CPU> tensor_transp(const Tensor<dtype, CPU>& x, const int32 ax1, c
 
 
 template<typename dtype>
-Tensor<dtype, CUDA> tensor_transp(const Tensor<dtype, CUDA>& xt, const int32 ax1, const int32 ax2)
+inline Tensor<dtype, CUDA> tensor_transp(const Tensor<dtype, CUDA>& xt, const int32 ax1, const int32 ax2)
 {
 	int64 dim = xt.dim;
 	Shape y_shape = xt.shape;

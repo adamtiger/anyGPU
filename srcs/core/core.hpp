@@ -52,7 +52,7 @@ static long long bytesize_of_datatypes[] = {
 /*
   Returns the bitsize of the data type
 */
-template<typename T> static int64 get_bitsize()
+template<typename T> inline int64 get_bitsize()
 {
 	return static_cast<int64>(sizeof(T) * 8);
 }
@@ -98,7 +98,7 @@ enum DataType
   This function can help to reason about the
   underlying type of the tensor.
 */
-template<typename T> static DataType get_datatype_enum()
+template<typename T> inline DataType get_datatype_enum()
 {
 	if constexpr (std::is_same_v<T, float32>)
 	{
@@ -152,7 +152,7 @@ std::string represent_datatype(const DataType dtype);
   Represents the underlying type as string.
 */
 template<typename dtype>
-static std::string represent_datatype()
+inline std::string represent_datatype()
 {
 	DataType dt = get_datatype_enum<dtype>();
 	return represent_datatype(dt);
@@ -184,7 +184,7 @@ std::string represent_array(const int64 dim, const DimArray& arr);
   Converting the int vector into any target data type.
 */
 template<typename T>
-static std::vector<T> cvt_int_vector_to_any(const std::vector<int>& hdata)
+inline std::vector<T> cvt_int_vector_to_any(const std::vector<int>& hdata)
 {
 	std::vector<T> out_data(hdata.size());
 
@@ -210,7 +210,7 @@ static std::vector<T> cvt_int_vector_to_any(const std::vector<int>& hdata)
 //}
 
 template<>
-static std::vector<bfloat16> cvt_int_vector_to_any(const std::vector<int>& hdata)
+inline std::vector<bfloat16> cvt_int_vector_to_any(const std::vector<int>& hdata)
 {
 	std::vector<bfloat16> out_data(hdata.size());
 
@@ -223,7 +223,7 @@ static std::vector<bfloat16> cvt_int_vector_to_any(const std::vector<int>& hdata
 }
 
 template<>
-static std::vector<fp8e4m3> cvt_int_vector_to_any(const std::vector<int>& hdata)
+inline std::vector<fp8e4m3> cvt_int_vector_to_any(const std::vector<int>& hdata)
 {
 	std::vector<fp8e4m3> out_data(hdata.size());
 
@@ -237,7 +237,7 @@ static std::vector<fp8e4m3> cvt_int_vector_to_any(const std::vector<int>& hdata)
 }
 
 template<>
-static std::vector<fp8e5m2> cvt_int_vector_to_any(const std::vector<int>& hdata)
+inline std::vector<fp8e5m2> cvt_int_vector_to_any(const std::vector<int>& hdata)
 {
 	std::vector<fp8e5m2> out_data(hdata.size());
 
@@ -256,31 +256,31 @@ static std::vector<fp8e5m2> cvt_int_vector_to_any(const std::vector<int>& hdata)
   any underlying type for printing.
 */
 template<typename T>
-static float32 cvt_any_to_float32(const T value)
+inline float32 cvt_any_to_float32(const T value)
 {
 	return static_cast<float32>(value);
 }
 
 template<>
-static float32 cvt_any_to_float32<float16>(const float16 value)
+inline float32 cvt_any_to_float32<float16>(const float16 value)
 {
 	return __half2float(value);
 }
 
 template<>
-static float32 cvt_any_to_float32<bfloat16>(const bfloat16 value)
+inline float32 cvt_any_to_float32<bfloat16>(const bfloat16 value)
 {
 	return __bfloat162float(value);
 }
 
 template<>
-static float32 cvt_any_to_float32<fp8e4m3>(const fp8e4m3 value)
+inline float32 cvt_any_to_float32<fp8e4m3>(const fp8e4m3 value)
 {
 	return (float)value;
 }
 
 template<>
-static float32 cvt_any_to_float32<fp8e5m2>(const fp8e5m2 value)
+inline float32 cvt_any_to_float32<fp8e5m2>(const fp8e5m2 value)
 {
 	return (float)value;
 }

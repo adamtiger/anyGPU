@@ -59,7 +59,7 @@ enum ScoreFuncKind
 *  specified with the template parameters.
 */
 template<FloatingPointType dtype, Device device>
-static Tensor<dtype, device> single_head_attention_fwd(
+inline Tensor<dtype, device> single_head_attention_fwd(
 	const Tensor<dtype, device>& qw,
 	const Tensor<dtype, device>& kw,
 	const Tensor<dtype, device>& vw) 
@@ -71,7 +71,7 @@ static Tensor<dtype, device> single_head_attention_fwd(
 /* cpu implementations */
 
 template<>
-static Tensor<float32, CPU> single_head_attention_fwd<float32, CPU>(
+inline Tensor<float32, CPU> single_head_attention_fwd<float32, CPU>(
 	const Tensor<float32, CPU>& qw,
 	const Tensor<float32, CPU>& kw,
 	const Tensor<float32, CPU>& vw)
@@ -80,7 +80,7 @@ static Tensor<float32, CPU> single_head_attention_fwd<float32, CPU>(
 }
 
 template<>
-static Tensor<float64, CPU> single_head_attention_fwd<float64, CPU>(
+inline Tensor<float64, CPU> single_head_attention_fwd<float64, CPU>(
 	const Tensor<float64, CPU>& qw,
 	const Tensor<float64, CPU>& kw,
 	const Tensor<float64, CPU>& vw)
@@ -91,20 +91,20 @@ static Tensor<float64, CPU> single_head_attention_fwd<float64, CPU>(
 /* not implemented cases for cpu (floats under 4 bytes) */
 
 template<>
-static Tensor<float16, CPU> single_head_attention_fwd<float16, CPU>(
+inline Tensor<float16, CPU> single_head_attention_fwd<float16, CPU>(
 	const Tensor<float16, CPU>& qw,
 	const Tensor<float16, CPU>& kw,
 	const Tensor<float16, CPU>& vw) = delete;
 
 template<>
-static Tensor<bfloat16, CPU> single_head_attention_fwd<bfloat16, CPU>(
+inline Tensor<bfloat16, CPU> single_head_attention_fwd<bfloat16, CPU>(
 	const Tensor<bfloat16, CPU>& qw,
 	const Tensor<bfloat16, CPU>& kw,
 	const Tensor<bfloat16, CPU>& vw) = delete;
 
 /* cuda implementations */
 template<>
-static Tensor<float32, CUDA> single_head_attention_fwd<float32, CUDA>(
+inline Tensor<float32, CUDA> single_head_attention_fwd<float32, CUDA>(
 	const Tensor<float32, CUDA>& qw,
 	const Tensor<float32, CUDA>& kw,
 	const Tensor<float32, CUDA>& vw)
@@ -122,7 +122,7 @@ static Tensor<float32, CUDA> single_head_attention_fwd<float32, CUDA>(
 *  specified with the template parameters.
 */
 template<FloatingPointType dtype, Device device>
-static SDPGradient<dtype, device> single_head_attention_bwd(
+inline SDPGradient<dtype, device> single_head_attention_bwd(
 	const Tensor<dtype, device>& qw,
 	const Tensor<dtype, device>& kw,
 	const Tensor<dtype, device>& vw,
@@ -135,7 +135,7 @@ static SDPGradient<dtype, device> single_head_attention_bwd(
 /* cpu implementations */
 
 template<>
-static SDPGradient<float32, CPU> single_head_attention_bwd<float32, CPU>(
+inline SDPGradient<float32, CPU> single_head_attention_bwd<float32, CPU>(
 	const Tensor<float32, CPU>& qw,
 	const Tensor<float32, CPU>& kw,
 	const Tensor<float32, CPU>& vw,
@@ -145,7 +145,7 @@ static SDPGradient<float32, CPU> single_head_attention_bwd<float32, CPU>(
 }
 
 template<>
-static SDPGradient<float64, CPU> single_head_attention_bwd<float64, CPU>(
+inline SDPGradient<float64, CPU> single_head_attention_bwd<float64, CPU>(
 	const Tensor<float64, CPU>& qw,
 	const Tensor<float64, CPU>& kw,
 	const Tensor<float64, CPU>& vw,
@@ -157,14 +157,14 @@ static SDPGradient<float64, CPU> single_head_attention_bwd<float64, CPU>(
 /* not implemented cases for cpu (floats under 4 bytes) */
 
 template<>
-static SDPGradient<float16, CPU> single_head_attention_bwd<float16, CPU>(
+inline SDPGradient<float16, CPU> single_head_attention_bwd<float16, CPU>(
 	const Tensor<float16, CPU>& qw,
 	const Tensor<float16, CPU>& kw,
 	const Tensor<float16, CPU>& vw,
 	const Tensor<float16, CPU>& grad_y) = delete;
 
 template<>
-static SDPGradient<bfloat16, CPU> single_head_attention_bwd<bfloat16, CPU>(
+inline SDPGradient<bfloat16, CPU> single_head_attention_bwd<bfloat16, CPU>(
 	const Tensor<bfloat16, CPU>& qw,
 	const Tensor<bfloat16, CPU>& kw,
 	const Tensor<bfloat16, CPU>& vw,
@@ -172,7 +172,7 @@ static SDPGradient<bfloat16, CPU> single_head_attention_bwd<bfloat16, CPU>(
 
 /* cuda implementations */
 template<>
-static SDPGradient<float32, CUDA> single_head_attention_bwd<float32, CUDA>(
+inline SDPGradient<float32, CUDA> single_head_attention_bwd<float32, CUDA>(
 	const Tensor<float32, CUDA>& qw,
 	const Tensor<float32, CUDA>& kw,
 	const Tensor<float32, CUDA>& vw,
@@ -200,7 +200,7 @@ template<
 	FloatingPointType hp_dtype,
 	IntegerType lp_dtype,
 	Device device>
-static Tensor<lp_dtype, device> quantized_single_head_attention_fwd(
+inline Tensor<lp_dtype, device> quantized_single_head_attention_fwd(
 	const Tensor<lp_dtype, device>& qw,
 	const Tensor<lp_dtype, device>& kw,
 	const Tensor<lp_dtype, device>& vw,
@@ -219,7 +219,7 @@ static Tensor<lp_dtype, device> quantized_single_head_attention_fwd(
 /* cpu implementations */
 
 template<>
-static Tensor<int8, CPU> quantized_single_head_attention_fwd<float32, int8, CPU>(
+inline Tensor<int8, CPU> quantized_single_head_attention_fwd<float32, int8, CPU>(
 	const Tensor<int8, CPU>& qw,
 	const Tensor<int8, CPU>& kw,
 	const Tensor<int8, CPU>& vw,
@@ -244,7 +244,7 @@ static Tensor<int8, CPU> quantized_single_head_attention_fwd<float32, int8, CPU>
 }
 
 template<>
-static Tensor<int8, CPU> quantized_single_head_attention_fwd<float64, int8, CPU>(
+inline Tensor<int8, CPU> quantized_single_head_attention_fwd<float64, int8, CPU>(
 	const Tensor<int8, CPU>& qw,
 	const Tensor<int8, CPU>& kw,
 	const Tensor<int8, CPU>& vw,
@@ -271,7 +271,7 @@ static Tensor<int8, CPU> quantized_single_head_attention_fwd<float64, int8, CPU>
 /* not implemented cases for cpu (floats under 4 bytes) */
 
 template<>
-static Tensor<int8, CPU> quantized_single_head_attention_fwd<float16, int8, CPU>(
+inline Tensor<int8, CPU> quantized_single_head_attention_fwd<float16, int8, CPU>(
 	const Tensor<int8, CPU>& qw,
 	const Tensor<int8, CPU>& kw,
 	const Tensor<int8, CPU>& vw,
@@ -284,7 +284,7 @@ static Tensor<int8, CPU> quantized_single_head_attention_fwd<float16, int8, CPU>
 	const float16 sy, const int8 zpy) = delete;
 
 template<>
-static Tensor<int8, CPU> quantized_single_head_attention_fwd<bfloat16, int8, CPU>(
+inline Tensor<int8, CPU> quantized_single_head_attention_fwd<bfloat16, int8, CPU>(
 	const Tensor<int8, CPU>& qw,
 	const Tensor<int8, CPU>& kw,
 	const Tensor<int8, CPU>& vw,
@@ -298,7 +298,7 @@ static Tensor<int8, CPU> quantized_single_head_attention_fwd<bfloat16, int8, CPU
 
 /* cuda implementations */
 template<>
-static Tensor<int8, CUDA> quantized_single_head_attention_fwd<float32, int8, CUDA>(
+inline Tensor<int8, CUDA> quantized_single_head_attention_fwd<float32, int8, CUDA>(
 	const Tensor<int8, CUDA>& qw,
 	const Tensor<int8, CUDA>& kw,
 	const Tensor<int8, CUDA>& vw,

@@ -10,7 +10,7 @@
 /* linear softcapping */
 
 template<FloatingPointType dtype>
-static Tensor<dtype, CUDA> tensor_gemma_linear_softcap(
+inline Tensor<dtype, CUDA> tensor_gemma_linear_softcap(
 	const Tensor<dtype, CUDA>& xt,
 	const Tensor<dtype, CUDA>& wt,  // [vocab_size, hidden_size]
 	const dtype final_softcapping)

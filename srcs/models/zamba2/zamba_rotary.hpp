@@ -7,7 +7,7 @@
 #include "core_concepts.hpp"
 
 template<FloatingPointType dtype>
-static Tensor<dtype, CUDA> tensor_zamba_precomp_rotary_embedding(
+inline Tensor<dtype, CUDA> tensor_zamba_precomp_rotary_embedding(
 	const Tensor<int32, CUDA>& pt,  // position ids, shape: [batch, seq_len]
 	const int32 emb_size,
 	const int32 base = 10000)
@@ -29,7 +29,7 @@ static Tensor<dtype, CUDA> tensor_zamba_precomp_rotary_embedding(
 
 
 template<FloatingPointType dtype>
-static Tensor<dtype, CUDA> tensor_apply_zamba_rotary_embedding(
+inline Tensor<dtype, CUDA> tensor_apply_zamba_rotary_embedding(
 	const Tensor<dtype, CUDA>& xt,  // input (e.g. query or key), shape: [batch, num_heads, seq_len, hdim]
 	const Tensor<dtype, CUDA>& ft)  // [batch, seq_len, hdim / 2]
 {

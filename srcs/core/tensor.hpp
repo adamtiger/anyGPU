@@ -384,7 +384,7 @@ Tensor<dtype, CUDA> Tensor<dtype, device>::copy_to_cuda() const
 
 // converters
 template<typename trg_dtype, typename src_dtype>
-Tensor<trg_dtype, CPU> cvt_tensor_datatype(const Tensor<src_dtype, CPU>& tensor)
+inline Tensor<trg_dtype, CPU> cvt_tensor_datatype(const Tensor<src_dtype, CPU>& tensor)
 {
 	Tensor<trg_dtype, CPU> converted(tensor.dim, tensor.shape, tensor.stride);
 
@@ -417,7 +417,7 @@ Tensor<trg_dtype, CPU> cvt_tensor_datatype(const Tensor<src_dtype, CPU>& tensor)
   @param head: the number of elements to print from the buffer (from the head of the buffer)
 */
 template<typename dtype>
-static std::string represent_tensor(const Tensor<dtype, CPU>& tensor, const int64 head=5)
+inline std::string represent_tensor(const Tensor<dtype, CPU>& tensor, const int64 head=5)
 {
 	std::stringstream ss;
 
@@ -461,7 +461,7 @@ static std::string represent_tensor(const Tensor<dtype, CPU>& tensor, const int6
   from the range (0, 10).
 */
 template<typename dtype, Device device>
-static Tensor<dtype, device> crt_random_tensor(const std::vector<int64>& shape, const int64 seed=10)
+inline Tensor<dtype, device> crt_random_tensor(const std::vector<int64>& shape, const int64 seed=10)
 {
 	std::default_random_engine eng(seed);
 	std::uniform_int_distribution<int> uni_dist(0, 10);
@@ -486,7 +486,7 @@ static Tensor<dtype, device> crt_random_tensor(const std::vector<int64>& shape, 
   with 0 mean and 1 variance.
 */
 template<typename dtype, Device device>
-static Tensor<dtype, device> crt_random_normal_tensor(const std::vector<int64>& shape, const int64 seed = 10)
+inline Tensor<dtype, device> crt_random_normal_tensor(const std::vector<int64>& shape, const int64 seed = 10)
 {
 	std::default_random_engine eng(seed);
 	std::normal_distribution<float32> norm_dist(0.f, 1.f);
@@ -510,7 +510,7 @@ static Tensor<dtype, device> crt_random_normal_tensor(const std::vector<int64>& 
   tensors can be easily reproduced.
 */
 template<typename dtype, Device device>
-static Tensor<dtype, device> crt_pattern_tensor(const std::vector<int64>& shape)
+inline Tensor<dtype, device> crt_pattern_tensor(const std::vector<int64>& shape)
 {
 	int64 length = calc_default_size(shape);
 	std::vector<int> host_data(length);
@@ -529,7 +529,7 @@ static Tensor<dtype, device> crt_pattern_tensor(const std::vector<int64>& shape)
   Creates a tensor filled with ones.
 */
 template<typename dtype, Device device>
-static Tensor<dtype, device> crt_ones_tensor(const std::vector<int64>& shape)
+inline Tensor<dtype, device> crt_ones_tensor(const std::vector<int64>& shape)
 {
 	int64 length = calc_default_size(shape);
 	std::vector<int> host_data(length);
@@ -556,7 +556,7 @@ static Tensor<dtype, device> crt_ones_tensor(const std::vector<int64>& shape)
   the element offsets will be the same in both tensors.
 */
 template<typename dtype, Device device>
-static bool elementwise_compatible(const Tensor<dtype, device>& lhs, const Tensor<dtype, device>& rhs)
+inline bool elementwise_compatible(const Tensor<dtype, device>& lhs, const Tensor<dtype, device>& rhs)
 {
 	bool cp = true;
 	cp = cp && (lhs.dim == rhs.dim);
@@ -569,7 +569,7 @@ static bool elementwise_compatible(const Tensor<dtype, device>& lhs, const Tenso
   Decides if two tensors can be matrix multiplied by each other.
 */
 template<typename dtype, Device device>
-static bool matmul_compatible(const Tensor<dtype, device>& lhs, const Tensor<dtype, device>& rhs)
+inline bool matmul_compatible(const Tensor<dtype, device>& lhs, const Tensor<dtype, device>& rhs)
 {
 	bool cp = true;
 	cp = cp && (lhs.dim == 2);
@@ -583,7 +583,7 @@ static bool matmul_compatible(const Tensor<dtype, device>& lhs, const Tensor<dty
   elementwise (pointwise) operations.
 */
 template<typename dtype, Device device>
-static KernelParameters calc_kernel_prms_pointwise(const Tensor<dtype, device>& tensor)
+inline KernelParameters calc_kernel_prms_pointwise(const Tensor<dtype, device>& tensor)
 {
 	unsigned int num_operations = (unsigned int)tensor.size();
 	unsigned int threads_per_block = 32 * 8;

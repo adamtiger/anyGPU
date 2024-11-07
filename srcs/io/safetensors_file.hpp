@@ -27,7 +27,7 @@ void _sft_read_tensorinfo_from_json(
   Reads the tensors from the safetensors file.
 */
 template<typename T>
-static void sft_read_tensors(const std::string& path, std::vector<Tensor<T, CPU>>& tensors)
+inline void sft_read_tensors(const std::string& path, std::vector<Tensor<T, CPU>>& tensors)
 {
 	std::ifstream sft_file(path, std::ios::binary);
 	ACASSERT(sft_file.is_open(), "safetensors file was not opened!");

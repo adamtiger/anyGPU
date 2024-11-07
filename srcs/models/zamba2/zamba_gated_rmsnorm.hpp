@@ -7,7 +7,7 @@
 
 
 template<FloatingPointType dtype, Device device>
-static Tensor<dtype, device> tensor_zamba_gated_rmsnorm(
+inline Tensor<dtype, device> tensor_zamba_gated_rmsnorm(
 	const Tensor<dtype, device>& xt,
 	const Tensor<dtype, device>& zt,
 	const Tensor<dtype, device>& wt,

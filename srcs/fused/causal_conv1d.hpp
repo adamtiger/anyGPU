@@ -22,7 +22,7 @@
       silu(conv1d(x, weights.unsqueeze(1), bias, stride=1, padding=width-1, groups=dims))[..., seq_len]
 */
 template<PreciseFloatType dtype>
-static Tensor<dtype, CPU> tensor_causal_conv1d(
+inline Tensor<dtype, CPU> tensor_causal_conv1d(
 	const Tensor<dtype, CPU>& xt, 
 	const Tensor<dtype, CPU>& wt, 
 	const Tensor<dtype, CPU>& bt)
@@ -88,7 +88,7 @@ static Tensor<dtype, CPU> tensor_causal_conv1d(
 
 
 template<FloatingPointType dtype>
-static Tensor<dtype, CUDA> tensor_causal_conv1d(
+inline Tensor<dtype, CUDA> tensor_causal_conv1d(
 	const Tensor<dtype, CUDA>& xt,
 	const Tensor<dtype, CUDA>& wt,
 	const Tensor<dtype, CUDA>& bt)

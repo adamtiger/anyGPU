@@ -60,7 +60,7 @@ struct GemmaDecoderweights
 };
 
 template<FloatingPointType dtype>
-static Tensor<dtype, CUDA> tensor_gemma_decoder(  // Gemma2DecoderLayer
+inline Tensor<dtype, CUDA> tensor_gemma_decoder(  // Gemma2DecoderLayer
 	const GemmaConfig& config,
 	const GemmaDecoderweights<dtype>& decoder_weights,
 	GemmaKVcache& kv_cache,

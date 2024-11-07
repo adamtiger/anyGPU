@@ -18,7 +18,7 @@
       gelu(x) = x * 0.5 * (1 + erf(x / sqrt(2)))
 */
 template<PreciseFloatType dtype>
-static Tensor<dtype, CPU> tensor_zamba_glu(const Tensor<dtype, CPU>& xt)
+inline Tensor<dtype, CPU> tensor_zamba_glu(const Tensor<dtype, CPU>& xt)
 {
 	// access the data arrays
 	int y_dim = xt.dim;
@@ -49,7 +49,7 @@ static Tensor<dtype, CPU> tensor_zamba_glu(const Tensor<dtype, CPU>& xt)
 
 
 template<FloatingPointType dtype>
-static Tensor<dtype, CUDA> tensor_zamba_glu(const Tensor<dtype, CUDA>& xt)
+inline Tensor<dtype, CUDA> tensor_zamba_glu(const Tensor<dtype, CUDA>& xt)
 {
 	// access the data arrays
 	int y_dim = xt.dim;

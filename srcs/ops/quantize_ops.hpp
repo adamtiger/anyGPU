@@ -13,7 +13,7 @@
 *  This is a per-tensor quantization.
 */
 template<PreciseFloatType src_dtype, IntegerType trg_dtype>
-static Tensor<trg_dtype, CPU> tensor_quantize_linear(const Tensor<src_dtype, CPU>& x, const src_dtype scale, const trg_dtype bias)
+inline Tensor<trg_dtype, CPU> tensor_quantize_linear(const Tensor<src_dtype, CPU>& x, const src_dtype scale, const trg_dtype bias)
 {
 	// access the data arrays
 	Tensor<trg_dtype, CPU> y(x.dim, x.shape);
@@ -45,7 +45,7 @@ static Tensor<trg_dtype, CPU> tensor_quantize_linear(const Tensor<src_dtype, CPU
 
 
 template<FloatingPointType src_dtype, IntegerType trg_dtype>
-static Tensor<trg_dtype, CUDA> tensor_quantize_linear(const Tensor<src_dtype, CUDA>& x, const src_dtype scale, const trg_dtype bias)
+inline Tensor<trg_dtype, CUDA> tensor_quantize_linear(const Tensor<src_dtype, CUDA>& x, const src_dtype scale, const trg_dtype bias)
 {
 	Tensor<trg_dtype, CUDA> y(x.dim, x.shape);
 
@@ -68,7 +68,7 @@ static Tensor<trg_dtype, CUDA> tensor_quantize_linear(const Tensor<src_dtype, CU
 *  This is a per-tensor dequantization.
 */
 template<IntegerType src_dtype, PreciseFloatType trg_dtype>
-Tensor<trg_dtype, CPU> tensor_dequantize_linear(const Tensor<src_dtype, CPU>& x, const trg_dtype scale, const src_dtype bias)
+inline Tensor<trg_dtype, CPU> tensor_dequantize_linear(const Tensor<src_dtype, CPU>& x, const trg_dtype scale, const src_dtype bias)
 {
 	// access the data arrays
 	Tensor<trg_dtype, CPU> y(x.dim, x.shape);
@@ -94,7 +94,7 @@ Tensor<trg_dtype, CPU> tensor_dequantize_linear(const Tensor<src_dtype, CPU>& x,
 
 
 template<IntegerType src_dtype, FloatingPointType trg_dtype>
-static Tensor<trg_dtype, CUDA> tensor_dequantize_linear(const Tensor<src_dtype, CUDA>& x, const trg_dtype scale, const src_dtype bias)
+inline Tensor<trg_dtype, CUDA> tensor_dequantize_linear(const Tensor<src_dtype, CUDA>& x, const trg_dtype scale, const src_dtype bias)
 {
 	Tensor<trg_dtype, CUDA> y(x.dim, x.shape);
 
@@ -117,7 +117,7 @@ static Tensor<trg_dtype, CUDA> tensor_dequantize_linear(const Tensor<src_dtype, 
    and calculates the quantized output.
 */
 template<IntegerType lp_dtype, PreciseFloatType hp_dtype>
-static Tensor<lp_dtype, CPU> tensor_qmm(
+inline Tensor<lp_dtype, CPU> tensor_qmm(
 	const Tensor<lp_dtype, CPU>& a,
 	const Tensor<lp_dtype, CPU>& b,
 	const hp_dtype sa, const lp_dtype zpa,
@@ -169,7 +169,7 @@ static Tensor<lp_dtype, CPU> tensor_qmm(
 
 
 template<IntegerType lp_dtype, FloatingPointType hp_dtype>
-static Tensor<lp_dtype, CUDA> tensor_qmm(
+inline Tensor<lp_dtype, CUDA> tensor_qmm(
 	const Tensor<lp_dtype, CUDA>& a,
 	const Tensor<lp_dtype, CUDA>& b,
 	const hp_dtype sa, const lp_dtype zpa,

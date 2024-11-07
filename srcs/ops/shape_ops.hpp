@@ -8,7 +8,7 @@
   View into the given buffer with a new tensor.
 */
 template<ArithmeticType dtype, Device device>
-static Tensor<dtype, device> tensor_view(const Tensor<dtype, device>& x, const std::vector<int64>& new_shape)
+inline Tensor<dtype, device> tensor_view(const Tensor<dtype, device>& x, const std::vector<int64>& new_shape)
 {
 	Tensor<dtype, device> y = x;
 	y.id = GlobalUUIDGenerator::generate_id();
@@ -23,7 +23,7 @@ static Tensor<dtype, device> tensor_view(const Tensor<dtype, device>& x, const s
   Splitting over the first dimension into equal pieces.
 */
 template<ArithmeticType dtype, Device device>
-static std::vector<Tensor<dtype, device>> tensor_split(const Tensor<dtype, device>& x, const int64 splits)
+inline std::vector<Tensor<dtype, device>> tensor_split(const Tensor<dtype, device>& x, const int64 splits)
 {
 	std::vector<Tensor<dtype, device>> ys(splits);
 	for (size_t ix = 0; ix < ys.size(); ++ix)
@@ -45,7 +45,7 @@ static std::vector<Tensor<dtype, device>> tensor_split(const Tensor<dtype, devic
   Assumes contigous memory.
 */
 template<ArithmeticType dtype, Device device>
-static Tensor<dtype, device> tensor_concat(const Tensor<dtype, device>& x1, const Tensor<dtype, device>& x2)
+inline Tensor<dtype, device> tensor_concat(const Tensor<dtype, device>& x1, const Tensor<dtype, device>& x2)
 {
 	ACASSERT(x1.dim == x2.dim, "dimensions have to be equal");
 
@@ -120,7 +120,7 @@ static Tensor<dtype, device> tensor_concat(const Tensor<dtype, device>& x1, cons
   Assumes contigous memory.
 */
 template<ArithmeticType dtype, Device device>
-static Tensor<dtype, device> tensor_repeat(const Tensor<dtype, device>& xt, const int64 axis, const int64 nreps)
+inline Tensor<dtype, device> tensor_repeat(const Tensor<dtype, device>& xt, const int64 axis, const int64 nreps)
 {
 	ACASSERT(0 <= axis && axis < xt.dim, "axis is out of valid range");
 
@@ -188,7 +188,7 @@ static Tensor<dtype, device> tensor_repeat(const Tensor<dtype, device>& xt, cons
   Assumes contigous memory.
 */
 template<ArithmeticType dtype, Device device>
-static Tensor<dtype, device> tensor_slice(
+inline Tensor<dtype, device> tensor_slice(
 	const Tensor<dtype, device>& xt, 
 	const int64 axis, 
 	const int64 low,   // inclusive

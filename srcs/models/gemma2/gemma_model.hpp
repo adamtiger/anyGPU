@@ -161,7 +161,7 @@ struct GemmaModelweights
 };
 
 template<FloatingPointType dtype>
-static Tensor<dtype, CUDA> tensor_gemma_model(  // Gemma2Model
+inline Tensor<dtype, CUDA> tensor_gemma_model(  // Gemma2Model
 	const GemmaConfig& config,
 	const GemmaModelweights<dtype>& model_weights,
 	GemmaKVcache& kv_cache,

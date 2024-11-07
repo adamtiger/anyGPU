@@ -18,7 +18,7 @@
   @param axis: the first axis to be normalized
 */
 template<PreciseFloatType dtype>
-static Tensor<dtype, CPU> tensor_layer_norm(
+inline Tensor<dtype, CPU> tensor_layer_norm(
 	const Tensor<dtype, CPU>& xt, 
 	const int32 axis, 
 	const Tensor<dtype, CPU> wt,
@@ -85,7 +85,7 @@ static Tensor<dtype, CPU> tensor_layer_norm(
 
 
 template<FloatingPointType dtype>
-static Tensor<dtype, CUDA> tensor_layer_norm(
+inline Tensor<dtype, CUDA> tensor_layer_norm(
 	const Tensor<dtype, CUDA>& xt,
 	const int32 axis,
 	const Tensor<dtype, CUDA> wt,
@@ -132,7 +132,7 @@ static Tensor<dtype, CUDA> tensor_layer_norm(
   @param axis: the first axis to be normalized
 */
 template<PreciseFloatType dtype>
-static Tensor<dtype, CPU> tensor_rms_norm(
+inline Tensor<dtype, CPU> tensor_rms_norm(
 	const Tensor<dtype, CPU>& xt,
 	const int32 axis,
 	const Tensor<dtype, CPU> wt,
@@ -195,7 +195,7 @@ static Tensor<dtype, CPU> tensor_rms_norm(
 
 
 template<FloatingPointType dtype>
-static Tensor<dtype, CUDA> tensor_rms_norm(
+inline Tensor<dtype, CUDA> tensor_rms_norm(
 	const Tensor<dtype, CUDA>& xt,
 	const int32 axis,
 	const Tensor<dtype, CUDA> wt,

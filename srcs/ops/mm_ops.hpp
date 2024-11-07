@@ -9,7 +9,7 @@
 
 
 template<NotHalfFloatType dtype>
-static void tensor_mm(const Tensor<dtype, CPU>& lhs, const Tensor<dtype, CPU>& rhs, Tensor<dtype, CPU>& res)
+inline void tensor_mm(const Tensor<dtype, CPU>& lhs, const Tensor<dtype, CPU>& rhs, Tensor<dtype, CPU>& res)
 {
 	ACASSERT(matmul_compatible(lhs, rhs) == true, "matrix multiplication requires compatible matrices");
 
@@ -46,7 +46,7 @@ static void tensor_mm(const Tensor<dtype, CPU>& lhs, const Tensor<dtype, CPU>& r
 
 
 template<typename dtype>
-static void tensor_mm(const Tensor<dtype, CUDA>& lhs, const Tensor<dtype, CUDA>& rhs, Tensor<dtype, CUDA>& res)
+inline void tensor_mm(const Tensor<dtype, CUDA>& lhs, const Tensor<dtype, CUDA>& rhs, Tensor<dtype, CUDA>& res)
 {
 	ACASSERT(matmul_compatible(lhs, rhs) == true, "matrix multiplication requires compatible matrices");
 
@@ -72,7 +72,7 @@ static void tensor_mm(const Tensor<dtype, CUDA>& lhs, const Tensor<dtype, CUDA>&
 
 
 template<NotHalfFloatType dtype>
-static Tensor<dtype, CPU> tensor_mm(const Tensor<dtype, CPU>& lhs, const Tensor<dtype, CPU>& rhs)
+inline Tensor<dtype, CPU> tensor_mm(const Tensor<dtype, CPU>& lhs, const Tensor<dtype, CPU>& rhs)
 {
 	int m = lhs.shape[0];
 	int n = rhs.shape[1];
@@ -85,7 +85,7 @@ static Tensor<dtype, CPU> tensor_mm(const Tensor<dtype, CPU>& lhs, const Tensor<
 
 
 template<typename dtype>
-static Tensor<dtype, CUDA> tensor_mm(const Tensor<dtype, CUDA>& lhs, const Tensor<dtype, CUDA>& rhs)
+inline Tensor<dtype, CUDA> tensor_mm(const Tensor<dtype, CUDA>& lhs, const Tensor<dtype, CUDA>& rhs)
 {
 	int m = lhs.shape[0];
 	int n = rhs.shape[1];
@@ -100,7 +100,7 @@ static Tensor<dtype, CUDA> tensor_mm(const Tensor<dtype, CUDA>& lhs, const Tenso
 
 
 template<NotHalfFloatType dtype>
-static Tensor<dtype, CPU> tensor_gemm(
+inline Tensor<dtype, CPU> tensor_gemm(
 	const Tensor<dtype, CPU>& xt,
 	const Tensor<dtype, CPU>& wt,
 	const Tensor<dtype, CPU>& bt)
@@ -145,7 +145,7 @@ static Tensor<dtype, CPU> tensor_gemm(
 
 
 template<typename dtype>
-static Tensor<dtype, CUDA> tensor_gemm(
+inline Tensor<dtype, CUDA> tensor_gemm(
 	const Tensor<dtype, CUDA>& xt, 
 	const Tensor<dtype, CUDA>& wt,
 	const Tensor<dtype, CUDA>& bt)
@@ -174,7 +174,7 @@ static Tensor<dtype, CUDA> tensor_gemm(
 
 
 template<FloatingPointType dtype, Device device>
-static Tensor<dtype, device> tensor_linear(
+inline Tensor<dtype, device> tensor_linear(
 	const Tensor<dtype, device>& xt,  // (*, in_features)
 	const Tensor<dtype, device>& wt,  // (in_features, out_features)
 	const Tensor<dtype, device>& bt)  // (out_features)
@@ -204,7 +204,7 @@ static Tensor<dtype, device> tensor_linear(
 
 
 template<FloatingPointType dtype, Device device>
-static Tensor<dtype, device> tensor_linear(
+inline Tensor<dtype, device> tensor_linear(
 	const Tensor<dtype, device>& xt,  // (*, in_features)
 	const Tensor<dtype, device>& wt)  // (in_features, out_features)
 {

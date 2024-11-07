@@ -28,7 +28,7 @@ struct GemmaCausalLMweights
 };
 
 template<FloatingPointType dtype>
-static Tensor<dtype, CUDA> tensor_gemma_causallm(  // Gemma2ForCausalLM
+inline Tensor<dtype, CUDA> tensor_gemma_causallm(  // Gemma2ForCausalLM
 	const GemmaConfig& config,
 	const GemmaCausalLMweights<dtype>& model_weights,
 	GemmaKVcache& kv_cache,

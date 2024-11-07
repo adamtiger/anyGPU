@@ -49,7 +49,7 @@ struct ZambaMLPweights
 };
 
 template<FloatingPointType dtype, Device device>
-static Tensor<dtype, device> tensor_zamba_mlp(
+inline Tensor<dtype, device> tensor_zamba_mlp(
 	const ZambaMLPweights<dtype, device>& mlp_weights,
 	const Tensor<dtype, device>& hidden_states,
 	const int fwd_layer_idx)

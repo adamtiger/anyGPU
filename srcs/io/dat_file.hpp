@@ -30,7 +30,7 @@
   Tensor reader from .dat files.
 */
 template<typename T=float32>
-static Tensor<T, CPU> load_tensor(const std::string& file_path)
+inline Tensor<T, CPU> load_tensor(const std::string& file_path)
 {
 	std::ifstream tensor_file(file_path, std::ios::binary);
 
