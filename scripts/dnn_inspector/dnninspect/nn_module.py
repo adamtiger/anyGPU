@@ -304,3 +304,52 @@ def inspect_function_repeated(func: any, name: str, reps: int, dict_out: bool = 
         return y
 
     return execute_module
+
+
+def inspect_torch_module_repeated(m: nn.Module, name: str, reps: int, dict_out: bool = False) -> any:
+    """
+    Inspects a torch module. Returns a module executor function
+    therefore the inspection and execution can be done in a single line.
+    """
+    # create output folder if needed
+    # create output folder if needed
+    output_path = pjoin(path_inspection_output_folder, name)
+    is_main_not_folder_exist = not os.path.exists(output_path)
+
+    module_weight_path = pjoin(output_path, const.MODULE_WEIGHTS)
+    minfo_path = pjoin(output_path, const.MODULE_INFO_JSON)
+
+    if is_main_not_folder_exist:
+        os.mkdir(output_path)
+        os.mkdir(module_weight_path)
+    
+    # save module info
+    if is_main_not_folder_exist:
+        m_info = get_torch_module_info(m)
+        m_info["top_modules"] = get_torch_top_submodule_names(m)
+        save_torch_module_weights(m, module_weight_path, name)
+
+        with open(minfo_path, "wt") as js:
+            json.dump(m_info, js)
+    
+    # create the next checkpoint folder name
+    num_saved = len(os.listdir(output_path))
+    save_function_call_data = num_saved < reps
+
+    io_save_path = None
+    if save_function_call_data:
+        io_save_path = pjoin(output_path, f"{const.IO_CHECKPOINT}_{num_saved + 1}")
+        os.mkdir(io_save_path)
+
+    # create executor function
+    # save input and output if needed
+    def execute_module(*inputs, **kwargs):
+        y = None
+        if save_function_call_data:
+            y = save_torch_module_calc(m, io_save_path, dict_out, *inputs, **kwargs)
+        else:
+            y = m.forward(*inputs, **kwargs)
+        return y
+
+    return execute_module
+

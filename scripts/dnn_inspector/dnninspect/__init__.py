@@ -2,6 +2,7 @@
 # module inspection functions
 from dnninspect.nn_module import set_inspection_output_folder
 from dnninspect.nn_module import inspect_torch_module
+from dnninspect.nn_module import inspect_torch_module_repeated
 from dnninspect.nn_module import inspect_torch_tensor
 from dnninspect.nn_module import inspect_function
 from dnninspect.nn_module import inspect_function_repeated
