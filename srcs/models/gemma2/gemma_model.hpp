@@ -129,7 +129,7 @@ struct GemmaModelweights
 		// load the weights
 		auto load_w = [&](const std::string& path_w)
 		{
-			return load_tensor<dtype>(path_w).copy_to_device<CUDA>();
+			return copy_to_device<dtype, CPU, CUDA>(load_tensor<dtype>(path_w));
 		};
 
 		embedding_data = load_w(path_embedding_data);
