@@ -21,7 +21,7 @@ struct GemmaMLPweights
 	{
 		auto load_w = [&](const std::string& path_w)
 		{
-			return tensor_transp(load_tensor<dtype>(path_w).copy_to_device<device>());
+			return copy_to_device<dtype, CPU, device>(tensor_transp(load_tensor<dtype>(path_w)));
 		};
 
 		gate_proj_weight = load_w(path_gate_proj_weight);

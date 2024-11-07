@@ -41,7 +41,7 @@ struct ZambaSDPAweights
 	{
 		auto load_w = [&](const std::string& path_w)
 			{
-				return tensor_transp(load_tensor<dtype>(path_w).copy_to_device<CUDA>());
+				return copy_to_device<dtype, CPU, CUDA>(tensor_transp(load_tensor<dtype>(path_w)));
 			};
 
 		q_proj_weight = load_w(path_q_proj_weight);

@@ -25,7 +25,7 @@ struct ZambaMLPweights
 	{
 		auto load_w = [&](const std::string& path_w)
 		{
-			return tensor_transp(load_tensor<dtype>(path_w).copy_to_device<device>());
+			return copy_to_device<dtype, CPU, CUDA>(tensor_transp(load_tensor<dtype>(path_w)));
 		};
 
 		fc1_weight = load_w(path_fc1_weight);

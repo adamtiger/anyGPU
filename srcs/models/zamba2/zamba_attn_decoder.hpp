@@ -57,7 +57,7 @@ struct ZambaAttentionDecoderweights
 
 		auto load_w = [&](const std::string& path_w)
 			{
-				return load_tensor<dtype>(path_w).copy_to_device<CUDA>();
+				return copy_to_device<dtype, CPU, CUDA>(load_tensor<dtype>(path_w));
 			};
 
 		input_rmsnorm_weight = load_w(ad_path_in_rmsnorm_weight);
