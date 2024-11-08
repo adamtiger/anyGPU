@@ -63,14 +63,16 @@ int main()
 	//external_test_mamba2_layer_gated_rmsnorm();
 	//test_zamba2_glu();
 
-	external_test_gemma2_decoder_mlp();
-	external_test_gemma2_decoder_rmsn();
-	external_test_gemma2_decoder_attention();
-	external_test_gemma2_attention_rotary();
-	external_test_gemma2_model_decoder();
+	//external_test_gemma2_decoder_mlp();
+	//external_test_gemma2_decoder_rmsn();
+	//external_test_gemma2_decoder_attention();
+	//external_test_gemma2_attention_rotary();
+	//external_test_gemma2_model_decoder();
 	//external_test_gemma2_lmhead_softcap();
-	external_test_gemma2_update_mask();
-	external_test_gemma2_kvcache_update();
+	//external_test_gemma2_update_mask();
+	//external_test_gemma2_kvcache_update();
+	external_test_gemma2_model_decoder_15();
+	external_test_gemma2_model_decoder_16();
 
 	//run_vk_compute();
 

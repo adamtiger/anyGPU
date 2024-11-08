@@ -11,4 +11,7 @@ void external_test_gemma2_lmhead_softcap();
 void external_test_gemma2_update_mask();
 void external_test_gemma2_kvcache_update();
 
+void external_test_gemma2_model_decoder_15();
+void external_test_gemma2_model_decoder_16();
+
 #endif  // __EXT_GEMMA2_TESTS__

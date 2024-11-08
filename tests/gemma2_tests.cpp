@@ -340,7 +340,7 @@ void external_test_gemma2_kvcache_update()
 		auto d_v = h_v.copy_to_cuda();
 		auto d_cpos = h_cpos.copy_to_cuda();
 		
-		int32 layer_idx = ix - 1;
+		int32 layer_idx = ix % 26 - 1;
 		int32 sliding_window = (layer_idx % 2 == 0 ? config.sliding_window : -1);
 
 		Tensor<float32, CUDA> act_dk_cuda;
@@ -362,4 +362,166 @@ void external_test_gemma2_kvcache_update()
 	}
 
 	std::cout << "TestCase [external_test_gemma2_kvcache_update - CUDA]: " << (correct ? "PASSED" : "FAILED") << "\n";
+}
+
+
+void external_test_gemma2_model_decoder_15()
+{
+	auto path = artifact_folder_path / "test_gemma2model_decoder_15";
+
+	// compare
+	auto cmp = [&](const Tensor<float32, CPU>& expected, const Tensor<float32, CPU>& actual)
+		{
+			bool eq = elementwise_compatible(expected, actual);  // checks the sizes
+			eq = eq && compare_data_buffers_l2(actual, expected);
+			return eq;
+		};
+
+	GemmaConfig config;
+
+	// initiate kv cache
+	GemmaKVcache kv_cache;
+	kv_cache.init_cache(config, 1);
+
+	GemmaDecoderweights<float32> gd_weights;
+	gd_weights.load_weights(
+		(path / "gemma2model_decoder_15.gemma2decoderlayer.input_layernorm.weight.dat").string(),
+		(path / "gemma2model_decoder_15.gemma2decoderlayer.pre_feedforward_layernorm.weight.dat").string(),
+		(path / "gemma2model_decoder_15.gemma2decoderlayer.post_feedforward_layernorm.weight.dat").string(),
+		(path / "gemma2model_decoder_15.gemma2decoderlayer.post_attention_layernorm.weight.dat").string(),
+
+		(path / "gemma2model_decoder_15.gemma2decoderlayer.self_attn.q_proj.weight.dat").string(),
+		(path / "gemma2model_decoder_15.gemma2decoderlayer.self_attn.k_proj.weight.dat").string(),
+		(path / "gemma2model_decoder_15.gemma2decoderlayer.self_attn.v_proj.weight.dat").string(),
+		(path / "gemma2model_decoder_15.gemma2decoderlayer.self_attn.o_proj.weight.dat").string(),
+
+		(path / "gemma2model_decoder_15.gemma2decoderlayer.mlp.gate_proj.weight.dat").string(),
+		(path / "gemma2model_decoder_15.gemma2decoderlayer.mlp.up_proj.weight.dat").string(),
+		(path / "gemma2model_decoder_15.gemma2decoderlayer.mlp.down_proj.weight.dat").string()
+	);
+
+	int32 layer_idx = 15;
+	int32 sliding_window = (layer_idx % 2 == 0 ? config.sliding_window : -1);
+
+	// test the cache in each state
+	bool correct = true;
+	for (int ix = 3; ix < 31; ++ix)
+	{
+		std::string fn = "io_ckpt_" + std::to_string(ix);
+		auto ckp_path = path / fn;
+
+		// read tensors from files
+		// read tensors from files
+		auto h_hidden_states = load_tensor((ckp_path / "in_0.dat").string());
+		auto h_attn_mask = load_tensor((ckp_path / "in_attention_mask.dat").string());
+		auto h_pos_ids = load_tensor<int32>((ckp_path / "in_position_ids.dat").string());
+		auto h_cache_pos = load_tensor<int32>((ckp_path / "in_cache_position.dat").string());
+
+		auto exp_hy = load_tensor((ckp_path / "out_0.dat").string());
+
+		auto d_hidden_states = h_hidden_states.copy_to_cuda();
+		auto d_attn_mask = h_attn_mask.copy_to_cuda();
+		auto d_pos_ids = h_pos_ids.copy_to_cuda();
+		auto d_cache_pos = h_cache_pos.copy_to_cuda();
+
+		auto act_dy_cuda = tensor_gemma_decoder(
+			config,
+			gd_weights,
+			kv_cache,
+			d_hidden_states,
+			d_attn_mask,
+			d_pos_ids,
+			d_cache_pos,
+			layer_idx,
+			sliding_window
+		);
+
+		auto act_hy_cuda = act_dy_cuda.copy_to_host();
+
+		// test cuda
+		correct = correct && cmp(exp_hy, act_hy_cuda);
+	}
+
+	std::cout << "TestCase [external_test_gemma2_model_decoder_15 - CUDA]: " << (correct ? "PASSED" : "FAILED") << "\n";
+}
+
+
+void external_test_gemma2_model_decoder_16()
+{
+	auto path = artifact_folder_path / "test_gemma2model_decoder_16";
+
+	// compare
+	auto cmp = [&](const Tensor<float32, CPU>& expected, const Tensor<float32, CPU>& actual)
+		{
+			bool eq = elementwise_compatible(expected, actual);  // checks the sizes
+			eq = eq && compare_data_buffers_l2(actual, expected);
+			return eq;
+		};
+
+	GemmaConfig config;
+
+	// initiate kv cache
+	GemmaKVcache kv_cache;
+	kv_cache.init_cache(config, 1);
+
+	GemmaDecoderweights<float32> gd_weights;
+	gd_weights.load_weights(
+		(path / "gemma2model_decoder_16.gemma2decoderlayer.input_layernorm.weight.dat").string(),
+		(path / "gemma2model_decoder_16.gemma2decoderlayer.pre_feedforward_layernorm.weight.dat").string(),
+		(path / "gemma2model_decoder_16.gemma2decoderlayer.post_feedforward_layernorm.weight.dat").string(),
+		(path / "gemma2model_decoder_16.gemma2decoderlayer.post_attention_layernorm.weight.dat").string(),
+
+		(path / "gemma2model_decoder_16.gemma2decoderlayer.self_attn.q_proj.weight.dat").string(),
+		(path / "gemma2model_decoder_16.gemma2decoderlayer.self_attn.k_proj.weight.dat").string(),
+		(path / "gemma2model_decoder_16.gemma2decoderlayer.self_attn.v_proj.weight.dat").string(),
+		(path / "gemma2model_decoder_16.gemma2decoderlayer.self_attn.o_proj.weight.dat").string(),
+
+		(path / "gemma2model_decoder_16.gemma2decoderlayer.mlp.gate_proj.weight.dat").string(),
+		(path / "gemma2model_decoder_16.gemma2decoderlayer.mlp.up_proj.weight.dat").string(),
+		(path / "gemma2model_decoder_16.gemma2decoderlayer.mlp.down_proj.weight.dat").string()
+	);
+
+	int32 layer_idx = 16;
+	int32 sliding_window = (layer_idx % 2 == 0 ? config.sliding_window : -1);
+
+	// test the cache in each state
+	bool correct = true;
+	for (int ix = 3; ix < 31; ++ix)
+	{
+		std::string fn = "io_ckpt_" + std::to_string(ix);
+		auto ckp_path = path / fn;
+
+		// read tensors from files
+		// read tensors from files
+		auto h_hidden_states = load_tensor((ckp_path / "in_0.dat").string());
+		auto h_attn_mask = load_tensor((ckp_path / "in_attention_mask.dat").string());
+		auto h_pos_ids = load_tensor<int32>((ckp_path / "in_position_ids.dat").string());
+		auto h_cache_pos = load_tensor<int32>((ckp_path / "in_cache_position.dat").string());
+
+		auto exp_hy = load_tensor((ckp_path / "out_0.dat").string());
+
+		auto d_hidden_states = h_hidden_states.copy_to_cuda();
+		auto d_attn_mask = h_attn_mask.copy_to_cuda();
+		auto d_pos_ids = h_pos_ids.copy_to_cuda();
+		auto d_cache_pos = h_cache_pos.copy_to_cuda();
+
+		auto act_dy_cuda = tensor_gemma_decoder(
+			config,
+			gd_weights,
+			kv_cache,
+			d_hidden_states,
+			d_attn_mask,
+			d_pos_ids,
+			d_cache_pos,
+			15,
+			config.sliding_window
+		);
+
+		auto act_hy_cuda = act_dy_cuda.copy_to_host();
+
+		// test cuda
+		correct = correct && cmp(exp_hy, act_hy_cuda);
+	}
+
+	std::cout << "TestCase [external_test_gemma2_model_decoder_16 - CUDA]: " << (correct ? "PASSED" : "FAILED") << "\n";
 }

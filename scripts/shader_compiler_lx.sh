@@ -1,0 +1,1 @@
+glslc ../tests/vk_relu_shader.comp -o ../shaders/vk_relu_shader.comp.spv
