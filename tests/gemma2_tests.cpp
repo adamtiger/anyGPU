@@ -12,6 +12,7 @@
 #include "gemma_linsoftcap.hpp"
 #include "gemma_update_mask.hpp"
 #include "gemma_kv_cache.hpp"
+#include "gemma_slide_mask.hpp"
 #include "zamba_rotary.hpp"
 
 
@@ -524,4 +525,31 @@ void external_test_gemma2_model_decoder_16()
 	}
 
 	std::cout << "TestCase [external_test_gemma2_model_decoder_16 - CUDA]: " << (correct ? "PASSED" : "FAILED") << "\n";
+}
+
+
+void external_test_gemma2_slide_mask()
+{
+	std::filesystem::path path = "C:\\Data\\AI\\projects\\anyGPU\\artifacts\\test_gemma2_slide_mask_f32";
+
+	// read tensors from files
+	// hw is tied to the embedding weights
+	auto h_mask = load_tensor((path / "attention_mask.dat").string());
+	auto exp_hy = load_tensor((path / "y.dat").string());
+
+	auto d_mask = h_mask.copy_to_cuda();
+	auto act_dy_cuda = tensor_gemma_slide_mask(d_mask, 34);
+	auto act_hy_cuda = act_dy_cuda.copy_to_host();
+
+	// compare
+	auto cmp = [&](const Tensor<float32, CPU>& expected, const Tensor<float32, CPU>& actual)
+		{
+			bool eq = elementwise_compatible(expected, actual);  // checks the sizes
+			eq = eq && compare_data_buffers(actual, expected);
+			return eq;
+		};
+
+	// test cuda
+	bool eq = cmp(exp_hy, act_hy_cuda);
+	std::cout << "TestCase [external_test_gemma2_slide_mask - CUDA]: " << (eq ? "PASSED" : "FAILED") << "\n";
 }

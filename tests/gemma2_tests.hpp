@@ -14,4 +14,6 @@ void external_test_gemma2_kvcache_update();
 void external_test_gemma2_model_decoder_15();
 void external_test_gemma2_model_decoder_16();
 
+void external_test_gemma2_slide_mask();
+
 #endif  // __EXT_GEMMA2_TESTS__

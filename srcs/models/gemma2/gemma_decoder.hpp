@@ -9,6 +9,7 @@
 #include "gemma_mlp.hpp"
 #include "gemma_sdpa.hpp"
 #include "gemma_config.hpp"
+#include "gemma_slide_mask.hpp"
 
 
 template<FloatingPointType dtype>
@@ -71,6 +72,13 @@ inline Tensor<dtype, CUDA> tensor_gemma_decoder(  // Gemma2DecoderLayer
 	const int32 layer_idx,
 	const int32 sliding_window)
 { 
+	// sliding mask update (if needed)
+	Tensor<dtype, CUDA> s_attention_mask = attention_mask;
+	if (layer_idx % 2 == 0)
+	{
+		s_attention_mask = tensor_gemma_slide_mask(attention_mask, sliding_window);
+	}
+
 	// rms norm + attention + rms norm
 
 	auto hidden_states_inp = tensor_rms_norm(
@@ -85,7 +93,7 @@ inline Tensor<dtype, CUDA> tensor_gemma_decoder(  // Gemma2DecoderLayer
 		decoder_weights.sdpa_weights,
 		kv_cache,
 		hidden_states_inp,
-		attention_mask,
+		s_attention_mask,
 		position_ids,
 		cache_position,
 		layer_idx,

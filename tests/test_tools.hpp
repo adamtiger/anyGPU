@@ -34,10 +34,9 @@ static bool compare_data_buffers(const Tensor<T, CPU>& actual, const Tensor<T, C
 	{
 		eq = eq && std::abs(expected_data[ix] - actual_data[ix]) < (T)abs_tol;
 
-		if (!eq && cntr++ < 10)
+		if (!eq && cntr++ < 20)
 		{
 			std::cout << ix << " [" << expected_data[ix] << " <> " << actual_data[ix] << "] \n";
-
 		}
 	}
 	return eq;
