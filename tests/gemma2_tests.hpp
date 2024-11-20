@@ -16,4 +16,6 @@ void external_test_gemma2_model_decoder_16();
 
 void external_test_gemma2_slide_mask();
 
+void external_test_gemma2_causallm();
+
 #endif  // __EXT_GEMMA2_TESTS__

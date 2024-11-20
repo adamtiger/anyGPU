@@ -553,3 +553,70 @@ void external_test_gemma2_slide_mask()
 	bool eq = cmp(exp_hy, act_hy_cuda);
 	std::cout << "TestCase [external_test_gemma2_slide_mask - CUDA]: " << (eq ? "PASSED" : "FAILED") << "\n";
 }
+
+
+void external_test_gemma2_causallm()
+{
+	std::filesystem::path path = "/home/ubuntu/gemma2_inspected/gemma2model_whole"; //artifact_folder_path / "test_gemma2_causallm";
+
+	// compare
+	auto cmp = [&](const Tensor<float32, CPU>& expected, const Tensor<float32, CPU>& actual)
+		{
+			bool eq = elementwise_compatible(expected, actual);  // checks the sizes
+			eq = eq && compare_data_buffers_l2(actual, expected);
+			return eq;
+		};
+
+    GemmaConfig config;
+
+	// initiate kv cache
+    GemmaKVcache kv_cache;
+    kv_cache.init_cache(config, 1);
+
+    GemmaCausalLMweights<float32> gcml_weights;
+    gcml_weights.load_weights(
+        (path / "weights").string()
+    );
+
+    // set the num_logits_to_keep
+    int32 num_logits_to_keep = 1;
+
+	// test the cache in each state
+	bool correct = true;
+	for (int ix = 3; ix < 35; ++ix)
+	{
+		std::string fn = "io_ckpt_" + std::to_string(ix);
+		auto ckp_path = path / fn;
+
+		// read tensors from files
+		auto h_input_ids = load_tensor<int32>((ckp_path / "in_input_ids.dat").string());
+		auto h_attn_mask = load_tensor<int32>((ckp_path / "in_attention_mask.dat").string());
+		auto h_pos_ids = load_tensor<int32>((ckp_path / "in_position_ids.dat").string());
+		auto h_cache_pos = load_tensor<int32>((ckp_path / "in_cache_position.dat").string());
+
+		auto exp_hy = load_tensor((ckp_path / "out_0.dat").string());
+
+		auto d_input_ids = h_input_ids.copy_to_cuda();
+		auto d_attn_mask = h_attn_mask.copy_to_cuda();
+		auto d_pos_ids = h_pos_ids.copy_to_cuda();
+		auto d_cache_pos = h_cache_pos.copy_to_cuda();
+
+		auto act_dy_cuda = tensor_gemma_causallm(
+			config,
+			gcml_weights,
+			kv_cache,
+			d_input_ids,
+			d_attn_mask,
+			d_pos_ids,
+			d_cache_pos,
+			num_logits_to_keep
+		);
+
+		auto act_hy_cuda = act_dy_cuda.copy_to_host();
+
+		// test cuda
+		correct = correct && cmp(exp_hy, act_hy_cuda);
+	}
+
+	std::cout << "TestCase [external_test_gemma2_causallm - CUDA]: " << (correct ? "PASSED" : "FAILED") << "\n";
+}
