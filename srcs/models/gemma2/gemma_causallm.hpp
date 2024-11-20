@@ -33,7 +33,7 @@ inline Tensor<dtype, CUDA> tensor_gemma_causallm(  // Gemma2ForCausalLM
 	const GemmaCausalLMweights<dtype>& model_weights,
 	GemmaKVcache& kv_cache,
 	const Tensor<int32, CUDA>& input_ids,
-	const Tensor<int32, CUDA>& attention_mask,
+	const Tensor<dtype, CUDA>& attention_mask,
 	const Tensor<int32, CUDA>& position_ids,
 	const Tensor<int32, CUDA>& cache_position,
 	const int32 num_logits_to_keep)

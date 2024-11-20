@@ -277,7 +277,7 @@ void external_test_gemma2_update_mask()
 
 	// read tensors from files
 	// hw is tied to the embedding weights
-	auto h_mask = load_tensor<int32>((path / "in_0.dat").string());
+	auto h_mask = load_tensor((path / "in_0.dat").string());
 	auto h_inp = load_tensor((path / "in_1.dat").string());
 	auto h_cpos = load_tensor<int32>((path / "in_2.dat").string());
 	auto exp_hy = load_tensor((path / "out_0.dat").string());
@@ -590,7 +590,7 @@ void external_test_gemma2_causallm()
 
 		// read tensors from files
 		auto h_input_ids = load_tensor<int32>((ckp_path / "in_input_ids.dat").string());
-		auto h_attn_mask = load_tensor<int32>((ckp_path / "in_attention_mask.dat").string());
+		auto h_attn_mask = load_tensor((ckp_path / "in_attention_mask.dat").string());
 		auto h_pos_ids = load_tensor<int32>((ckp_path / "in_position_ids.dat").string());
 		auto h_cache_pos = load_tensor<int32>((ckp_path / "in_cache_position.dat").string());
 

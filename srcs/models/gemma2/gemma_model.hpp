@@ -166,7 +166,7 @@ inline Tensor<dtype, CUDA> tensor_gemma_model(  // Gemma2Model
 	const GemmaModelweights<dtype>& model_weights,
 	GemmaKVcache& kv_cache,
 	const Tensor<int32, CUDA>& input_ids,
-	const Tensor<int32, CUDA>& attention_mask,
+	const Tensor<dtype, CUDA>& attention_mask,
 	const Tensor<int32, CUDA>& position_ids,
 	const Tensor<int32, CUDA>& cache_position)
 {

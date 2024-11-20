@@ -2,7 +2,7 @@
 
 
 __global__ void cu_tensor_gemma_update_mask_f32_kernel(
-	const int32* d_mask,
+	const float32* d_mask,
 	const int32* d_pos,
 	const int32 batch,
 	const int32 mask_len,
@@ -34,7 +34,7 @@ __global__ void cu_tensor_gemma_update_mask_f32_kernel(
 
 		if (tx < mask_len)
 		{
-			int32 mask = d_mask[batch_ix * mask_len + tx];
+			int32 mask = static_cast<int32>(d_mask[batch_ix * mask_len + tx]);
 
 			if (mask != 0)
 			{
@@ -53,7 +53,7 @@ __global__ void cu_tensor_gemma_update_mask_f32_kernel(
 
 
 void cu_tensor_gemma_update_mask_f32(
-	const Tensor<int32, CUDA>& attention_mask,
+	const Tensor<float32, CUDA>& attention_mask,
 	const Tensor<int32, CUDA>& cache_position,
 	const int32 trg_len,
 	Tensor<float32, CUDA>& yt)
@@ -66,7 +66,7 @@ void cu_tensor_gemma_update_mask_f32(
 	int32 seq_len = cache_position.shape[0];
 
 	// buffers
-	const int32* d_mask = attention_mask.buffer();
+	const float32* d_mask = attention_mask.buffer();
 	const int32* d_pos = cache_position.buffer();
 	float32* d_y = yt.buffer();
 

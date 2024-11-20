@@ -11,7 +11,7 @@
 
 template<FloatingPointType dtype>
 inline Tensor<dtype, CUDA> tensor_gemma_update_mask(
-	const Tensor<int32, CUDA>& attention_mask,  // [batch, seq_len(?)]
+	const Tensor<dtype, CUDA>& attention_mask,  // [batch, seq_len(?)]
 	const Tensor<dtype, CUDA>& input_tensor,    // [batch, seq_len, hidden_size]
 	const Tensor<int32, CUDA>& cache_position,  // [seq_len]
 	const int32 target_length)
