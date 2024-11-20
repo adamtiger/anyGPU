@@ -21,7 +21,7 @@ struct GemmaCausalLMweights
 		gemma_model.load_weights(weights_folder_path);
 	}
 
-	Tensor<dtype, CUDA>& get_lm_head_weight() const  // tied to the embedding weight
+	const Tensor<dtype, CUDA>& get_lm_head_weight() const  // tied to the embedding weight
 	{
 		return gemma_model.embedding_data;
 	}
