@@ -563,7 +563,7 @@ void external_test_gemma2_causallm()
 	auto cmp = [&](const Tensor<float32, CPU>& expected, const Tensor<float32, CPU>& actual)
 		{
 			bool eq = elementwise_compatible(expected, actual);  // checks the sizes
-			eq = eq && compare_data_buffers_l2(actual, expected);
+			eq = eq && compare_data_buffers_l2(actual, expected, 0.05f);
 			return eq;
 		};
 

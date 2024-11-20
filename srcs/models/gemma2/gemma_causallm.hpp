@@ -51,9 +51,9 @@ inline Tensor<dtype, CUDA> tensor_gemma_causallm(  // Gemma2ForCausalLM
 
 	// lm_head (slicing can save computation)
 	int seq_len = hidden_states.shape[1];
-	tensor_slice(hidden_states, 1, seq_len - num_logits_to_keep, seq_len);
+	auto hs_sliced = tensor_slice(hidden_states, 1, seq_len - num_logits_to_keep, seq_len);
 	auto yt = tensor_gemma_linear_softcap(
-		hidden_states, 
+		hs_sliced,
 		model_weights.get_lm_head_weight(), 
 		config.final_softcapping);
 

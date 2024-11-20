@@ -174,12 +174,12 @@ inline Tensor<dtype, CUDA> tensor_gemma_model(  // Gemma2Model
 	auto inp_embeds = tensor_embedding(input_ids, model_weights.embedding_data);
 
 	// update_causal mask
-	auto causal_mask = tensor_gemma_update_mask(
+	auto causal_mask = attention_mask; /*tensor_gemma_update_mask(
 		attention_mask,
 		inp_embeds,
 		cache_position,
 		config.target_length
-	);
+	);*/
 
 
 	// normalize hidden states
