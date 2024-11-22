@@ -49,7 +49,7 @@
 
 ### Build infrastructure
 
-- [ ] remove vulkan (temporary it is in another repo)
+- [x] remove vulkan (temporary it is in another repo)
 - [ ] cmake enhancement
     . cuda with linux
 	. cuda for any machine (sm is hardcoded yet)

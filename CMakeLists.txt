@@ -19,12 +19,6 @@ IF (BUILD_WITH_CUDA)
     message("Compile with cuda")
 ENDIF()
 
-IF (BUILD_WITH_VULKAN)
-    find_package(Vulkan REQUIRED)
-	add_compile_definitions(AC_WITH_VULKAN)
-    message("Compile with vulkan")
-ENDIF()
-
 IF (BUILD_WITH_ASSERT)
     add_compile_definitions(AC_WITH_ASSERT)
 	message("Compile with asserts")
@@ -92,7 +86,6 @@ set (TEST_SRCS
     ${TEST_DIR}/zamba2_tests.cpp
     ${TEST_DIR}/ext_torch_tests.cpp
 	${TEST_DIR}/performance.cpp
-	${TEST_DIR}/vk_relu_skeleton.cpp
 )
 
 set (TEST_HEADERS
@@ -102,8 +95,6 @@ set (TEST_HEADERS
     ${TEST_DIR}/zamba2_tests.hpp
     ${TEST_DIR}/ext_torch_tests.hpp
 	${TEST_DIR}/performance.hpp
-	${TEST_DIR}/vk_relu_skeleton.hpp
-    ${TEST_DIR}/vk_relu_shader.comp
 )
 
 source_group("tests" FILES ${TEST_HEADERS} ${TEST_SRCS})
@@ -250,7 +241,7 @@ endif()
 
 add_executable(anygpu ${SOURCES} ${HEADERS})
 target_include_directories(
-    anygpu PUBLIC ${Vulkan_INCLUDE_DIR} ${CUDA_HEADERS}
+    anygpu PUBLIC ${CUDA_HEADERS}
 	${TRF_DIR} ${CORE_DIR} ${IO_DIR} 
 	${TEST_DIR} ${OPS_DIR} ${FUSED_DIR}
 	${ZAM2_DIR} ${GEM2_DIR}
@@ -259,7 +250,5 @@ target_include_directories(
 if (MSVC)
     target_link_options(anygpu PUBLIC "/NODEFAULTLIB:libcmt.lib")
 endif()
-
-target_link_libraries(anygpu PUBLIC ${Vulkan_LIBRARIES})
 
 message("Finished")

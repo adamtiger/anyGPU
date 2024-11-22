@@ -1,7 +1,6 @@
 #include "tests.hpp"
 #include "performance.hpp"
 #include "safetensors_file.hpp"
-#include "vk_relu_skeleton.hpp"
 
 int main()
 {
@@ -72,11 +71,9 @@ int main()
 	//external_test_gemma2_update_mask();
 	//external_test_gemma2_kvcache_update();
 	//external_test_gemma2_model_decoder_15();
-	//external_test_gemma2_model_decoder_16();
+	external_test_gemma2_model_decoder_16();
 	//external_test_gemma2_slide_mask();
-	external_test_gemma2_causallm();
-
-	//run_vk_compute();
+	//external_test_gemma2_causallm();
 
 	/* performance measurement (cuda) */
 
