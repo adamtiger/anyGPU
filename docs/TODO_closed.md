@@ -154,3 +154,17 @@
 
 - [x] full model tests and error fixes
     . for several iterations (will require linux at first time)
+
+
+### Cleaning, adjustment
+
+- [x] copy test data folders to s3 bucket
+- [x] revisit the gemma2 implementation, delete unused parts
+- [x] identify possible missing test cases (uncovered functions) 
+- [x] execute more tests
+- [x] examine the model calculation inaccuracy over time
+    . 5% l2 error rate
+	. where the difference arise (look for possible source in kv cache update and mask update)
+	. (the real test will be the long sequence with generator)
+	. optimization can also change the course of the divergence
+	. overall the maximum points are the important

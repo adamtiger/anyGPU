@@ -58,6 +58,39 @@ struct GemmaDecoderweights
 		postf_rmsnorm_weight = load_w(gd_path_postf_rmsnorm_weight);
 		post_attn_rmsnorm_weight = load_w(gd_path_post_attn_rmsnorm_weight);
 	}
+
+	void set_weights(
+		Tensor<dtype, CUDA>& gd_in_rmsnorm_weight,
+		Tensor<dtype, CUDA>& gd_preff_rmsnorm_weight,
+		Tensor<dtype, CUDA>& gd_postf_rmsnorm_weight,
+		Tensor<dtype, CUDA>& gd_post_attn_rmsnorm_weight,
+		Tensor<dtype, CUDA>& sdpa_q_proj_weight,
+		Tensor<dtype, CUDA>& sdpa_k_proj_weight,
+		Tensor<dtype, CUDA>& sdpa_v_proj_weight,
+		Tensor<dtype, CUDA>& sdpa_o_proj_weight,
+		Tensor<dtype, CUDA>& mlp_gate_proj_weight,
+		Tensor<dtype, CUDA>& mlp_up_proj_weight,
+		Tensor<dtype, CUDA>& mlp_down_proj_weight)
+	{
+		sdpa_weights.set_weights(
+			sdpa_q_proj_weight,
+			sdpa_k_proj_weight,
+			sdpa_v_proj_weight,
+			sdpa_o_proj_weight
+		);
+
+		mlp_weights.set_weights(
+			mlp_gate_proj_weight,
+			mlp_up_proj_weight,
+			mlp_down_proj_weight
+		);
+
+		input_rmsnorm_weight = gd_in_rmsnorm_weight;
+		preff_rmsnorm_weight = gd_preff_rmsnorm_weight;
+		postf_rmsnorm_weight = gd_postf_rmsnorm_weight;
+		post_attn_rmsnorm_weight = gd_post_attn_rmsnorm_weight;
+	}
+
 };
 
 template<FloatingPointType dtype>

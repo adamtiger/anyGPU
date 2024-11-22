@@ -59,7 +59,7 @@ int main()
 	//external_test_gemma2_model_decoder();
 	//external_test_gemma2_lmhead_softcap();
 	//external_test_gemma2_update_mask();
-	external_test_gemma2_kvcache_update();
+	//external_test_gemma2_kvcache_update();
 	//external_test_gemma2_model_decoder_15();
 	//external_test_gemma2_model_decoder_16();
 	//external_test_gemma2_slide_mask();
@@ -72,11 +72,11 @@ int main()
 	//perf_mm_f16_640x1280_1280x320();
 
 
-	/*std::string path = "C:\\Data\\AI\\projects\\anyGPU\\artifacts\\safetensors\\diffusion_pytorch_model.safetensors";
+	std::string path = "C:\\Data\\AI\\projects\\anyGPU\\artifacts\\safetensors\\gemma2_2b\\model-00003-of-00003.safetensors";
 	std::vector<Tensor<float32, CPU>> tensors;
 	sft_read_tensors(path, tensors);
 
-	std::cout << represent_tensor(tensors[0]) << "\n";
+	/*std::cout << represent_tensor(tensors[0]) << "\n";
 	std::cout << represent_tensor(tensors[1]) << "\n";*/
 
 	std::cout << "Finished" << std::endl;

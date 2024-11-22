@@ -36,6 +36,18 @@ struct GemmaSDPAweights
 		v_proj_weight = load_w(path_v_proj_weight);
 		o_proj_weight = load_w(path_o_proj_weight);
 	}
+
+	void set_weights(
+		Tensor<dtype, CUDA>& sdpa_q_proj_weight,
+		Tensor<dtype, CUDA>& sdpa_k_proj_weight,
+		Tensor<dtype, CUDA>& sdpa_v_proj_weight,
+		Tensor<dtype, CUDA>& sdpa_o_proj_weight)
+	{
+		q_proj_weight = sdpa_q_proj_weight;
+		k_proj_weight = sdpa_k_proj_weight;
+		v_proj_weight = sdpa_v_proj_weight;
+		o_proj_weight = sdpa_o_proj_weight;
+	}
 };
 
 template<FloatingPointType dtype>

@@ -3,20 +3,6 @@
 ## Current steps to be done
 
 
-### Cleaning, adjustment
-
-- [x] copy test data folders to s3 bucket
-- [x] revisit the gemma2 implementation, delete unused parts
-- [x] identify possible missing test cases (uncovered functions) 
-- [x] execute more tests
-- [x] examine the model calculation inaccuracy over time
-    . 5% l2 error rate
-	. where the difference arise (look for possible source in kv cache update and mask update)
-	. (the real test will be the long sequence with generator)
-	. optimization can also change the course of the divergence
-	. overall the maximum points are the important
-
-
 ### Memory and data
 
 - [ ] read model weights directly from safetensor (instead of dat)
@@ -63,7 +49,5 @@
 
 
 - save script should handle dictionary inputs
-
-
-
-
+- safetensor io should be able to handle chunked weight lists (more saftensors for a single model) 
+    - e.g. gemma model's safetensor loader would be more efficient (no vector resizes etc.)

@@ -28,6 +28,16 @@ struct GemmaMLPweights
 		up_proj_weight = load_w(path_up_proj_weight);
 		down_proj_weight = load_w(path_down_proj_weight);
 	}
+
+	void set_weights(
+		Tensor<dtype, device>& mlp_gate_proj_weight,
+		Tensor<dtype, device>& mlp_up_proj_weight,
+		Tensor<dtype, device>& mlp_down_proj_weight)
+	{
+		gate_proj_weight = mlp_gate_proj_weight;
+		up_proj_weight = mlp_up_proj_weight;
+		down_proj_weight = mlp_down_proj_weight;
+	}
 };
 
 template<FloatingPointType dtype, Device device>
