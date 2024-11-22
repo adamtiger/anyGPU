@@ -52,16 +52,6 @@ int main()
 	external_test_slice_fwd_f32();*/
 	//external_test_causal_conv1d_fwd_f32();
 
-	//external_test_zamba2_model_rmsnorm();
-	//external_test_zamba2_attndeco_attn();
-	//external_test_zamba2_attndeco_mlp();
-	//external_test_zamba2_attn_rotary();
-	//external_test_zamba2_attn_sdp();
-	//external_test_zamba2_model_attndecoder();
-	//external_test_mamba2_layer_causal_conv1d();
-	//external_test_mamba2_layer_gated_rmsnorm();
-	//test_zamba2_glu();
-
 	//external_test_gemma2_decoder_mlp();
 	//external_test_gemma2_decoder_rmsn();
 	//external_test_gemma2_decoder_attention();

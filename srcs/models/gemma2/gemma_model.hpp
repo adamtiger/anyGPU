@@ -174,13 +174,7 @@ inline Tensor<dtype, CUDA> tensor_gemma_model(  // Gemma2Model
 	auto inp_embeds = tensor_embedding(input_ids, model_weights.embedding_data);
 
 	// update_causal mask
-	auto causal_mask = attention_mask; /*tensor_gemma_update_mask(
-		attention_mask,
-		inp_embeds,
-		cache_position,
-		config.target_length
-	);*/
-
+	auto& causal_mask = attention_mask; 
 
 	// normalize hidden states
 	dtype norm_factor = static_cast<dtype>(sqrtf(static_cast<float32>(config.hidden_size)));
@@ -210,9 +204,6 @@ inline Tensor<dtype, CUDA> tensor_gemma_model(  // Gemma2Model
 
 	// calculate rms norm
 	auto y = tensor_rms_norm(hidden_states, -1, model_weights.pos_rmsnorm_weight, config.rms_norm_eps, true);
-
-
-	// TODO: store required additional outputs (e.g. all hidden states, attentions etc.) (is this required???, what is the purpose? saving computation and memory?)
 
 	return y;
 }

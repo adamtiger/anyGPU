@@ -5,8 +5,8 @@
 
 ### Cleaning, adjustment
 
-- [ ] copy test data folders to s3 bucket
-- [ ] revisit the gemma2 implementation, delete unused parts
+- [x] copy test data folders to s3 bucket
+- [x] revisit the gemma2 implementation, delete unused parts
 - [ ] identify possible missing test cases (uncovered functions) 
 - [ ] execute more tests
 - [ ] examine the model calculation inaccuracy over time
