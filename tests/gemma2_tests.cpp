@@ -306,7 +306,7 @@ void external_test_gemma2_update_mask()
 
 void external_test_gemma2_kvcache_update()
 {
-	auto path = artifact_folder_path / "test_gemma2kvcache_update";
+	auto path = artifact_folder_path / "test_gemma2attention_kvupdate";
 
 	GemmaConfig config;
 
@@ -324,7 +324,7 @@ void external_test_gemma2_kvcache_update()
 
 	// test the cache in each state
 	bool correct = true;
-	for (int ix = 1; ix < 11; ++ix)
+	for (int ix = 1; ix < 101; ++ix)
 	{
 		std::string fn = "io_ckpt_" + std::to_string(ix);
 		auto ckp_path = path / fn;
@@ -333,7 +333,7 @@ void external_test_gemma2_kvcache_update()
 	    // hw is tied to the embedding weights
 		auto h_k = load_tensor((ckp_path / "in_0.dat").string());
 		auto h_v = load_tensor((ckp_path / "in_1.dat").string());
-		auto h_cpos = load_tensor<int32>((ckp_path / "in_3.dat").string());
+		auto h_cpos = load_tensor<int32>((ckp_path / "in_4.dat").string());
 		auto exp_hk = load_tensor((ckp_path / "out_0.dat").string());
 		auto exp_hv = load_tensor((ckp_path / "out_1.dat").string());
 
@@ -341,7 +341,7 @@ void external_test_gemma2_kvcache_update()
 		auto d_v = h_v.copy_to_cuda();
 		auto d_cpos = h_cpos.copy_to_cuda();
 		
-		int32 layer_idx = ix % 26 - 1;
+		int32 layer_idx = (ix - 1) % 26;
 		int32 sliding_window = (layer_idx % 2 == 0 ? config.sliding_window : -1);
 
 		Tensor<float32, CUDA> act_dk_cuda;
