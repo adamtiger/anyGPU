@@ -122,6 +122,7 @@ private:
 		// constants
 		const int num_decoder_weights = 11;
 		const int offset_layer_id_str = 8;  // length of .layers.
+		const int num_nonlayer_weights = 2;
 
 		// paths
 		int index_embedding_data;
@@ -165,7 +166,7 @@ private:
 
 		// calculate the number of layers from the number of files
 		int num_tensors = static_cast<int>(loaded_tensors.size());
-		int num_layer_weight_files = num_tensors - 2;
+		int num_layer_weight_files = num_tensors - num_nonlayer_weights;
 		const int num_layers = num_layer_weight_files / num_decoder_weights;
 
 		indices_decoder_layer_weight.resize(num_layer_weight_files);
