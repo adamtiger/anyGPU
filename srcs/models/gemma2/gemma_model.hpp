@@ -4,6 +4,7 @@
 #include "tensor.hpp"
 #include "core_concepts.hpp"
 #include "dat_file.hpp"
+#include "safetensors_file.hpp"
 #include "ops.hpp"
 
 #include "gemma_update_mask.hpp"
@@ -312,14 +313,19 @@ private:
 		for (const auto& sf_path : sf_paths)
 		{
 			std::vector<Tensor<dtype, CUDA>> tensors_partial;
-			sft_read_tensors(sf_path, tensors_partial);
+			{
+				std::vector<Tensor<dtype, CPU>> tensors_partial_cpu;
+				sft_read_tensors(sf_path, tensors_partial_cpu);
 
-			// append to the loaded_tensors
-			size_t increased_size = loaded_tensors.size() + tensors_partial.size();
-			loaded_tensors.resize(increased_size);
-			
+				tensors_partial.reserve(tensors_partial_cpu.size());
+				for (auto& t : tensors_partial_cpu)
+				{
+					tensors_partial.push_back(t.copy_to_cuda());
+				}
+			}
+			// append to the loaded_tensors			
 			loaded_tensors.insert(
-				loaded_tensors.begin() + loaded_tensors.size(),
+				loaded_tensors.end(),
 				tensors_partial.begin(), 
 				tensors_partial.end()
 			);

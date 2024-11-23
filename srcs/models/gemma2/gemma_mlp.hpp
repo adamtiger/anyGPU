@@ -34,9 +34,9 @@ struct GemmaMLPweights
 		Tensor<dtype, device>& mlp_up_proj_weight,
 		Tensor<dtype, device>& mlp_down_proj_weight)
 	{
-		gate_proj_weight = mlp_gate_proj_weight;
-		up_proj_weight = mlp_up_proj_weight;
-		down_proj_weight = mlp_down_proj_weight;
+		gate_proj_weight = tensor_transp(mlp_gate_proj_weight);
+		up_proj_weight = tensor_transp(mlp_up_proj_weight);
+		down_proj_weight = tensor_transp(mlp_down_proj_weight);
 	}
 };
 

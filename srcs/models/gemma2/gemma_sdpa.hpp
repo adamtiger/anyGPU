@@ -43,10 +43,10 @@ struct GemmaSDPAweights
 		Tensor<dtype, CUDA>& sdpa_v_proj_weight,
 		Tensor<dtype, CUDA>& sdpa_o_proj_weight)
 	{
-		q_proj_weight = sdpa_q_proj_weight;
-		k_proj_weight = sdpa_k_proj_weight;
-		v_proj_weight = sdpa_v_proj_weight;
-		o_proj_weight = sdpa_o_proj_weight;
+		q_proj_weight = tensor_transp(sdpa_q_proj_weight);
+		k_proj_weight = tensor_transp(sdpa_k_proj_weight);
+		v_proj_weight = tensor_transp(sdpa_v_proj_weight);
+		o_proj_weight = tensor_transp(sdpa_o_proj_weight);
 	}
 };
 

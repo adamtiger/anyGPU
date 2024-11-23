@@ -326,6 +326,7 @@ Tensor<dtype, CPU> Tensor<dtype, device>::copy_to_host() const
 	tensor.stride = this->stride;
 	tensor.alignment = this->alignment;
 	tensor.offset = this->offset;
+	tensor.name = this->name;
 	
 	char* trg = tensor.raw_buffer();
 	char* src = this->raw_buffer();
@@ -352,6 +353,7 @@ Tensor<dtype, CUDA> Tensor<dtype, device>::copy_to_cuda() const
 	tensor.stride = this->stride;
 	tensor.alignment = this->alignment;
 	tensor.offset = this->offset;
+	tensor.name = this->name;
 
 	char* trg = tensor.raw_buffer();
 	char* src = this->raw_buffer();
