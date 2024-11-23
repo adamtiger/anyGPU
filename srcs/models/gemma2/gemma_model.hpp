@@ -315,11 +315,11 @@ private:
 			sft_read_tensors(sf_path, tensors_partial);
 
 			// append to the loaded_tensors
-			size_t increased_size = load_tensor.size() + tensors_partial.size();
+			size_t increased_size = loaded_tensors.size() + tensors_partial.size();
 			loaded_tensors.resize(increased_size);
 			
 			loaded_tensors.insert(
-				loaded_tensors.begin() + load_tensor.size(), 
+				loaded_tensors.begin() + loaded_tensors.size(),
 				tensors_partial.begin(), 
 				tensors_partial.end()
 			);
