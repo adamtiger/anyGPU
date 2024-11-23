@@ -5,7 +5,7 @@
 
 ### Memory and data
 
-- [ ] read model weights directly from safetensor (instead of dat)
+- [x] read model weights directly from safetensor (instead of dat)
 
 - [ ] arena implementation
     - [ ] default arena (falls back to cudaMalloc, dynamic memory allocation)

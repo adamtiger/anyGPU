@@ -16,14 +16,14 @@ struct GemmaCausalLMweights
 {
 	GemmaModelweights<dtype> gemma_model;
 
-	void load_weights(const std::string& weights_folder_path)
-	{
-		gemma_model.load_weights(weights_folder_path);
-	}
-
 	void load_weights_from_safetensors(const std::string& weights_folder_path)
 	{
 		gemma_model.load_weights_from_safetensors(weights_folder_path);
+	}
+
+	void load_weights_from_datfiles(const std::string& weights_folder_path)
+	{
+		gemma_model.load_weights_from_datfiles(weights_folder_path);
 	}
 
 	const Tensor<dtype, CUDA>& get_lm_head_weight() const  // tied to the embedding weight

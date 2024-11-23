@@ -573,10 +573,12 @@ void external_test_gemma2_causallm()
     GemmaKVcache kv_cache;
     kv_cache.init_cache(config, 1);
 
+	std::cout << "Loading weights ... \n";
     GemmaCausalLMweights<float32> gcml_weights;
     gcml_weights.load_weights_from_safetensors(
         (path / "weights_sf").string()
     );
+	std::cout << "Loaded ... \n";
 
     // set the num_logits_to_keep
     int32 num_logits_to_keep = 1;
