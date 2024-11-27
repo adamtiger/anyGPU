@@ -3,22 +3,11 @@
 ## Current steps to be done
 
 
-### Memory and data
-
-- [x] read model weights directly from safetensor (instead of dat)
-
-- [ ] arena implementation
-    - [ ] default arena (falls back to cudaMalloc, dynamic memory allocation)
-	- [ ] record the allocation pattern in the graph (default allocator with monitoring)
-	- [ ] allocate the arena once, create tensors from the arena (no cost)
-	    - this requires to calculate an allocation strategy (can be optimized because it is known in advance)
-	- ...
-
 
 ### Optimization
 
-- [ ] measure the execution time per operator
-- [ ] create a bar plot about exec times
+- [x] measure the execution time per operator
+- [x] create a bar plot about exec times
 - [ ] create separate folder for cuda kernels
 
 - [ ] fast f32 matmul for cuda
@@ -32,6 +21,18 @@
 - quantization
 - sparse implementation
 - other techniques ...
+
+
+### Memory and data
+
+- [x] read model weights directly from safetensor (instead of dat)
+
+- [ ] arena implementation
+    - [ ] default arena (falls back to cudaMalloc, dynamic memory allocation)
+	- [ ] record the allocation pattern in the graph (default allocator with monitoring)
+	- [ ] allocate the arena once, create tensors from the arena (no cost)
+	    - this requires to calculate an allocation strategy (can be optimized because it is known in advance)
+	- ...
 
 
 ### Build infrastructure

@@ -248,6 +248,7 @@ target_include_directories(
 )
 #target_compile_options(anygpu PUBLIC $<$<COMPILE_LANGUAGE:CUDA>:--keep>)
 if (MSVC)
+    set_target_properties(anygpu PROPERTIES LINK_FLAGS "/PROFILE")
     target_link_options(anygpu PUBLIC "/NODEFAULTLIB:libcmt.lib")
 endif()
 
