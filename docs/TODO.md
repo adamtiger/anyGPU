@@ -8,7 +8,7 @@
 
 - [x] measure the execution time per operator
 - [x] create a bar plot about exec times
-- [ ] create separate folder for cuda kernels
+- [x] create separate folder for cuda kernels
 
 - [ ] fast f32 matmul for cuda
 

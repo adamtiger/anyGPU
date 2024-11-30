@@ -51,11 +51,10 @@ source_group("core" FILES ${CORE_HEADERS} ${CORE_SRCS})
 set(FUSED_DIR ${ANYGPU_ROOT}/srcs/fused)
 
 set (FUSED_SRCS
-    ${FUSED_DIR}/causal_conv1d.cu
+    
 )
 
 set (FUSED_HEADERS
-    ${FUSED_DIR}/causal_conv1d.cuh
 	${FUSED_DIR}/causal_conv1d.hpp
 )
 
@@ -104,32 +103,17 @@ source_group("tests" FILES ${TEST_HEADERS} ${TEST_SRCS})
 set(OPS_DIR ${ANYGPU_ROOT}/srcs/ops)
 
 set (OPS_SRCS
-    ${OPS_DIR}/binary_ops.cu
-    ${OPS_DIR}/math_ops.cu
-    ${OPS_DIR}/mm_ops.cu
-    ${OPS_DIR}/norm_ops.cu
-    ${OPS_DIR}/transp_ops.cu
-    ${OPS_DIR}/softmax_ops.cu
-    ${OPS_DIR}/quantize_ops.cu
-    ${OPS_DIR}/embedding_ops.cu
+
 )
 
 set (OPS_HEADERS
-    ${OPS_DIR}/binary_ops.cuh
     ${OPS_DIR}/binary_ops.hpp
-    ${OPS_DIR}/math_ops.cuh
     ${OPS_DIR}/math_ops.hpp
-    ${OPS_DIR}/mm_ops.cuh
     ${OPS_DIR}/mm_ops.hpp
-    ${OPS_DIR}/norm_ops.cuh
     ${OPS_DIR}/norm_ops.hpp
-    ${OPS_DIR}/transp_ops.cuh
     ${OPS_DIR}/transp_ops.hpp
-    ${OPS_DIR}/softmax_ops.cuh
     ${OPS_DIR}/softmax_ops.hpp
-    ${OPS_DIR}/quantize_ops.cuh
     ${OPS_DIR}/quantize_ops.hpp
-    ${OPS_DIR}/embedding_ops.cuh
     ${OPS_DIR}/embedding_ops.hpp
     ${OPS_DIR}/shape_ops.hpp
     ${OPS_DIR}/ops.hpp
@@ -152,6 +136,37 @@ set (TRF_HEADERS
 )
 
 source_group("transformers" FILES ${TRF_HEADERS} ${TRF_SRCS})
+
+# kernels (cuda)
+
+set(KERNEL_CU_DIR ${ANYGPU_ROOT}/srcs/kernels/cuda)
+
+set (KRN_CU_SRCS
+    ${KERNEL_CU_DIR}/binary_ops.cu
+    ${KERNEL_CU_DIR}/math_ops.cu
+    ${KERNEL_CU_DIR}/mm_ops.cu
+    ${KERNEL_CU_DIR}/norm_ops.cu
+    ${KERNEL_CU_DIR}/transp_ops.cu
+    ${KERNEL_CU_DIR}/softmax_ops.cu
+    ${KERNEL_CU_DIR}/quantize_ops.cu
+    ${KERNEL_CU_DIR}/embedding_ops.cu
+    ${KERNEL_CU_DIR}/causal_conv1d.cu
+)
+
+set (KRN_CU_HEADERS
+    ${KERNEL_CU_DIR}/binary_ops.cuh
+    ${KERNEL_CU_DIR}/math_ops.cuh
+    ${KERNEL_CU_DIR}/mm_ops.cuh
+    ${KERNEL_CU_DIR}/norm_ops.cuh
+    ${KERNEL_CU_DIR}/transp_ops.cuh
+    ${KERNEL_CU_DIR}/softmax_ops.cuh
+    ${KERNEL_CU_DIR}/quantize_ops.cuh
+    ${KERNEL_CU_DIR}/embedding_ops.cuh
+    ${KERNEL_CU_DIR}/causal_conv1d.cuh
+)
+
+source_group("kcuda" FILES ${KRN_CU_HEADERS} ${KRN_CU_SRCS})
+
 
 # model related (zamba2)
 
@@ -217,6 +232,7 @@ set (SOURCES
     ${IO_SRCS}
     ${TEST_SRCS}
     ${OPS_SRCS}
+    ${KRN_CU_SRCS}
 )
 
 set (HEADERS
@@ -228,6 +244,7 @@ set (HEADERS
     ${IO_HEADERS}
     ${TEST_HEADERS}
     ${OPS_HEADERS}
+    ${KRN_CU_HEADERS}
 )
 
 if (MSVC OR CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC")
@@ -242,9 +259,9 @@ endif()
 add_executable(anygpu ${SOURCES} ${HEADERS})
 target_include_directories(
     anygpu PUBLIC ${CUDA_HEADERS}
-	${TRF_DIR} ${CORE_DIR} ${IO_DIR} 
+	${TRF_DIR} ${CORE_DIR} ${IO_DIR} ${KERNEL_CU_DIR}
 	${TEST_DIR} ${OPS_DIR} ${FUSED_DIR}
-	${ZAM2_DIR} ${GEM2_DIR}
+	${ZAM2_DIR} ${GEM2_DIR} 
 )
 #target_compile_options(anygpu PUBLIC $<$<COMPILE_LANGUAGE:CUDA>:--keep>)
 if (MSVC)
