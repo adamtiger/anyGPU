@@ -151,6 +151,7 @@ set (KRN_CU_SRCS
     ${KERNEL_CU_DIR}/quantize_ops.cu
     ${KERNEL_CU_DIR}/embedding_ops.cu
     ${KERNEL_CU_DIR}/causal_conv1d.cu
+    ${KERNEL_CU_DIR}/mlp_gemma2_fused_upproj_f32_128.cu
 )
 
 set (KRN_CU_HEADERS
@@ -163,6 +164,7 @@ set (KRN_CU_HEADERS
     ${KERNEL_CU_DIR}/quantize_ops.cuh
     ${KERNEL_CU_DIR}/embedding_ops.cuh
     ${KERNEL_CU_DIR}/causal_conv1d.cuh
+    ${KERNEL_CU_DIR}/mlp_gemma2_fused_upproj.cuh
 )
 
 source_group("kcuda" FILES ${KRN_CU_HEADERS} ${KRN_CU_SRCS})

@@ -40,17 +40,36 @@ struct GemmaMLPweights
 	}
 };
 
+template<FloatingPointType dtype, Device device, int variant>
+inline Tensor<dtype, device> tensor_gemma_mlp_fused_uprpoj(
+	const GemmaMLPweights<dtype, device>& mlp_weights,
+	const Tensor<dtype, device>& x)
+{
+	Tensor<dtype, device> y;
+
+	if constexpr (device == CUDA && variant == 1)
+	{
+
+	}
+	else  // default (for any device)
+	{
+		auto gated_x = tensor_linear(x, mlp_weights.gate_proj_weight);
+		auto act_gated_x = tensor_gelu(gated_x, true);
+
+		auto up_x = tensor_linear(x, mlp_weights.up_proj_weight);
+
+		y = tensor_mul(act_gated_x, up_x);
+	}
+
+	return y;
+}
+
 template<FloatingPointType dtype, Device device>
 inline Tensor<dtype, device> tensor_gemma_mlp(
 	const GemmaMLPweights<dtype, device>& mlp_weights,
 	const Tensor<dtype, device>& x)
 {
-	auto gated_x = tensor_linear(x, mlp_weights.gate_proj_weight);
-	auto act_gated_x = tensor_gelu(gated_x, true);
-
-	auto up_x = tensor_linear(x, mlp_weights.up_proj_weight);
-
-	auto comb_x = tensor_mul(act_gated_x, up_x);
+	auto comb_x = tensor_gemma_mlp_fused_uprpoj<dtype, device, 0>(mlp_weights, x);
 
 	auto y = tensor_linear(comb_x, mlp_weights.down_proj_weight);
 

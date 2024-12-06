@@ -52,11 +52,11 @@ int main()
 	external_test_slice_fwd_f32();*/
 	//external_test_causal_conv1d_fwd_f32();
 
-	//external_test_gemma2_decoder_mlp();
+	external_test_gemma2_decoder_mlp();
 	//external_test_gemma2_decoder_rmsn();
 	//external_test_gemma2_decoder_attention();
 	//external_test_gemma2_attention_rotary();
-	external_test_gemma2_model_decoder();
+	//external_test_gemma2_model_decoder();
 	//external_test_gemma2_lmhead_softcap();
 	//external_test_gemma2_update_mask();
 	//external_test_gemma2_kvcache_update();
