@@ -18,4 +18,7 @@ void external_test_gemma2_slide_mask();
 
 void external_test_gemma2_causallm();
 
+// more tests for internal functions
+void external_test_gemma2_decoder_fused_mlp();
+
 #endif  // __EXT_GEMMA2_TESTS__

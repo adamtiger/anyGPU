@@ -31,9 +31,9 @@ def generate_fused_mlp_upproj_f32(path: str, test_name: str, seq_len: int = 9):
 
     # save tensors
     save_tensor(x, pjoin(test_fld_name, "x.dat"))
-    save_tensor(w_gate_proj, pjoin(test_fld_name, "w_gate_proj.dat"))
-    save_tensor(w_up_proj, pjoin(test_fld_name, "w_up_proj.dat"))
-    save_tensor(w_down_proj, pjoin(test_fld_name, "w_down_proj.dat"))
+    save_tensor(w_gate_proj.T, pjoin(test_fld_name, "w_gate_proj.dat"))
+    save_tensor(w_up_proj.T, pjoin(test_fld_name, "w_up_proj.dat"))
+    save_tensor(w_down_proj.T, pjoin(test_fld_name, "w_down_proj.dat"))
     save_tensor(y, pjoin(test_fld_name, "y.dat"))
 
     # print sample

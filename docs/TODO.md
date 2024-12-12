@@ -11,7 +11,7 @@
 - [x] create separate folder for cuda kernels
 
 - [x] optimization step: mlp
-- [ ] check the fused mlp kernel on more tests
+- [x] check the fused mlp kernel on more tests
 - [ ] optimization step: mlp linear part
 
 - [ ] float to bfloat16 and other similar conversions can be done with static_cast (consider this)

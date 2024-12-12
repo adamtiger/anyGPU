@@ -622,3 +622,36 @@ void external_test_gemma2_causallm()
 
 	std::cout << "TestCase [external_test_gemma2_causallm - CUDA]: " << (correct ? "PASSED" : "FAILED") << "\n";
 }
+
+
+void external_test_gemma2_decoder_fused_mlp()
+{
+	auto path = artifact_folder_path / ".." / "test_gemma2_fused_mlp_upproj_f32_sqlen158";
+
+	// read tensors from files
+	auto hx = load_tensor((path / "x.dat").string());
+	auto exp_hy = load_tensor((path / "y.dat").string());
+
+	GemmaMLPweights<float32, CUDA> mlp_weights;
+	mlp_weights.load_weights(
+		(path / "w_gate_proj.dat").string(),
+		(path / "w_up_proj.dat").string(),
+		(path / "w_down_proj.dat").string()
+	);
+
+	auto dx = hx.copy_to_cuda();
+	auto act_dy_cuda = tensor_gemma_mlp(mlp_weights, dx);
+	auto act_hy_cuda = act_dy_cuda.copy_to_host();
+
+	// compare
+	auto cmp = [&](const Tensor<float32, CPU>& expected, const Tensor<float32, CPU>& actual)
+		{
+			bool eq = elementwise_compatible(expected, actual);  // checks the sizes
+			eq = eq && compare_data_buffers_l2(actual, expected, 0.01f);
+			return eq;
+		};
+
+	// test cuda
+	bool eq = cmp(exp_hy, act_hy_cuda);
+	std::cout << "TestCase [external_test_gemma2_decoder_fused_mlp - CUDA]: " << (eq ? "PASSED" : "FAILED") << "\n";
+}
