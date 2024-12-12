@@ -7,6 +7,7 @@
 #include "ops.hpp"
 
 #include "mlp_gemma2_fused_upproj.cuh"
+#include "mlp_gemma2_dp_linear.cuh"
 
 
 template<FloatingPointType dtype, Device device>
@@ -86,6 +87,35 @@ inline Tensor<dtype, device> tensor_gemma_mlp_fused_uprpoj(
 	return y;
 }
 
+
+template<FloatingPointType dtype, Device device, int variant>
+inline Tensor<dtype, device> tensor_gemma_mlp_dp_linear(
+	const GemmaMLPweights<dtype, device>& mlp_weights,
+	const Tensor<dtype, device>& x)
+{
+	Tensor<dtype, device> y;
+
+	if constexpr (device == CUDA && variant == 1)
+	{
+		Shape y_shape = x.shape;
+		y_shape[x.dim - 1] = x.shape[x.dim - 1] / 4;  // 9216 -> 2304
+		Tensor<dtype, device> out(x.dim, y_shape);
+
+		cu_mlp_gemma2_dp_linear_f32_v1(
+			x, mlp_weights.down_proj_weight, out
+		);
+
+		y = out;
+	}
+	else  // default (for any device)
+	{
+		y = tensor_linear(x, mlp_weights.down_proj_weight);
+	}
+
+	return y;
+}
+
+
 template<FloatingPointType dtype, Device device>
 inline Tensor<dtype, device> tensor_gemma_mlp(
 	const GemmaMLPweights<dtype, device>& mlp_weights,
@@ -93,7 +123,7 @@ inline Tensor<dtype, device> tensor_gemma_mlp(
 {
 	auto comb_x = tensor_gemma_mlp_fused_uprpoj<dtype, device, 2>(mlp_weights, x);
 
-	auto y = tensor_linear(comb_x, mlp_weights.down_proj_weight);
+	auto y = tensor_gemma_mlp_dp_linear<dtype, device, 0>(mlp_weights, comb_x);
 
 	return y;
 }
