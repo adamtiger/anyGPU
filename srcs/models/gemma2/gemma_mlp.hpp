@@ -61,6 +61,18 @@ inline Tensor<dtype, device> tensor_gemma_mlp_fused_uprpoj(
 
 		y = out;
 	}
+	else if constexpr (device == CUDA && variant == 2)
+	{
+		Shape y_shape = x.shape;
+		y_shape[x.dim - 1] = x.shape[x.dim - 1] * 4;
+		Tensor<dtype, device> out(x.dim, y_shape);
+
+		cu_mlp_gemma2_fused_upproj_f32_v2(
+			x, mlp_weights.gate_proj_weight, mlp_weights.up_proj_weight, out
+		);
+
+		y = out;
+	}
 	else  // default (for any device)
 	{
 		auto gated_x = tensor_linear(x, mlp_weights.gate_proj_weight);
@@ -79,7 +91,7 @@ inline Tensor<dtype, device> tensor_gemma_mlp(
 	const GemmaMLPweights<dtype, device>& mlp_weights,
 	const Tensor<dtype, device>& x)
 {
-	auto comb_x = tensor_gemma_mlp_fused_uprpoj<dtype, device, 1>(mlp_weights, x);
+	auto comb_x = tensor_gemma_mlp_fused_uprpoj<dtype, device, 2>(mlp_weights, x);
 
 	auto y = tensor_linear(comb_x, mlp_weights.down_proj_weight);
 

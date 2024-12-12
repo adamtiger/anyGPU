@@ -107,7 +107,7 @@ def plot_kernel_times(l2_kernel_times: dict):
 
 
 if __name__ == '__main__':
-    df = read_data("C:\\Data\\AI\\projects\\anyGPU\\artifacts\\performance\\gemma_decoder\\gemma_decoder_fmlp_v1_gpu_profile.csv")
+    df = read_data("C:\\Data\\AI\\projects\\anyGPU\\artifacts\\performance\\gemma_decoder\\gemma_decoder_fmlp_v2_gpu_profile.csv")
 
     print(df.head(5))
 

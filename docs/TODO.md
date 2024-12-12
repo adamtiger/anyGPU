@@ -10,9 +10,9 @@
 - [x] create a bar plot about exec times
 - [x] create separate folder for cuda kernels
 
-- [ ] fast f32 matmul for cuda
-
-- [ ] fp16, bfp16 kernel versions
+- [x] optimization step: mlp
+- [ ] check the fused mlp kernel on more tests
+- [ ] optimization step: mlp linear part
 
 - [ ] float to bfloat16 and other similar conversions can be done with static_cast (consider this)
 - [ ] bf16 support for tensor saver (numpy cannot support bfloat16)

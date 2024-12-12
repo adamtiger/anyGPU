@@ -10,7 +10,7 @@ constexpr int TS_X = NUM_WARPS * WARP_SIZE;  // number of cols from wt_gp and wt
 constexpr int TS_Y = 16;  // number of rows from xt, to handle at once
 
 
-__device__ float gelu_approx(const float z)
+static __device__ float gelu_approx(const float z)
 {
 	return z * 0.5f * (1.f + tanhf(sqrt(2.f / 3.14159265358979323846f) * (z + 0.044715f * z * z * z)));
 }
