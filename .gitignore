@@ -1,6 +1,7 @@
 build/**
 *.pdf
 *.md
+*.txt
 *.dat
 *.json
 
