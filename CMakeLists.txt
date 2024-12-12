@@ -151,7 +151,7 @@ set (KRN_CU_SRCS
     ${KERNEL_CU_DIR}/quantize_ops.cu
     ${KERNEL_CU_DIR}/embedding_ops.cu
     ${KERNEL_CU_DIR}/causal_conv1d.cu
-    ${KERNEL_CU_DIR}/mlp_gemma2_fused_upproj_f32_128.cu
+    ${KERNEL_CU_DIR}/mlp_gemma2_fused_upproj_f32_v1.cu
 )
 
 set (KRN_CU_HEADERS

@@ -40,14 +40,14 @@ __global__ void cu_mlp_gemma2_fused_uprpoj_f32_v1_kernel(
 			float32 w1 = dwgp[k * w_width + j];
 			ymm1 += x * w1;
 
-			float32 w2 = dwgp[k * w_width + j];
+			float32 w2 = dwup[k * w_width + j];
 			ymm2 += x * w2;
 		}
 
 		ymm1 = gelu_approx(ymm1);
 
 		float32 y = ymm1 * ymm2;
-		dy[(i0 + i) * x_width + j] = y;
+		dy[(i0 + i) * w_width + j] = y;
 	}
 }
 
@@ -70,6 +70,6 @@ void cu_mlp_gemma2_fused_upproj_f32_v1(
 	dim3 bs = { TS_X, 1, 1 };
 	dim3 gs = { calc_req_num_blocks(w_width, TS_X), calc_req_num_blocks(sl, TS_Y), 1 };
 
-	cu_mlp_gemma2_fused_uprpoj_f32_v1_kernel<<<gs, bs>>>(sl, dx, dw_gp, dw_up, dy);
+	cu_mlp_gemma2_fused_uprpoj_f32_v1_kernel<<<gs, bs>>>(sl, dx, dwgp, dwup, dy);
 	CUDA_CHECK_LAST_ERROR();
 }
