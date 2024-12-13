@@ -11,6 +11,8 @@
 #include "gemma_kv_cache.hpp"
 #include "zamba_rotary.hpp"
 
+#include "sdpa_gemma2_linear.cuh"
+
 
 template<FloatingPointType dtype>
 struct GemmaSDPAweights
@@ -50,6 +52,33 @@ struct GemmaSDPAweights
 	}
 };
 
+
+template<FloatingPointType dtype, int variant>
+inline Tensor<dtype, CUDA> tensor_gemma_sdpa_linear(
+	const Tensor<dtype, CUDA>& xt,
+	const Tensor<dtype, CUDA>& wt)
+{
+	Tensor<dtype, CUDA> yt;
+
+	if constexpr (variant == 1)
+	{
+		Shape y_shape = xt.shape;
+		y_shape[xt.dim - 1] = wt.shape[1];
+		Tensor<dtype, CUDA> out(xt.dim, y_shape);
+
+		cu_sdpa_gemma2_linear_f32_v1(xt, wt, out);
+
+		yt = out;
+	}
+	else  // default
+	{
+		yt = tensor_linear(xt, wt);
+	}
+
+	return yt;
+}
+
+
 template<FloatingPointType dtype>
 inline Tensor<dtype, CUDA> tensor_gemma_sdpa(
 	const GemmaConfig& config,
@@ -64,9 +93,9 @@ inline Tensor<dtype, CUDA> tensor_gemma_sdpa(
 {
 	// projection of hidden states
 
-	auto q_proj = tensor_linear(hidden_states, sdpa_weights.q_proj_weight);
-	auto k_proj = tensor_linear(hidden_states, sdpa_weights.k_proj_weight);
-	auto v_proj = tensor_linear(hidden_states, sdpa_weights.v_proj_weight);
+	auto q_proj = tensor_gemma_sdpa_linear<dtype, 1>(hidden_states, sdpa_weights.q_proj_weight);
+	auto k_proj = tensor_gemma_sdpa_linear<dtype, 1>(hidden_states, sdpa_weights.k_proj_weight);
+	auto v_proj = tensor_gemma_sdpa_linear<dtype, 1>(hidden_states, sdpa_weights.v_proj_weight);
 
 
 	// change shape of q, k, v for attention module
@@ -126,7 +155,7 @@ inline Tensor<dtype, CUDA> tensor_gemma_sdpa(
 	// output projection
 	auto attn_out_t = tensor_transp(attn_out, 1, 2);
 	auto attn_out_tv = tensor_view(attn_out_t, { bsz, q_len, hidden_size });
-	auto y = tensor_linear(attn_out_tv, sdpa_weights.o_proj_weight);
+	auto y = tensor_gemma_sdpa_linear<dtype, 1>(attn_out_tv, sdpa_weights.o_proj_weight);
 
 	return y;
 }

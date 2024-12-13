@@ -6,6 +6,7 @@ void external_test_gemma2_decoder_rmsn();  // input_rmsns
 void external_test_gemma2_decoder_attention();
 void external_test_gemma2_attention_rotary();
 void external_test_gemma2_model_decoder();
+void external_test_gemma2_model_decoder_sl1();  // wrong result, due to missing cache update, (for perf.)
 
 void external_test_gemma2_lmhead_softcap();
 void external_test_gemma2_update_mask();

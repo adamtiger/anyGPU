@@ -154,6 +154,7 @@ set (KRN_CU_SRCS
     ${KERNEL_CU_DIR}/mlp_gemma2_fused_upproj_f32_v1.cu
     ${KERNEL_CU_DIR}/mlp_gemma2_fused_upproj_f32_v2.cu
     ${KERNEL_CU_DIR}/mlp_gemma2_dp_linear_f32_v1.cu
+    ${KERNEL_CU_DIR}/sdpa_gemma2_linear_f32_v1.cu
 )
 
 set (KRN_CU_HEADERS
@@ -168,6 +169,7 @@ set (KRN_CU_HEADERS
     ${KERNEL_CU_DIR}/causal_conv1d.cuh
     ${KERNEL_CU_DIR}/mlp_gemma2_fused_upproj.cuh
     ${KERNEL_CU_DIR}/mlp_gemma2_dp_linear.cuh
+    ${KERNEL_CU_DIR}/sdpa_gemma2_linear.cuh
 )
 
 source_group("kcuda" FILES ${KRN_CU_HEADERS} ${KRN_CU_SRCS})

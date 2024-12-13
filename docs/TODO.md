@@ -12,7 +12,12 @@
 
 - [x] optimization step: mlp
 - [x] check the fused mlp kernel on more tests
-- [ ] optimization step: mlp linear part
+- [x] optimization step: mlp linear part
+
+- [x] check performance distribution inside sdpa
+- [x] sdpa linear functions, need optim
+- [x] test performance with seq_len 1, token generation case (does the bottleneck change? -> not much)
+- [ ] test examples for fused mlp with positive and uniform random values
 
 - [ ] float to bfloat16 and other similar conversions can be done with static_cast (consider this)
 - [ ] bf16 support for tensor saver (numpy cannot support bfloat16)

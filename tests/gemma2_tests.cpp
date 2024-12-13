@@ -242,6 +242,74 @@ void external_test_gemma2_model_decoder()
 }
 
 
+void external_test_gemma2_model_decoder_sl1()
+{
+	auto path = artifact_folder_path / "test_gemma2model_decoder_15";
+
+	// read tensors from files
+	auto h_hidden_states = load_tensor((path / "io_ckpt_4" / "in_0.dat").string());
+	auto h_attn_mask = load_tensor((path / "io_ckpt_4" / "in_attention_mask.dat").string());
+	auto h_pos_ids = load_tensor<int32>((path / "io_ckpt_4" / "in_position_ids.dat").string());
+	auto h_cache_pos = load_tensor<int32>((path / "io_ckpt_4" / "in_cache_position.dat").string());
+
+	auto exp_hy = load_tensor((path / "io_ckpt_4" / "out_0.dat").string());
+
+	GemmaConfig config;
+
+	// initiate kv cache
+	GemmaKVcache kv_cache;
+	kv_cache.init_cache(config, 1);
+
+	GemmaDecoderweights<float32> gd_weights;
+	gd_weights.load_weights(
+		(path / "gemma2model_decoder_15.gemma2decoderlayer.input_layernorm.weight.dat").string(),
+		(path / "gemma2model_decoder_15.gemma2decoderlayer.pre_feedforward_layernorm.weight.dat").string(),
+		(path / "gemma2model_decoder_15.gemma2decoderlayer.post_feedforward_layernorm.weight.dat").string(),
+		(path / "gemma2model_decoder_15.gemma2decoderlayer.post_attention_layernorm.weight.dat").string(),
+
+		(path / "gemma2model_decoder_15.gemma2decoderlayer.self_attn.q_proj.weight.dat").string(),
+		(path / "gemma2model_decoder_15.gemma2decoderlayer.self_attn.k_proj.weight.dat").string(),
+		(path / "gemma2model_decoder_15.gemma2decoderlayer.self_attn.v_proj.weight.dat").string(),
+		(path / "gemma2model_decoder_15.gemma2decoderlayer.self_attn.o_proj.weight.dat").string(),
+
+		(path / "gemma2model_decoder_15.gemma2decoderlayer.mlp.gate_proj.weight.dat").string(),
+		(path / "gemma2model_decoder_15.gemma2decoderlayer.mlp.up_proj.weight.dat").string(),
+		(path / "gemma2model_decoder_15.gemma2decoderlayer.mlp.down_proj.weight.dat").string()
+	);
+
+	auto d_hidden_states = h_hidden_states.copy_to_cuda();
+	auto d_attn_mask = h_attn_mask.copy_to_cuda();
+	auto d_pos_ids = h_pos_ids.copy_to_cuda();
+	auto d_cache_pos = h_cache_pos.copy_to_cuda();
+
+	auto act_dy_cuda = tensor_gemma_decoder(
+		config,
+		gd_weights,
+		kv_cache,
+		d_hidden_states,
+		d_attn_mask,
+		d_pos_ids,
+		d_cache_pos,
+		0,
+		config.sliding_window
+	);
+
+	auto act_hy_cuda = act_dy_cuda.copy_to_host();
+
+	// compare
+	auto cmp = [&](const Tensor<float32, CPU>& expected, const Tensor<float32, CPU>& actual)
+		{
+			bool eq = elementwise_compatible(expected, actual);  // checks the sizes
+			eq = eq && compare_data_buffers(actual, expected);
+			return eq;
+		};
+
+	// test cuda
+	bool eq = cmp(exp_hy, act_hy_cuda);
+	std::cout << "TestCase [external_test_gemma2_model_decoder_sl1 - CUDA]: " << (eq ? "PASSED" : "FAILED") << "\n";
+}
+
+
 void external_test_gemma2_lmhead_softcap()
 {
 	auto path = artifact_folder_path / "test_gemma2_lmhead_softcap";

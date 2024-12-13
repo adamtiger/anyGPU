@@ -56,7 +56,7 @@ def crt_kernel_map(w_fmlp=False) -> dict:
     
     # remaining kernels
     kernel_location_map[offset + 1] = [CNM_DECODER, CNM_SDPA, CNM_TRANSP]
-    kernel_location_map[offset + 2] = [CNM_DECODER, CNM_SDPA, CNM_MM]
+    kernel_location_map[offset + 2] = [CNM_DECODER, CNM_SDPA, CNM_LINEAR]
 
     kernel_location_map[offset + 3] = [CNM_DECODER, CNM_RMSNORM]
     kernel_location_map[offset + 4] = [CNM_DECODER, CNM_ADD]
@@ -94,21 +94,30 @@ def calc_level2_kernel_times(df: pd.DataFrame, kernel_loc_map: dict):
 
 
 def calc_leaf_kernel_times(df: pd.DataFrame, kernel_loc_map: dict):
-    l2_kernel_times = defaultdict(float)
+    leaf_kernel_times = defaultdict(float)
     for kernel_id, location in kernel_loc_map.items():
         kernel_group_nm = location[-1]
-        l2_kernel_times[kernel_group_nm] += df['gpu__time_duration.sum [ms]'].loc[kernel_id]
-    return l2_kernel_times
+        leaf_kernel_times[kernel_group_nm] += df['gpu__time_duration.sum [ms]'].loc[kernel_id]
+    return leaf_kernel_times
 
 
-def plot_kernel_times(l2_kernel_times: dict):
-    plt.bar(list(l2_kernel_times.keys()), list(l2_kernel_times.values()))
-    plt.xticks(rotation=45, ha='right')
+def calc_sdpa_kernel_times(df: pd.DataFrame, kernel_loc_map: dict):
+    sdpa_kernel_times = defaultdict(float)
+    for kernel_id, location in kernel_loc_map.items():
+        if CNM_SDPA in location:
+            kernel_group_nm = location[2]  # direct component in sdpa
+            sdpa_kernel_times[kernel_group_nm] += df['gpu__time_duration.sum [ms]'].loc[kernel_id]
+    return sdpa_kernel_times
+
+
+def plot_kernel_times(kernel_times: dict):
+    plt.bar(list(kernel_times.keys()), list(kernel_times.values()))
+    plt.xticks(rotation=25, ha='right')
     plt.show()
 
 
 if __name__ == '__main__':
-    df = read_data("C:\\Data\\AI\\projects\\anyGPU\\artifacts\\performance\\gemma_decoder\\gemma_decoder_dp_linear_v1_gpu_profile.csv")
+    df = read_data("C:\\Data\\AI\\projects\\anyGPU\\artifacts\\performance\\gemma_decoder\\gemma_decoder_sl1_sdpa_linear_v1_gpu_profile.csv")
 
     print(df.head(5))
 
@@ -121,3 +130,5 @@ if __name__ == '__main__':
     kts = calc_leaf_kernel_times(df, kernel_map)
     plot_kernel_times(kts)
 
+    kts = calc_sdpa_kernel_times(df, kernel_map)
+    plot_kernel_times(kts)
