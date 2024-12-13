@@ -33,5 +33,6 @@ if __name__ == '__main__':
     #generate_causal_conv1d_fwd_f32(path, "test_causal_conv1d_fwd_f32")
 
     #slide_mask_test.generate_slide_mask_f32(path, "test_gemma2_slide_mask_f32")
+    fused_mlp_test.generate_fused_mlp_upproj_f32(path, "test_gemma2_fused_mlp_upproj_f32", 1)
     fused_mlp_test.generate_fused_mlp_upproj_f32(path, "test_gemma2_fused_mlp_upproj_f32", 9)
     fused_mlp_test.generate_fused_mlp_upproj_f32(path, "test_gemma2_fused_mlp_upproj_f32", 158)

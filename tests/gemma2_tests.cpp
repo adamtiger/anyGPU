@@ -715,7 +715,7 @@ void external_test_gemma2_decoder_fused_mlp()
 	auto cmp = [&](const Tensor<float32, CPU>& expected, const Tensor<float32, CPU>& actual)
 		{
 			bool eq = elementwise_compatible(expected, actual);  // checks the sizes
-			eq = eq && compare_data_buffers_l2(actual, expected, 0.01f);
+			eq = eq && compare_data_buffers_reldiff(actual, expected, 0.01f);
 			return eq;
 		};
 

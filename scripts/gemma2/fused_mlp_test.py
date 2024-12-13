@@ -15,10 +15,10 @@ def generate_fused_mlp_upproj_f32(path: str, test_name: str, seq_len: int = 9):
     hidden_size = 2304
     upp_hidden_size = hidden_size * 4
     tensor_size = (1, seq_len, hidden_size)
-    x = torch.randn(tensor_size, dtype=torch.float32)
-    w_gate_proj = torch.randn((hidden_size, upp_hidden_size), dtype=torch.float32)
-    w_up_proj = torch.randn((hidden_size, upp_hidden_size), dtype=torch.float32)
-    w_down_proj = torch.randn((upp_hidden_size, hidden_size), dtype=torch.float32)
+    x = torch.rand(tensor_size, dtype=torch.float32)
+    w_gate_proj = torch.rand((hidden_size, upp_hidden_size), dtype=torch.float32)
+    w_up_proj = torch.rand((hidden_size, upp_hidden_size), dtype=torch.float32)
+    w_down_proj = torch.rand((upp_hidden_size, hidden_size), dtype=torch.float32)
 
     x_gated = F.gelu(torch.matmul(x, w_gate_proj), approximate='tanh')
     x_up = torch.matmul(x, w_up_proj)

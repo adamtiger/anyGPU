@@ -56,7 +56,7 @@ int main()
 	//external_test_gemma2_decoder_rmsn();
 	//external_test_gemma2_decoder_attention();
 	//external_test_gemma2_attention_rotary();
-	external_test_gemma2_model_decoder();
+	//external_test_gemma2_model_decoder();
 	//external_test_gemma2_model_decoder_sl1();
 	//external_test_gemma2_lmhead_softcap();
 	//external_test_gemma2_update_mask();
@@ -66,7 +66,7 @@ int main()
 	//external_test_gemma2_slide_mask();
 	//external_test_gemma2_causallm();
 
-	//external_test_gemma2_decoder_fused_mlp();
+	external_test_gemma2_decoder_fused_mlp();
 
 
 	/*std::string path = "C:\\Data\\AI\\projects\\anyGPU\\artifacts\\safetensors\\gemma2_2b\\model-00003-of-00003.safetensors";
