@@ -17,6 +17,7 @@ CNM_ADD = "tensor_add"
 CNM_SFX = "tensor_softmax"
 CNM_GELU = "tensor_gelu"
 CNM_FMLP = "tensor_gemma_fmlp"
+CNM_DP_LIN = "tensor_dp_linear"
 
 
 def read_data(path: str) -> pd.DataFrame:
@@ -72,7 +73,7 @@ def crt_kernel_map(w_fmlp=False) -> dict:
         kernel_location_map[offset + 12] = [CNM_DECODER, CNM_ADD]
     else:
         kernel_location_map[offset + 6] = [CNM_DECODER, CNM_MLP, CNM_FMLP]
-        kernel_location_map[offset + 7] = [CNM_DECODER, CNM_MLP, CNM_MM]
+        kernel_location_map[offset + 7] = [CNM_DECODER, CNM_MLP, CNM_DP_LIN]
 
         kernel_location_map[offset + 8] = [CNM_DECODER, CNM_RMSNORM]
         kernel_location_map[offset + 9] = [CNM_DECODER, CNM_ADD]
@@ -107,7 +108,7 @@ def plot_kernel_times(l2_kernel_times: dict):
 
 
 if __name__ == '__main__':
-    df = read_data("C:\\Data\\AI\\projects\\anyGPU\\artifacts\\performance\\gemma_decoder\\gemma_decoder_fmlp_v2_gpu_profile.csv")
+    df = read_data("C:\\Data\\AI\\projects\\anyGPU\\artifacts\\performance\\gemma_decoder\\gemma_decoder_dp_linear_v1_gpu_profile.csv")
 
     print(df.head(5))
 

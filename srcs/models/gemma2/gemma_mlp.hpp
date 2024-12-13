@@ -123,7 +123,7 @@ inline Tensor<dtype, device> tensor_gemma_mlp(
 {
 	auto comb_x = tensor_gemma_mlp_fused_uprpoj<dtype, device, 2>(mlp_weights, x);
 
-	auto y = tensor_gemma_mlp_dp_linear<dtype, device, 0>(mlp_weights, comb_x);
+	auto y = tensor_gemma_mlp_dp_linear<dtype, device, 1>(mlp_weights, comb_x);
 
 	return y;
 }
