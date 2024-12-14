@@ -113,18 +113,6 @@ inline Tensor<dtype, device> tensor_gemma_mlp_dp_linear(
 
 		y = out;
 	}
-	else if constexpr (device == CUDA && variant == 2)
-	{
-		Shape y_shape = x.shape;
-		y_shape[x.dim - 1] = x.shape[x.dim - 1] / 4;  // 9216 -> 2304
-		Tensor<dtype, device> out(x.dim, y_shape);
-
-		cu_mlp_gemma2_dp_linear_f32_v2(
-			x, mlp_weights.down_proj_weight, out
-		);
-
-		y = out;
-	}
 	else if constexpr (device == CUDA && variant == 3)
 	{
 		Shape y_shape = x.shape;
@@ -153,7 +141,7 @@ inline Tensor<dtype, device> tensor_gemma_mlp(
 {
 	auto comb_x = tensor_gemma_mlp_fused_uprpoj<dtype, device, 2>(mlp_weights, x);
 
-	auto y = tensor_gemma_mlp_dp_linear<dtype, device, 3>(mlp_weights, comb_x);
+	auto y = tensor_gemma_mlp_dp_linear<dtype, device, 1>(mlp_weights, comb_x);
 
 	return y;
 }
