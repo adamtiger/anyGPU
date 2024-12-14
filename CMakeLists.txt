@@ -154,6 +154,8 @@ set (KRN_CU_SRCS
     ${KERNEL_CU_DIR}/mlp_gemma2_fused_upproj_f32_v1.cu
     ${KERNEL_CU_DIR}/mlp_gemma2_fused_upproj_f32_v2.cu
     ${KERNEL_CU_DIR}/mlp_gemma2_dp_linear_f32_v1.cu
+    ${KERNEL_CU_DIR}/mlp_gemma2_dp_linear_f32_v2.cu
+    ${KERNEL_CU_DIR}/mlp_gemma2_dp_linear_f32_v3.cu
     ${KERNEL_CU_DIR}/sdpa_gemma2_linear_f32_v1.cu
 )
 
