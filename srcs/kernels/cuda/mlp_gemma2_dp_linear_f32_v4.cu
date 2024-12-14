@@ -15,7 +15,7 @@ constexpr int NUM_KTILES = x_width / TS_K;  // number tiles along the common dim
 constexpr int NR_LOAD = TS_K / NUM_WARPS;   // during glob -> shared load each warp handles more rows
 
 
-__global__ void cu_mlp_gemma2_dp_linear_f32_v3_kernel(
+__global__ void cu_mlp_gemma2_dp_linear_f32_v4_kernel(
 	const int sl,
 	const float32* dx,
 	const float32* dwdp,
@@ -37,11 +37,11 @@ __global__ void cu_mlp_gemma2_dp_linear_f32_v3_kernel(
 	for (int tk = 0; tk < NUM_KTILES; ++tk)
 	{
 		// load the data from glob xt to shared mem
-		__shared__ float32 shrd_x[TS_K * TS_H];
+		__shared__ float32 shrd_x[TS_H * TS_K];
 		for (int r = 0; r < NR_LOAD; ++r)
 		{
 			int wrow_id = lane_id / 2;
-			int shrd_index_x = (wrow_id * NR_LOAD + r) + (WARP_SIZE * (lane_id % 2) + threadIdx.x) * TS_H;
+			int shrd_index_x = (wrow_id * NR_LOAD + r) * TS_K + WARP_SIZE * (lane_id % 2) + threadIdx.x;
 
 			if (wrow_id * NR_LOAD + r < imax)
 			{
@@ -66,13 +66,35 @@ __global__ void cu_mlp_gemma2_dp_linear_f32_v3_kernel(
 		__syncthreads();
 
 		// calculate matmul
-		for (int r = 0; r < NR; ++r)
+		for (int r = 0; r < NR; r+=4)
 		{
-			for (int k = 0; k < TS_K; ++k)
+			for (int k = 0; k < TS_K; k+=8)
 			{
-				int index_x = k * TS_H + lane_id * NR + r;
-				int index_w = k * TS_W + threadIdx.x;
-				y[r] += shrd_x[index_x] * shrd_w[index_w];
+				float32 reg_x[4][8];
+				float32 reg_w[8];
+
+				// load from shared to registers
+				for (int m = 0; m < 4; ++m)
+				{
+					for (int n = 0; n < 8; ++n)
+					{
+						reg_x[m][n] = shrd_x[(lane_id * NR + r + m) * TS_K + k + n];
+					}
+				}
+
+				for (int n = 0; n < 8; ++n)
+				{
+					reg_w[n] = shrd_w[(k + n) * TS_W + threadIdx.x];
+				}
+
+				// multiply
+				for (int m = 0; m < 4; ++m)
+				{
+					for (int n = 0; n < 8; ++n)
+					{
+						y[r + m] += reg_x[m][n] * reg_w[n];
+					}
+				}
 			}
 		}
 
@@ -92,7 +114,7 @@ __global__ void cu_mlp_gemma2_dp_linear_f32_v3_kernel(
 }
 
 
-void cu_mlp_gemma2_dp_linear_f32_v3(
+void cu_mlp_gemma2_dp_linear_f32_v4(
 	const Tensor<float32, CUDA>& xt,     // input (batch * seq_len, 9216)
 	const Tensor<float32, CUDA>& wt_dp,  // down proj weight, (9216, 2304)
 	Tensor<float32, CUDA>& yt)
@@ -108,6 +130,6 @@ void cu_mlp_gemma2_dp_linear_f32_v3(
 	dim3 bs = { WARP_SIZE, NUM_WARPS, 1 };
 	dim3 gs = { calc_req_num_blocks(w_width, TS_W), calc_req_num_blocks(sl, TS_H), 1 };
 
-	cu_mlp_gemma2_dp_linear_f32_v3_kernel<<<gs, bs>>>(sl, dx, dwdp, dy);
+	cu_mlp_gemma2_dp_linear_f32_v4_kernel<<<gs, bs>>>(sl, dx, dwdp, dy);
 	CUDA_CHECK_LAST_ERROR();
 }

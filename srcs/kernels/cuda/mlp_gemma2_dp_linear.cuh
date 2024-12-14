@@ -11,8 +11,8 @@ void cu_mlp_gemma2_dp_linear_f32_v1(
 
 
 // tiled matrix multiplication, shared mem level
-// transposed xt (corner turning)
-void cu_mlp_gemma2_dp_linear_f32_v3(
+// register tiled mm
+void cu_mlp_gemma2_dp_linear_f32_v4(
 	const Tensor<float32, CUDA>& xt,     // input (batch * seq_len, 9216)
 	const Tensor<float32, CUDA>& wt_dp,  // down proj weight, (9216, 2304)
 	Tensor<float32, CUDA>& yt);
