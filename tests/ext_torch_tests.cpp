@@ -4,6 +4,7 @@
 #include "tensor.hpp"
 #include "attention.hpp"
 #include "causal_conv1d.hpp"
+#include "fast_mm.cuh"
 #include "dat_file.hpp"
 #include <filesystem>
 
@@ -514,6 +515,35 @@ void external_test_transpose_fwd_f32()
 	// test cuda
 	eq = cmp(exp_hy, act_hy_cuda);
 	std::cout << "TestCase [external_test_transpose_fwd_f32 - CUDA]: " << (eq ? "PASSED" : "FAILED") << "\n";
+}
+
+
+void external_test_mm_m1024_n2048_k2304_f32()
+{
+	auto path = artifact_folder_path / "test_mm_m1024_n2048_k2304_f32";
+
+	// read tensors from files
+	auto hx = load_tensor((path / "x.dat").string());
+	auto hw = load_tensor((path / "w.dat").string());
+	auto exp_hy = load_tensor((path / "y.dat").string());
+
+	auto dx = hx.copy_to_cuda();
+	auto dw = hw.copy_to_cuda();
+	Tensor<float32, CUDA> act_dy_cuda(exp_hy.dim, exp_hy.shape);
+	cu_fast_mm_f32_v1(dx, dw, act_dy_cuda);
+	auto act_hy_cuda = act_dy_cuda.copy_to_host();
+
+	// compare
+	auto cmp = [&](const Tensor<float32, CPU>& expected, const Tensor<float32, CPU>& actual)
+		{
+			bool eq = elementwise_compatible(expected, actual);  // checks the sizes
+			eq = eq && compare_data_buffers(actual, expected);
+			return eq;
+		};
+
+	// test cuda
+	bool eq = cmp(exp_hy, act_hy_cuda);
+	std::cout << "TestCase [external_test_mm_m1024_n2048_k2304_f32 - CUDA]: " << (eq ? "PASSED" : "FAILED") << "\n";
 }
 
 

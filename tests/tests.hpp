@@ -16,7 +16,6 @@ void test_mm_f32();
 void test_mm_f32_640x1280_1280x320();
 void test_mm_f16_640x1280_1280x320();
 
-
 void test_transp_f32();
 
 

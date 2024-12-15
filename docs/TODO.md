@@ -19,6 +19,13 @@
 - [x] test performance with seq_len 1, token generation case (does the bottleneck change? -> not much)
 - [x] test examples for fused mlp with positive and uniform random values
 
+- [ ] MM optimization
+    - [ ] create mm example for f16 and f32 (128 multiplies)
+	- [ ] implement mm with wgemm
+	- [ ] implement mm with register tiles
+	- experiment with performance (tiling, bank conflict)
+	- https://github.com/NervanaSystems/maxas/wiki/SGEMM
+
 - [ ] float to bfloat16 and other similar conversions can be done with static_cast (consider this)
 - [ ] bf16 support for tensor saver (numpy cannot support bfloat16)
 
