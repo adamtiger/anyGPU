@@ -20,7 +20,7 @@
 - [x] test examples for fused mlp with positive and uniform random values
 
 - [ ] MM optimization
-    - [ ] create mm example for f16 and f32 (128 multiplies)
+    - [x] create mm example for f16 and f32 (128 multiplies)
 	- [ ] implement mm with wgemm
 	- [ ] implement mm with register tiles
 	- experiment with performance (tiling, bank conflict)
