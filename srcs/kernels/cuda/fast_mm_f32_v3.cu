@@ -58,9 +58,12 @@ __global__ void cu_fast_mm_f32_v3_kernel(
 		{
 			for (int c = 0; c < TS_W / WARP_SIZE; ++c)  // over chnuks with warp size
 			{
-				int shrd_idx = (laneid * NR + r) * TS_W + c * WARP_SIZE + tx;
-				int glob_idx = gmem_tile_offset_w + (laneid * NR + r) * w_width + c * WARP_SIZE + tx;
-				shrd_tile_w[shrd_idx] = dw[glob_idx];
+				if (c * WARP_SIZE + tx < TS_W)
+				{
+					int shrd_idx = (laneid * NR + r) * TS_W + c * WARP_SIZE + tx;
+					int glob_idx = gmem_tile_offset_w + (laneid * NR + r) * w_width + c * WARP_SIZE + tx;
+					shrd_tile_w[shrd_idx] = dw[glob_idx];
+				}
 			}
 		}
 		__syncthreads();
@@ -71,6 +74,25 @@ __global__ void cu_fast_mm_f32_v3_kernel(
 			int smem_rtile_offset_x = threadIdx.y * RS_H * TS_K + rk * RS_K;
 			int smem_rtile_offset_w = rk * RS_K * TS_W + threadIdx.x * RS_W;
 
+			float32 rmem_x[RS_H * RS_K];
+			float32 rmem_w[RS_K * RS_W];
+
+			for (int m = 0; m < RS_H; ++m)
+			{
+				for (int k = 0; k < RS_K; ++k)
+				{
+					rmem_x[m * RS_K + k] = shrd_tile_x[smem_rtile_offset_x + m * TS_K + k];
+				}
+			}
+
+			for (int k = 0; k < RS_K; ++k)
+			{
+				for (int n = 0; n < RS_W; ++n)
+				{
+					rmem_w[k * RS_W + n] = shrd_tile_w[smem_rtile_offset_w + k * TS_W + n];
+				}
+			}
+
 			for (int m = 0; m < RS_H; ++m)
 			{
 				for (int n = 0; n < RS_W; ++n)
@@ -78,7 +100,7 @@ __global__ void cu_fast_mm_f32_v3_kernel(
 					float32 acc = 0.f;
 					for (int k = 0; k < RS_K; ++k)
 					{
-						acc += shrd_tile_x[smem_rtile_offset_x + m * TS_K + k] * shrd_tile_w[smem_rtile_offset_w + k * TS_W + n];
+						acc += rmem_x[m * RS_K + k] * rmem_w[k * RS_W + n];
 					}
 					rmem_out[m * RS_W + n] += acc;
 				}
