@@ -33,4 +33,11 @@ void cu_fast_mm_f16_v1(
 	const Tensor<float16, CUDA>& wt,  // weight (multiple of 128)
 	Tensor<float16, CUDA>& yt);
 
+
+// shared tiles
+void cu_fast_mm_f16_v2(
+	const Tensor<float16, CUDA>& xt,  // input (multiple of 128)
+	const Tensor<float16, CUDA>& wt,  // weight (multiple of 128)
+	Tensor<float16, CUDA>& yt);
+
 #endif  // __FAST_MM_CUH__
