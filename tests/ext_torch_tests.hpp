@@ -24,7 +24,7 @@ void external_test_linear_fwd_f32();
 void external_test_transpose_fwd_f32();
 
 void external_test_mm_m1024_n2048_k2304_f32();
-//void external_test_mm_m1024_n2048_k2304_f16();
+void external_test_mm_m1024_n2048_k2304_f16();
 
 void external_test_concat_fwd_f32();
 void external_test_repeat_fwd_f32();

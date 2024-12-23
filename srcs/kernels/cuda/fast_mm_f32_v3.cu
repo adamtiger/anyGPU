@@ -1,4 +1,4 @@
-#include "mlp_gemma2_dp_linear.cuh"
+#include "fast_mm.cuh"
 
 constexpr int BS = 16;    // block size BS X BS
 constexpr int WARP_SIZE = 32;

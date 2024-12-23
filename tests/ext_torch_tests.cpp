@@ -546,6 +546,36 @@ void external_test_mm_m1024_n2048_k2304_f32()
 	std::cout << "TestCase [external_test_mm_m1024_n2048_k2304_f32 - CUDA]: " << (eq ? "PASSED" : "FAILED") << "\n";
 }
 
+void external_test_mm_m1024_n2048_k2304_f16()
+{
+	auto path = artifact_folder_path / "test_mm_m1024_n2048_k2304_f16";
+
+	// read tensors from files
+	auto hx = load_tensor<float16>((path / "x.dat").string());
+	auto hw = load_tensor<float16>((path / "w.dat").string());
+	auto exp_hy_16 = load_tensor<float16>((path / "y.dat").string());
+	auto exp_hy = cvt_tensor_datatype<float32, float16>(exp_hy_16);
+
+	auto dx = hx.copy_to_cuda();
+	auto dw = hw.copy_to_cuda();
+	Tensor<float16, CUDA> act_dy_cuda(exp_hy.dim, exp_hy.shape);
+	cu_fast_mm_f16_v1(dx, dw, act_dy_cuda);
+	auto act_hy_cuda_16 = act_dy_cuda.copy_to_host();
+	auto act_hy_cuda = cvt_tensor_datatype<float32, float16>(act_hy_cuda_16);
+
+	// compare
+	auto cmp = [&](const Tensor<float32, CPU>& expected, const Tensor<float32, CPU>& actual)
+		{
+			bool eq = elementwise_compatible(expected, actual);  // checks the sizes
+			eq = eq && compare_data_buffers_l2(actual, expected, 0.04);
+			return eq;
+		};
+
+	// test cuda
+	bool eq = cmp(exp_hy, act_hy_cuda);
+	std::cout << "TestCase [external_test_mm_m1024_n2048_k2304_f16 - CUDA]: " << (eq ? "PASSED" : "FAILED") << "\n";
+}
+
 
 void external_test_concat_fwd_f32()
 {

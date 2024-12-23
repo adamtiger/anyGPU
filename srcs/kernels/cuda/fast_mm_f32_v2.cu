@@ -1,4 +1,4 @@
-#include "mlp_gemma2_dp_linear.cuh"
+#include "fast_mm.cuh"
 
 constexpr int NUM_WARPS = 8;
 constexpr int WARP_SIZE = 32;

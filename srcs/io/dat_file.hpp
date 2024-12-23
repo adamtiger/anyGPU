@@ -58,6 +58,10 @@ inline Tensor<T, CPU> load_tensor(const std::string& file_path)
     {
         ACASSERT(dtype == 5, "Data type in tensor data file expected to be float32");
     }
+	else if constexpr (std::is_same_v<T, float16>)
+	{
+		ACASSERT(dtype == 4, "Data type in tensor data file expected to be float16");
+	}
     else
     {
 		static_assert(std::is_same_v<T, int32>, "Unsupported data type");
