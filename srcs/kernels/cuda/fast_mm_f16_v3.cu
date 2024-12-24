@@ -6,6 +6,7 @@ constexpr int NUM_WARPS = 8;
 constexpr int TS = 64;  // tile size
 constexpr int NR = TS / NUM_WARPS;
 constexpr int NM = TS / 16;
+constexpr int P = 16;
 
 
 __global__ void cu_fast_mm_f16_v3_kernel(
@@ -16,8 +17,8 @@ __global__ void cu_fast_mm_f16_v3_kernel(
 	float16* dy)
 {
 	// output tile
-	__shared__ float16 shrd_y[TS * TS];
-	for (int ix = 0; ix < TS * TS; ++ix)
+	__shared__ float16 shrd_y[TS * (TS + P)];
+	for (int ix = 0; ix < TS * (TS + P); ++ix)
 	{
 		shrd_y[ix] = 0.f;
 	}
@@ -26,14 +27,14 @@ __global__ void cu_fast_mm_f16_v3_kernel(
 	int NT = x_width / TS;
 	for (int tk = 0; tk < NT; ++tk)
 	{
-		__shared__ float16 shrd_x[TS * TS];
-		__shared__ float16 shrd_w[TS * TS];
+		__shared__ float16 shrd_x[TS * (TS + P)];
+		__shared__ float16 shrd_w[TS * (TS + P)];
 
 		// load global to shared (xt)
 		for (int r = 0; r < NR; ++r)
 		{
 			int glob_idx = (blockIdx.y * TS + threadIdx.y * NR + r) * x_width + tk * TS + threadIdx.x * 2;
-			int shrd_idx = (threadIdx.y * NR + r) * TS + threadIdx.x * 2;
+			int shrd_idx = (threadIdx.y * NR + r) * (TS + P) + threadIdx.x * 2;
 
 			const int32* wide_glob_x = reinterpret_cast<const int32*>(dx);
 			int32* wide_shrd_x = reinterpret_cast<int32*>(shrd_x);
@@ -45,7 +46,7 @@ __global__ void cu_fast_mm_f16_v3_kernel(
 		for (int r = 0; r < NR; ++r)
 		{
 			int glob_idx = (tk * TS + threadIdx.y * NR + r) * w_width + blockIdx.x * TS + threadIdx.x * 2;
-			int shrd_idx = (threadIdx.y * NR + r) * TS + threadIdx.x * 2;
+			int shrd_idx = (threadIdx.y * NR + r) * (TS + P) + threadIdx.x * 2;
 
 			const int32* wide_glob_w = reinterpret_cast<const int32*>(dw);
 			int32* wide_shrd_w = reinterpret_cast<int32*>(shrd_w);
@@ -66,7 +67,7 @@ __global__ void cu_fast_mm_f16_v3_kernel(
 			int col = c + start;
 
 			nvcuda::wmma::fragment<nvcuda::wmma::accumulator, 16, 16, 16, float16> acc;
-			nvcuda::wmma::load_matrix_sync(acc, shrd_y + row * TS * 16 + col * 16, TS, nvcuda::wmma::mem_row_major);
+			nvcuda::wmma::load_matrix_sync(acc, shrd_y + row * (TS + P) * 16 + col * 16, (TS + P), nvcuda::wmma::mem_row_major);
 
             #pragma unroll
 			for (int k = 0; k < NM; ++k)
@@ -74,13 +75,13 @@ __global__ void cu_fast_mm_f16_v3_kernel(
 				nvcuda::wmma::fragment<nvcuda::wmma::matrix_a, 16, 16, 16, float16, nvcuda::wmma::row_major> reg_x;
 				nvcuda::wmma::fragment<nvcuda::wmma::matrix_b, 16, 16, 16, float16, nvcuda::wmma::row_major> reg_w;
 
-				nvcuda::wmma::load_matrix_sync(reg_x, shrd_x + row * TS * 16 + k * 16, TS);
-				nvcuda::wmma::load_matrix_sync(reg_w, shrd_w + k * TS * 16 + col * 16, TS);
+				nvcuda::wmma::load_matrix_sync(reg_x, shrd_x + row * (TS + P) * 16 + k * 16, (TS + P));
+				nvcuda::wmma::load_matrix_sync(reg_w, shrd_w + k * (TS + P) * 16 + col * 16, (TS + P));
 
 				nvcuda::wmma::mma_sync(acc, reg_x, reg_w, acc);
 			}
 
-			nvcuda::wmma::store_matrix_sync(shrd_y + row * TS * 16 + col * 16, acc, TS, nvcuda::wmma::mem_row_major);
+			nvcuda::wmma::store_matrix_sync(shrd_y + row * (TS + P) * 16 + col * 16, acc, (TS + P), nvcuda::wmma::mem_row_major);
 		}
 
 		__syncthreads();
@@ -90,7 +91,7 @@ __global__ void cu_fast_mm_f16_v3_kernel(
 	for (int r = 0; r < NR; ++r)
 	{
 		int glob_idx = (blockIdx.y * TS + threadIdx.y * NR + r) * w_width + blockIdx.x * TS + threadIdx.x * 2;
-		int shrd_idx = (threadIdx.y * NR + r) * TS + threadIdx.x * 2;
+		int shrd_idx = (threadIdx.y * NR + r) * (TS + P) + threadIdx.x * 2;
 
 		int32* wide_glob_y = reinterpret_cast<int32*>(dy);
 		int32* wide_shrd_y = reinterpret_cast<int32*>(shrd_y);
