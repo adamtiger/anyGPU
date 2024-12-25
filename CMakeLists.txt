@@ -148,6 +148,7 @@ set (KRN_CU_SRCS
     ${KERNEL_CU_DIR}/fast_mm_f16_v1.cu
     ${KERNEL_CU_DIR}/fast_mm_f16_v2.cu
     ${KERNEL_CU_DIR}/fast_mm_f16_v3.cu
+    ${KERNEL_CU_DIR}/fast_mm_f16_v3.1.cu
     ${KERNEL_CU_DIR}/fast_mm_f32_v1.cu
     ${KERNEL_CU_DIR}/fast_mm_f32_v2.cu
     ${KERNEL_CU_DIR}/fast_mm_f32_v3.cu
