@@ -530,7 +530,7 @@ void external_test_mm_m1024_n2048_k2304_f32()
 	auto dx = hx.copy_to_cuda();
 	auto dw = hw.copy_to_cuda();
 	Tensor<float32, CUDA> act_dy_cuda(exp_hy.dim, exp_hy.shape);
-	cu_fast_mm_f32_v2(dx, dw, act_dy_cuda);
+	cu_fast_mm_f32_v2_1(dx, dw, act_dy_cuda);
 	auto act_hy_cuda = act_dy_cuda.copy_to_host();
 
 	// compare
@@ -559,7 +559,7 @@ void external_test_mm_m1024_n2048_k2304_f16()
 	auto dx = hx.copy_to_cuda();
 	auto dw = hw.copy_to_cuda();
 	Tensor<float16, CUDA> act_dy_cuda(exp_hy.dim, exp_hy.shape);
-	cu_fast_mm_f16_v3_1(dx, dw, act_dy_cuda);
+	cu_fast_mm_f16_v3_2(dx, dw, act_dy_cuda);
 	auto act_hy_cuda_16 = act_dy_cuda.copy_to_host();
 	auto act_hy_cuda = cvt_tensor_datatype<float32, float16>(act_hy_cuda_16);
 

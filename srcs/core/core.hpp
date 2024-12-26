@@ -78,7 +78,7 @@ enum Device
 	CUDA
 };
 
-enum DataType
+enum class DataType
 {
     INT8,
     INT16,
