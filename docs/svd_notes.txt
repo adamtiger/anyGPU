@@ -1,0 +1,67 @@
+
+Model on huggingface:
+    stabilityai/stable-video-diffusion-img2vid-xt
+
+Implementation:
+    https://github.com/huggingface/diffusers/blob/main/src/diffusers/pipelines/stable_video_diffusion/pipeline_stable_video_diffusion.py
+
+Details:
+
+    Main parts of the model:
+        vae: AutoencoderKLTemporalDecoder,
+        image_encoder: CLIPVisionModelWithProjection,
+        unet: UNetSpatioTemporalConditionModel,
+        scheduler: EulerDiscreteScheduler,
+        feature_extractor: CLIPImageProcessor
+	
+	    self.video_processor = VideoProcessor(do_resize=True, vae_scale_factor=self.vae_scale_factor)
+	
+	SVD functions:
+	    _encode_image
+		    self.feature_extractor
+			self.image_encoder
+		
+		_encode_vae_image
+		    self.vae.encode
+		
+	    decode_latents
+		    for cycle {self.vae.decode}
+		
+		__call__:
+		    self._encode_image
+			self.video_processor.preprocess
+			self._encode_vae_image
+			self.prepare_latents (simple function)
+			
+			for cycle 
+			{
+			    self.unet
+				self.scheduler.step
+				self.decode_latents
+				self.video_processor.postprocess_video
+			}
+
+	VAE functions: link(https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/autoencoders/autoencoder_kl_temporal_decoder.py#L165)
+	    self.encoder = Encoder
+		self.decoder = TemporalDecoder
+		self.quant_conv = nn.Conv2d
+		
+		func encode
+	        self.encoder
+			self.quant_conv
+			DiagonalGaussianDistribution
+		
+		func decode
+		    self.decoder
+		
+		func forward (most likely not necessary!)
+		    self.encode
+			self.decode
+	
+	UNET functions: link(https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/unets/unet_spatio_temporal_condition.py#L32)
+    
+	CLIPVisionModelWithProjection functions: link(https://github.com/huggingface/transformers/blob/main/src/transformers/models/clip/modeling_clip.py#L1510)
+	
+	CLIPImageProcessor functions: link(https://github.com/huggingface/transformers/blob/main/src/transformers/models/clip/image_processing_clip.py#L52)
+
+    EulerDiscreteScheduler functions: link(https://github.com/huggingface/diffusers/blob/main/src/diffusers/schedulers/scheduling_euler_discrete.py#L135)
