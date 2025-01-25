@@ -3,6 +3,12 @@
 
 #include "tensor.hpp"
 
+// baseline cublas
+void cu_fast_mm_f32_cb(
+	const Tensor<float32, CUDA>& xt,  // input (multiple of 128)
+	const Tensor<float32, CUDA>& wt,  // weight (multiple of 128)
+	Tensor<float32, CUDA>& yt);
+
 // baseline global
 void cu_fast_mm_f32_v1(
 	const Tensor<float32, CUDA>& xt,  // input (multiple of 128)

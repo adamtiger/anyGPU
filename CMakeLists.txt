@@ -150,6 +150,7 @@ set (KRN_CU_SRCS
     ${KERNEL_CU_DIR}/fast_mm_f16_v3.cu
     ${KERNEL_CU_DIR}/fast_mm_f16_v3.1.cu
     ${KERNEL_CU_DIR}/fast_mm_f16_v3.2.cu
+    ${KERNEL_CU_DIR}/fast_mm_f32_cb.cu
     ${KERNEL_CU_DIR}/fast_mm_f32_v1.cu
     ${KERNEL_CU_DIR}/fast_mm_f32_v2.cu
     ${KERNEL_CU_DIR}/fast_mm_f32_v2.1.cu
@@ -281,6 +282,7 @@ target_include_directories(
 	${TEST_DIR} ${OPS_DIR} ${FUSED_DIR}
 	${ZAM2_DIR} ${GEM2_DIR} 
 )
+target_link_libraries(anygpu PUBLIC cublas)
 #target_compile_options(anygpu PUBLIC $<$<COMPILE_LANGUAGE:CUDA>:--keep>)
 if (MSVC)
     set_target_properties(anygpu PROPERTIES LINK_FLAGS "/PROFILE")
