@@ -58,10 +58,136 @@ Details:
 		    self.encode
 			self.decode
 	
-	UNET functions: link(https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/unets/unet_spatio_temporal_condition.py#L32)
+	Encoder in VAE functions: link(https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/autoencoders/vae.py#L60)
+	    self.conv_in = nn.Conv2d
+		self.down_blocks = list(get_down_block)
+		self.mid_block = UNetMidBlock2D
+		self.conv_norm_out = nn.GroupNorm
+		self.conv_act = nn.SiLU
+		self.conv_out = nn.Conv2d
+		
+		func forward (follows the same order)
+		
+	TemporalDecoder in VAE functions: link(https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/autoencoders/autoencoder_kl_temporal_decoder.py#L30)
+	    self.conv_in = nn.Conv2d
+		self.mid_block = MidBlockTemporalDecoder
+		self.up_blocks = list(UpBlockTemporalDecoder)
+		self.conv_norm_out = nn.GroupNorm
+		self.conv_act = nn.SiLU
+        self.conv_out = torch.nn.Conv2d
+		self.time_conv_out = torch.nn.Conv3d
+		
+		func forward (follows the same order)
+
+
+MidBlockTemporalDecoder
+	
+	MidBlockTemporalDecoder in TemporalDecoder in VAE functions: link(https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/unets/unet_3d_blocks.py#L899)
+	    self.resnets = list(SpatioTemporalResBlock)
+		self.attentions = list(Attention)
+	
+	Attention in MidBlockTemporalDecoder: link(https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/attention_processor.py#L50)
+	    normal attention block with several variants (normalizations, liner etc.)
+	
+	SpatioTemporalResBlock in MidBlockTemporalDecoder: link(https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/resnet.py#L635)
+	    self.spatial_res_block = ResnetBlock2D
+		self.temporal_res_block = TemporalResnetBlock
+		self.time_mixer = AlphaBlender
+		
+		func forward (follows the same order; reshape, permute)
+	
+	ResnetBlock2D in SpatioTemporalResBlock: link(https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/resnet.py#L189)
+	    depends on the settings but the main parts:
+		
+		self.norm1 = torch.nn.GroupNorm
+		self.conv1 = nn.Conv2d
+		self.time_emb_proj = nn.Linear
+		self.norm2 = torch.nn.GroupNorm
+		self.dropout = torch.nn.Dropout
+		self.conv2 = nn.Conv2d
+		self.nonlinearity = get_activation
+		self.upsample = Upsample2D or self.downsample = Downsample2D
+		self.conv_shortcut = nn.Conv2d
+		
+		func forward 
+	
+	Upsample2D in ResnetBlock2D: link(https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/upsampling.py#L76)
+	    self.norm = nn.LayerNorm or self.norm = RMSNorm
+		conv = nn.ConvTranspose2d or conv = nn.Conv2d
+		
+		func forward
+	
+	Downsample2D in ResnetBlock2D: link(https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/downsampling.py#L69)
+	    self.norm = nn.LayerNorm or self.norm = RMSNorm
+		conv = nn.Conv2d or conv = nn.AvgPool2d
+		
+	TemporalResnetBlock in SpatioTemporalResBlock: link(https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/resnet.py#L542)
+	    self.norm1 = torch.nn.GroupNorm
+		self.conv1 = nn.Conv3d
+		self.time_emb_proj = nn.Linear
+		self.norm2 = torch.nn.GroupNorm
+		self.dropout = torch.nn.Dropout
+		self.conv2 = nn.Conv3d
+		self.nonlinearity = get_activation
+		self.conv_shortcut = nn.Conv3d
+		
+		func forward (similar order but some permute and adding)
+	
+	AlphaBlender in SpatioTemporalResBlock: link(https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/resnet.py#L719)
+	    func forward (simple scaling)
+
+
+UpBlockTemporalDecoder
+    
+	UpBlockTemporalDecoder in TemporalDecoder: link(https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/unets/unet_3d_blocks.py#L962)
+	    self.resnets = list(SpatioTemporalResBlock)
+		self.upsamplers = list(Upsample2D)
+
+
+UNetMidBlock2D
+    
+	UNetMidBlock2D in Encoder: link(https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/unets/unet_2d_blocks.py#L589)
+	    Attention in attentions (if requested in settings)
+		resnets = list(ResnetBlock2D) or resnets = list(ResnetBlockCondNorm2D)
+	
+	ResnetBlockCondNorm2D in UNetMidBlock2D: link(https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/resnet.py#L44)
+	    AdaGroupNorm or SpatialNorm
+		self.conv1 = nn.Conv2d
+		AdaGroupNorm or SpatialNorm
+		self.dropout = torch.nn.Dropout
+		self.conv2 = nn.Conv2d
+		self.nonlinearity = get_activation
+		Upsample2D or Downsample2D
+		self.conv_shortcut = nn.Conv2d
+	
+
+# CLIPImageProcessor
+    
+	CLIPImageProcessor functions: link(https://github.com/huggingface/transformers/blob/main/src/transformers/models/clip/image_processing_clip.py#L52)
+        preprocess function is the key; in BaseImageProcessor the __call__ function calls it
+		link: https://github.com/huggingface/transformers/blob/main/src/transformers/image_processing_utils.py#L35
+		
+		resize or center_crop or rescale or normalize
+
+
+# CLIPVisionModelWithProjection
     
 	CLIPVisionModelWithProjection functions: link(https://github.com/huggingface/transformers/blob/main/src/transformers/models/clip/modeling_clip.py#L1510)
+        vision_model = CLIPVisionModel._from_config(config)
+        self.vision_model = vision_model.vision_model
+        self.visual_projection = nn.Linear
+		
+		CLIPVisionTransformer is inside: link(https://github.com/huggingface/transformers/blob/main/src/transformers/models/clip/modeling_clip.py#L1066)
+		    self.embeddings = CLIPVisionEmbeddings(config) (https://github.com/huggingface/transformers/blob/main/src/transformers/models/clip/modeling_clip.py#L177)
+            self.pre_layrnorm = nn.LayerNorm(embed_dim, eps=config.layer_norm_eps)
+            self.encoder = CLIPEncoder(config) -> CLIPEncoderLayer (https://github.com/huggingface/transformers/blob/main/src/transformers/models/clip/modeling_clip.py#L585)
+            self.post_layernorm = nn.LayerNorm(embed_dim, eps=config.layer_norm_eps)
+
+
+# UNET functions
+
+    UNetSpatioTemporalConditionModel functions: link(https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/unets/unet_spatio_temporal_condition.py#L32)
+        
 	
-	CLIPImageProcessor functions: link(https://github.com/huggingface/transformers/blob/main/src/transformers/models/clip/image_processing_clip.py#L52)
 
     EulerDiscreteScheduler functions: link(https://github.com/huggingface/diffusers/blob/main/src/diffusers/schedulers/scheduling_euler_discrete.py#L135)
