@@ -184,10 +184,88 @@ UNetMidBlock2D
             self.post_layernorm = nn.LayerNorm(embed_dim, eps=config.layer_norm_eps)
 
 
-# UNET functions
+# UNetSpatioTemporalConditionModel
+    
+	UNetSpatioTemporalConditionModel functions: link(https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/unets/unet_spatio_temporal_condition.py#L32)
+	    self.conv_in = nn.Conv2d
+		self.time_proj = Timesteps
+		self.time_embedding = TimestepEmbedding
+		self.add_time_proj = Timesteps
+		self.add_embedding = TimestepEmbedding
+		
+		self.down_blocks = list(CrossAttnDownBlockSpatioTemporal x 3, DownBlockSpatioTemporal)
+		self.mid_block = UNetMidBlockSpatioTemporal
+		self.up_blocks = list(UpBlockSpatioTemporal, CrossAttnUpBlockSpatioTemporal x 3)
+		
+		self.conv_norm_out = nn.GroupNorm
+		self.conv_act = nn.SiLU
+		self.conv_out = nn.Conv2d
 
-    UNetSpatioTemporalConditionModel functions: link(https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/unets/unet_spatio_temporal_condition.py#L32)
-        
+
+## UNetMidBlockSpatioTemporal
+	UNetMidBlockSpatioTemporal in UNetSpatioTemporalConditionModel: link(https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/unets/unet_3d_blocks.py#L1012)
+	    self.attentions = list(TransformerSpatioTemporalModel)
+		self.resnets = list(SpatioTemporalResBlock)  # already identified
+		
+	TransformerSpatioTemporalModel in UNetMidBlockSpatioTemporal: link(https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/transformers/transformer_temporal.py#L205)
+	    self.norm = torch.nn.GroupNorm
+		self.proj_in = nn.Linear
+		self.transformer_blocks = list(BasicTransformerBlock)
+		self.temporal_transformer_blocks = list(TemporalBasicTransformerBlock)
+		self.time_pos_embed = TimestepEmbedding
+		self.time_proj = Timesteps
+		self.time_mixer = AlphaBlender
+		self.proj_out = nn.Linear
 	
+	BasicTransformerBlock in TransformerSpatioTemporalModel: link(https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/attention.py#L261)
+	    depends on settings
+	
+	Timesteps in TransformerSpatioTemporalModel: link(https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/embeddings.py#L1317)
+	    requires standalone implementation
+	
+	TimestepEmbedding in TransformerSpatioTemporalModel: link(https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/embeddings.py#L1269)
+	    two linears and activation
+	
+	TemporalBasicTransformerBlock in TransformerSpatioTemporalModel: link(https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/attention.py#L643)
+        self.norm_in = nn.LayerNorm
+		self.ff_in = FeedForward
+		self.norm1 = nn.LayerNorm
+		self.attn1 = Attention
+		# if requested:
+		self.norm2 = nn.LayerNorm
+        self.attn2 = Attention
+		
+		self.norm3 = nn.LayerNorm
+		self.ff = FeedForward
+	
+	FeedForward in TemporalBasicTransformerBlock: link(https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/attention.py#L1192)
+	    depends on settings
+
+
+## CrossAttnDownBlockSpatioTemporal
+    CrossAttnDownBlockSpatioTemporal in UNetSpatioTemporalConditionModel: link(https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/unets/unet_3d_blocks.py#L1166)
+	    self.attentions = list(TransformerSpatioTemporalModel)
+		self.resnets = list(SpatioTemporalResBlock)
+		self.downsamplers = list(Downsample2D)  # if given
+
+## CrossAttnUpBlockSpatioTemporal
+    CrossAttnUpBlockSpatioTemporal in UNetSpatioTemporalConditionModel: link(https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/unets/unet_3d_blocks.py#L1332)
+	    self.attentions = list(TransformerSpatioTemporalModel)
+		self.resnets = list(SpatioTemporalResBlock)
+		self.upsamplers = list(Upsample2D)  # if given
+
+## DownBlockSpatioTemporal
+    DownBlockSpatioTemporal in UNetSpatioTemporalConditionModel: link(https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/unets/unet_3d_blocks.py#L1101)
+        self.resnets = list(SpatioTemporalResBlock)
+		self.downsamplers = list(Downsample2D)
+
+## UpBlockSpatioTemporal
+    UpBlockSpatioTemporal in UNetSpatioTemporalConditionModel: link(https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/unets/unet_3d_blocks.py#L1267)
+	    self.resnets = list(SpatioTemporalResBlock)
+		self.upsamplers = list(Upsample2D)
+
+
+
+# EulerDiscreteScheduler functions
 
     EulerDiscreteScheduler functions: link(https://github.com/huggingface/diffusers/blob/main/src/diffusers/schedulers/scheduling_euler_discrete.py#L135)

@@ -229,4 +229,64 @@ inline Tensor<dtype, CUDA> tensor_rms_norm(
 
 
 
+
+
+/* group normalization */
+
+/*
+  Group normalization.
+  The implementation assumes contigous memory.
+  This is a torch inspired implementation.
+  @param xt: input tensor
+  @param num_groups: number of groups for the channels (num_channels % num_groups = 0)
+  @param wt: per-channel affine parameter (gamma)
+  @param bt: same as wt but for the bias
+*/
+template<PreciseFloatType dtype>
+inline Tensor<dtype, CPU> tensor_group_norm(
+	const Tensor<dtype, CPU>& xt,
+	const int32 num_groups,
+	const Tensor<dtype, CPU>& wt,  // per-channel affine parameter (gamma)
+	const Tensor<dtype, CPU>& bt,  // (beta)
+	const dtype eps)
+{
+
+	return {};
+}
+
+
+template<FloatingPointType dtype>
+inline Tensor<dtype, CUDA> tensor_group_norm(  // TODO: implementation!
+	const Tensor<dtype, CUDA>& xt,
+	const int32 num_groups,
+	const Tensor<dtype, CUDA>& wt,  // per-channel affine parameter (gamma)
+	const Tensor<dtype, CUDA>& bt,  // (beta)
+	const dtype eps)
+{
+	// check and modify axis if needed
+	int32 dim = xt.dim;
+	ACASSERT((-dim <= axis && axis < dim), "axis is out of range");
+	int32 paxis = (dim + axis) % dim;
+
+	for (int32 k = paxis; k < dim; ++k)
+	{
+		ACASSERT(xt.shape[k] == wt.shape[k - paxis], "wt shape is incorrect");
+	}
+
+	// access the data arrays
+	Tensor<dtype, CUDA> yt(dim, xt.shape);
+
+	if constexpr (std::is_same_v<dtype, float32>)
+	{
+		cu_tensor_rms_norm_f32(xt, wt, eps, zero_centered, yt);
+	}
+	else
+	{
+		static_assert(std::is_same_v<dtype, float32>, "Unsupported data types");
+	}
+
+	return yt;
+}
+
+
 #endif  // __NORM_OPS__
