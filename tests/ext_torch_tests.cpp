@@ -175,6 +175,46 @@ void external_test_sf_data_reading()
 }
 
 
+void external_test_group_norm_fwd_f32()
+{
+	auto path = artifact_folder_path / "test_groupnorm_1_fwd_f32" / "groupnorm.safetensors";
+
+	// read tensors from files
+	std::unordered_map<std::string, Tensor<float32, CPU>> tensors;
+	sft_read_tensors(path.string(), tensors);
+	auto hx = tensors.at("x");
+	auto hw = tensors.at("weight");
+	auto hb = tensors.at("bias");
+	auto exp_hy = tensors.at("y");
+
+	auto act_hy_cpu = tensor_group_norm(hx, 12, hw, hb, 5e-4f);
+
+
+	/*auto dx = hx.copy_to_cuda();
+	auto dw = hw.copy_to_cuda();
+	auto db = hb.copy_to_cuda();
+
+	auto act_dy_cuda = tensor_layer_norm(dx, 2, dw, db, 2e-3f);
+	auto act_hy_cuda = act_dy_cuda.copy_to_host();*/
+
+	// compare
+	auto cmp = [&](const Tensor<float32, CPU>& expected, const Tensor<float32, CPU>& actual)
+		{
+			bool eq = elementwise_compatible(expected, actual);  // checks the sizes
+			eq = eq && compare_data_buffers(actual, expected);
+			return eq;
+		};
+
+	// test cpu
+	bool eq = cmp(exp_hy, act_hy_cpu);
+	std::cout << "TestCase [external_test_group_norm_fwd_f32 - CPU]: " << (eq ? "PASSED" : "FAILED") << "\n";
+
+	// test cuda
+	/*eq = cmp(exp_hy, act_hy_cuda);
+	std::cout << "TestCase [external_test_layer_norm_fwd_f32 - CUDA]: " << (eq ? "PASSED" : "FAILED") << "\n";*/
+}
+
+
 void external_test_layer_norm_fwd_f32()
 {
 	auto path = artifact_folder_path / "test_layer_norm_fwd_f32";

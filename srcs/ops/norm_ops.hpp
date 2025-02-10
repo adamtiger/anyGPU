@@ -265,7 +265,7 @@ inline Tensor<dtype, CPU> tensor_group_norm(
 	int32 nbatch = xt.shape[0];
 
 	// output
-	Tensor<dtype, CUDA> yt(x_dim, xt.shape);
+	Tensor<dtype, CPU> yt(dim, xt.shape);
 
 	// access the dataset
 	dtype* x_data = xt.buffer();
@@ -320,20 +320,20 @@ inline Tensor<dtype, CUDA> tensor_group_norm(  // TODO: implementation!
 {
 	// check and modify axis if needed
 	int32 dim = xt.dim;
-	ACASSERT((-dim <= axis && axis < dim), "axis is out of range");
+	/*ACASSERT((-dim <= axis && axis < dim), "axis is out of range");
 	int32 paxis = (dim + axis) % dim;
 
 	for (int32 k = paxis; k < dim; ++k)
 	{
 		ACASSERT(xt.shape[k] == wt.shape[k - paxis], "wt shape is incorrect");
-	}
+	}*/
 
 	// access the data arrays
 	Tensor<dtype, CUDA> yt(dim, xt.shape);
 
 	if constexpr (std::is_same_v<dtype, float32>)
 	{
-		cu_tensor_rms_norm_f32(xt, wt, eps, zero_centered, yt);
+		//cu_tensor_rms_norm_f32(xt, wt, eps, zero_centered, yt);
 	}
 	else
 	{

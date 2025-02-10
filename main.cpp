@@ -52,6 +52,8 @@ int main()
 	external_test_slice_fwd_f32();*/
 	//external_test_causal_conv1d_fwd_f32();
 
+	external_test_group_norm_fwd_f32();
+
 	//external_test_gemma2_decoder_mlp();
 	//external_test_gemma2_decoder_rmsn();
 	//external_test_gemma2_decoder_attention();
@@ -68,7 +70,7 @@ int main()
 
 	//external_test_gemma2_decoder_fused_mlp();
 
-	external_test_mm_m1024_n2048_k2304_f32();
+	//external_test_mm_m1024_n2048_k2304_f32();
 	//external_test_mm_m1024_n2048_k2304_f16();
 
 

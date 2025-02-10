@@ -75,4 +75,18 @@ inline void sft_read_tensors(const std::string& path, std::vector<Tensor<T, CPU>
 	}
 }
 
+
+template<typename T>
+inline void sft_read_tensors(const std::string& path, std::unordered_map<std::string, Tensor<T, CPU>>& tensors)
+{
+	std::vector<Tensor<T, CPU>> tensors_vec;
+	sft_read_tensors(path, tensors_vec);
+
+	tensors.reserve(tensors_vec.size());
+	for (auto& t : tensors_vec)
+	{
+		tensors.insert({t.name, t});
+	}
+}
+
 #endif  // __SAFE_TENSORS_FILE__
