@@ -250,8 +250,63 @@ inline Tensor<dtype, CPU> tensor_group_norm(
 	const Tensor<dtype, CPU>& bt,  // (beta)
 	const dtype eps)
 {
+	// check sizes
+	int32 num_channels = xt.shape[1];
+	ACASSERT(num_channels % num_groups == 0, "num_channels is a multiple of num_groups");
+	ACASSERT(wt.shape[0] == num_channels, "wt (gamma) has to be num_channels sized");
+	ACASSERT(bt.shape[0] == num_channels, "bt (beta) has to be num_channels sized");
 
-	return {};
+	// calculate group sizes
+	int32 dim = xt.dim;
+	int32 num_group_channels = num_channels / num_groups;
+	int32 instance_size = xt.stride[1];
+	int32 group_size = num_group_channels * instance_size;
+
+	int32 nbatch = xt.shape[0];
+
+	// output
+	Tensor<dtype, CUDA> yt(x_dim, xt.shape);
+
+	// access the dataset
+	dtype* x_data = xt.buffer();
+	dtype* w_data = wt.buffer();
+	dtype* b_data = bt.buffer();
+	dtype* y_data = yt.buffer();
+
+	// calculate the norms
+	for (int32 b = 0; b < nbatch; ++b)
+	{
+		for (int32 g = 0; g < num_groups; ++g)
+		{
+			dtype accum_sum = (dtype)0;
+			dtype accum_sum_square = (dtype)0;
+			int32 group_offset = b * xt.stride[0] + g * num_group_channels * xt.stride[1];
+
+			for (int32 ix = 0; ix < group_size; ++ix)
+			{
+				dtype x = x_data[group_offset + ix];
+				accum_sum += x;
+				accum_sum_square += x * x;
+			}
+
+			dtype mean = accum_sum / (dtype)group_size;
+			dtype var = accum_sum_square / (dtype)group_size - mean * mean;
+
+			for (int32 c = 0; c < num_group_channels; ++c)
+			{
+				for (int32 ix = 0; ix < instance_size; ++ix)
+				{
+					int32 offset = group_offset + c * xt.stride[1] + ix;
+					dtype x = x_data[offset];
+					dtype y = (x - mean) / sqrt(var + eps);
+					y = y * w_data[c] + b_data[c];
+					y_data[offset] = y;
+				}
+			}
+		}
+	}
+
+	return yt;
 }
 
 

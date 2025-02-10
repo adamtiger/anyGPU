@@ -160,6 +160,9 @@ UNetMidBlock2D
 		Upsample2D or Downsample2D
 		self.conv_shortcut = nn.Conv2d
 	
+	SpatialNorm in ResnetBlockCondNorm2D: link(https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/attention_processor.py#L4812)
+	AdaGroupNorm in ResnetBlockCondNorm2D: link(https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/normalization.py#L271)
+
 
 # CLIPImageProcessor
     
