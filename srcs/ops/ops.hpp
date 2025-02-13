@@ -2,6 +2,7 @@
 #define __OPS__
 
 #include "binary_ops.hpp"
+#include "conv_ops.hpp"
 #include "mm_ops.hpp"
 #include "softmax_ops.hpp"
 #include "transp_ops.hpp"

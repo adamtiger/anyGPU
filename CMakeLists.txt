@@ -108,6 +108,7 @@ set (OPS_SRCS
 
 set (OPS_HEADERS
     ${OPS_DIR}/binary_ops.hpp
+    ${OPS_DIR}/conv_ops.hpp
     ${OPS_DIR}/math_ops.hpp
     ${OPS_DIR}/mm_ops.hpp
     ${OPS_DIR}/norm_ops.hpp
@@ -171,6 +172,7 @@ set (KRN_CU_SRCS
 
 set (KRN_CU_HEADERS
     ${KERNEL_CU_DIR}/binary_ops.cuh
+    ${KERNEL_CU_DIR}/conv_ops.cuh
     ${KERNEL_CU_DIR}/math_ops.cuh
     ${KERNEL_CU_DIR}/mm_ops.cuh
     ${KERNEL_CU_DIR}/fast_mm.cuh

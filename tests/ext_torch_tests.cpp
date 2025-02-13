@@ -749,3 +749,46 @@ void external_test_causal_conv1d_fwd_f32()
 	eq = cmp(exp_hy, act_hy_cuda);
 	std::cout << "TestCase [external_test_causal_conv1d_fwd_f32 - CUDA]: " << (eq ? "PASSED" : "FAILED") << "\n";
 }
+
+
+void external_test_conv2d_k3x3_s1x1_p0x0_1_fwd_f32()
+{
+	auto path = artifact_folder_path / "test_conv2d_k3x3_s1x1_p0x0_1_fwd_f32" / "conv2d.safetensors";
+
+	// read tensors from files
+	std::unordered_map<std::string, Tensor<float32, CPU>> tensors;
+	sft_read_tensors(path.string(), tensors);
+	auto hx = tensors.at("x");
+	auto hw = tensors.at("weight");
+	auto hb = tensors.at("bias");
+	auto exp_hy = tensors.at("y");
+
+	std::array<int32, 2> stride = {1, 1};
+	std::array<int32, 4> pads = { 0, 0, 0, 0 };
+
+	auto act_hy_cpu = tensor_conv2d(hx, hw, hb, stride, pads);
+
+
+	auto dx = hx.copy_to_cuda();
+	auto dw = hw.copy_to_cuda();
+	auto db = hb.copy_to_cuda();
+
+	auto act_dy_cuda = tensor_conv2d(dx, dw, db, stride, pads);
+	auto act_hy_cuda = act_dy_cuda.copy_to_host();
+
+	// compare
+	auto cmp = [&](const Tensor<float32, CPU>& expected, const Tensor<float32, CPU>& actual)
+		{
+			bool eq = elementwise_compatible(expected, actual);  // checks the sizes
+			eq = eq && compare_data_buffers(actual, expected);
+			return eq;
+		};
+
+	// test cpu
+	bool eq = cmp(exp_hy, act_hy_cpu);
+	std::cout << "TestCase [external_test_conv2d_k3x3_s1x1_p0x0_1_fwd_f32 - CPU]: " << (eq ? "PASSED" : "FAILED") << "\n";
+
+	// test cuda
+	eq = cmp(exp_hy, act_hy_cuda);
+	std::cout << "TestCase [external_test_conv2d_k3x3_s1x1_p0x0_1_fwd_f32 - CUDA]: " << (eq ? "PASSED" : "FAILED") << "\n";
+}

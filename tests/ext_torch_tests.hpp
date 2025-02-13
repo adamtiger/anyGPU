@@ -33,4 +33,6 @@ void external_test_slice_fwd_f32();
 
 void external_test_causal_conv1d_fwd_f32();
 
+void external_test_conv2d_k3x3_s1x1_p0x0_1_fwd_f32();
+
 #endif  // __EXT_TORCH_TESTS__
