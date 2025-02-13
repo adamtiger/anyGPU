@@ -320,20 +320,18 @@ inline Tensor<dtype, CUDA> tensor_group_norm(  // TODO: implementation!
 {
 	// check and modify axis if needed
 	int32 dim = xt.dim;
-	/*ACASSERT((-dim <= axis && axis < dim), "axis is out of range");
-	int32 paxis = (dim + axis) % dim;
-
-	for (int32 k = paxis; k < dim; ++k)
-	{
-		ACASSERT(xt.shape[k] == wt.shape[k - paxis], "wt shape is incorrect");
-	}*/
+	ACASSERT(wt.dim == 1, "weight dimension is not 1");
+	ACASSERT(wt.dim == bt.dim, "weight and bias must have the same dimension");
+	ACASSERT(wt.shape[0] == bt.shape[0], "weight and bias must have the same size");
+	ACASSERT(xt.shape[1] == wt.shape[0], "weight must have a size equal with the number of channels");
+	ACASSERT(xt.shape[1] % num_groups == 0, "the number of channels is the multiple of num_groups");
 
 	// access the data arrays
 	Tensor<dtype, CUDA> yt(dim, xt.shape);
 
 	if constexpr (std::is_same_v<dtype, float32>)
 	{
-		//cu_tensor_rms_norm_f32(xt, wt, eps, zero_centered, yt);
+		cu_tensor_group_norm_f32(xt, wt, bt, num_groups, eps, yt);
 	}
 	else
 	{

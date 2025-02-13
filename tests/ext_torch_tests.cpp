@@ -190,12 +190,12 @@ void external_test_group_norm_fwd_f32()
 	auto act_hy_cpu = tensor_group_norm(hx, 12, hw, hb, 5e-4f);
 
 
-	/*auto dx = hx.copy_to_cuda();
+	auto dx = hx.copy_to_cuda();
 	auto dw = hw.copy_to_cuda();
 	auto db = hb.copy_to_cuda();
 
-	auto act_dy_cuda = tensor_layer_norm(dx, 2, dw, db, 2e-3f);
-	auto act_hy_cuda = act_dy_cuda.copy_to_host();*/
+	auto act_dy_cuda = tensor_group_norm(dx, 12, dw, db, 5e-4f);
+	auto act_hy_cuda = act_dy_cuda.copy_to_host();
 
 	// compare
 	auto cmp = [&](const Tensor<float32, CPU>& expected, const Tensor<float32, CPU>& actual)
@@ -210,8 +210,8 @@ void external_test_group_norm_fwd_f32()
 	std::cout << "TestCase [external_test_group_norm_fwd_f32 - CPU]: " << (eq ? "PASSED" : "FAILED") << "\n";
 
 	// test cuda
-	/*eq = cmp(exp_hy, act_hy_cuda);
-	std::cout << "TestCase [external_test_layer_norm_fwd_f32 - CUDA]: " << (eq ? "PASSED" : "FAILED") << "\n";*/
+	eq = cmp(exp_hy, act_hy_cuda);
+	std::cout << "TestCase [external_test_group_norm_fwd_f32 - CUDA]: " << (eq ? "PASSED" : "FAILED") << "\n";
 }
 
 
