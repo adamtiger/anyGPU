@@ -157,6 +157,7 @@ set (KRN_CU_SRCS
     ${KERNEL_CU_DIR}/fast_mm_f32_v2.1.cu
     ${KERNEL_CU_DIR}/fast_mm_f32_v3.cu
     ${KERNEL_CU_DIR}/fast_mm_f32_v4.cu
+    ${KERNEL_CU_DIR}/conv_2d_f32_v1.cu
     ${KERNEL_CU_DIR}/norm_ops.cu
     ${KERNEL_CU_DIR}/transp_ops.cu
     ${KERNEL_CU_DIR}/softmax_ops.cu

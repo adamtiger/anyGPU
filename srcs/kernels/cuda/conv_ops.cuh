@@ -4,7 +4,7 @@
 #include "tensor.hpp"
 
 // baseline global
-void cu_tensor_conv2d_f32(
+void cu_tensor_conv2d_f32_v1(
 	const Tensor<float32, CUDA>& xt,
 	const Tensor<float32, CUDA> wt,
 	const Tensor<float32, CUDA> bt,

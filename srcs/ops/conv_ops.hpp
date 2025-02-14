@@ -1,7 +1,7 @@
 #ifndef __CONV_OPS__
 #define __CONV_OPS__
 
-#include "norm_ops.cuh"
+#include "conv_ops.cuh"
 
 #include "tensor.hpp"
 #include "core_concepts.hpp"
@@ -129,15 +129,24 @@ inline Tensor<dtype, CUDA> tensor_conv2d(
 	const std::array<int32, 2>& stride,
 	const std::array<int32, 4>& pads)
 {
-	// check and modify axis if needed
-	int32 dim = xt.dim;
+	// check input variables
+	ACASSERT(xt.shape[1] == wt.shape[1], "kernel and input must have the same number of channels");
+	ACASSERT(wt.shape[0] == bt.shape[0], "kernel feature num != bias size");
 
-	// access the data arrays
-	Tensor<dtype, CUDA> yt(dim, xt.shape);
+	// calculate output size
+	int32 y_dim = 4;
+	Shape y_shape;
+	y_shape[0] = xt.shape[0];
+	y_shape[1] = wt.shape[0];
+	y_shape[2] = _calc_conv_output_size_along_one_axis(xt.shape[2], wt.shape[2], stride[0], pads[0], pads[2]);
+	y_shape[3] = _calc_conv_output_size_along_one_axis(xt.shape[3], wt.shape[3], stride[1], pads[1], pads[3]);
+
+	// create output tensor
+	Tensor<dtype, CUDA> yt(y_dim, y_shape);
 
 	if constexpr (std::is_same_v<dtype, float32>)
 	{
-		//cu_tensor_layer_norm_f32(xt, wt, bt, eps, yt);
+		cu_tensor_conv2d_f32_v1(xt, wt, bt, stride, pads, yt);
 	}
 	else
 	{
