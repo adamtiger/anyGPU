@@ -751,9 +751,13 @@ void external_test_causal_conv1d_fwd_f32()
 }
 
 
-void external_test_conv2d_k3x3_s1x1_p0x0_1_fwd_f32()
+static void _common_external_test_conv2d_params_fwd_f32(
+	const std::string& folder_name,
+	const std::string& test_name,
+	std::array<int32, 2> stride,
+	std::array<int32, 4> pads)
 {
-	auto path = artifact_folder_path / "test_conv2d_k3x3_s1x1_p0x0_1_fwd_f32" / "conv2d.safetensors";
+	auto path = artifact_folder_path / folder_name / "conv2d.safetensors";
 
 	// read tensors from files
 	std::unordered_map<std::string, Tensor<float32, CPU>> tensors;
@@ -762,9 +766,6 @@ void external_test_conv2d_k3x3_s1x1_p0x0_1_fwd_f32()
 	auto hw = tensors.at("weight");
 	auto hb = tensors.at("bias");
 	auto exp_hy = tensors.at("y");
-
-	std::array<int32, 2> stride = {1, 1};
-	std::array<int32, 4> pads = { 0, 0, 0, 0 };
 
 	auto act_hy_cpu = tensor_conv2d(hx, hw, hb, stride, pads);
 
@@ -786,9 +787,50 @@ void external_test_conv2d_k3x3_s1x1_p0x0_1_fwd_f32()
 
 	// test cpu
 	bool eq = cmp(exp_hy, act_hy_cpu);
-	std::cout << "TestCase [external_test_conv2d_k3x3_s1x1_p0x0_1_fwd_f32 - CPU]: " << (eq ? "PASSED" : "FAILED") << "\n";
+	std::cout << "TestCase [" << test_name << " - CPU]: " << (eq ? "PASSED" : "FAILED") << "\n";
 
 	// test cuda
 	eq = cmp(exp_hy, act_hy_cuda);
-	std::cout << "TestCase [external_test_conv2d_k3x3_s1x1_p0x0_1_fwd_f32 - CUDA]: " << (eq ? "PASSED" : "FAILED") << "\n";
+	std::cout << "TestCase [" << test_name << " - CUDA]: " << (eq ? "PASSED" : "FAILED") << "\n";
+}
+
+
+void external_test_conv2d_k3x3_s1x1_p0x0_1_fwd_f32()
+{
+	_common_external_test_conv2d_params_fwd_f32(
+		"test_conv2d_k3x3_s1x1_p0x0_1_fwd_f32",
+		"external_test_conv2d_k3x3_s1x1_p0x0_1_fwd_f32",
+		{1, 1},
+		{0, 0, 0, 0}
+	);
+}
+
+void external_test_conv2d_k3x3_s2x3_p0x0_1_fwd_f32()
+{
+	_common_external_test_conv2d_params_fwd_f32(
+		"test_conv2d_k3x3_s2x3_p0x0_1_fwd_f32",
+		"external_test_conv2d_k3x3_s2x3_p0x0_1_fwd_f32",
+		{ 2, 3 },
+		{ 0, 0, 0, 0 }
+	);
+}
+
+void external_test_conv2d_k5x5_s2x2_p1x1_1_fwd_f32()
+{
+	_common_external_test_conv2d_params_fwd_f32(
+		"test_conv2d_k5x5_s2x2_p1x1_1_fwd_f32",
+		"external_test_conv2d_k5x5_s2x2_p1x1_1_fwd_f32",
+		{ 2, 2 },
+		{ 1, 1, 1, 1 }
+	);
+}
+
+void external_test_conv2d_k3x5_s2x1_p1x2_1_fwd_f32()
+{
+	_common_external_test_conv2d_params_fwd_f32(
+		"test_conv2d_k3x5_s2x1_p1x2_1_fwd_f32",
+		"external_test_conv2d_k3x5_s2x1_p1x2_1_fwd_f32",
+		{ 2, 1 },
+		{ 1, 2, 1, 2 }
+	);
 }

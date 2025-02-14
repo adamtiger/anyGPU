@@ -55,6 +55,9 @@ int main()
 	//external_test_group_norm_fwd_f32();
 
 	external_test_conv2d_k3x3_s1x1_p0x0_1_fwd_f32();
+	external_test_conv2d_k3x3_s2x3_p0x0_1_fwd_f32();
+	external_test_conv2d_k5x5_s2x2_p1x1_1_fwd_f32();
+	external_test_conv2d_k3x5_s2x1_p1x2_1_fwd_f32();
 
 	//external_test_gemma2_decoder_mlp();
 	//external_test_gemma2_decoder_rmsn();
