@@ -4,7 +4,7 @@ const int WARP_SIZE = 32;
 
 // register level tile size
 //   per-thread tile
-const int RH = 4;
+const int RH = 8;
 const int RW = 4;
 const int RK = 2;
 
@@ -14,7 +14,7 @@ const int WW = WARP_SIZE * RW;
 
 // shared mem level tile size
 //   per-block tile
-const int NUM_WARPS = 16;
+const int NUM_WARPS = 8;
 
 const int TH = NUM_WARPS * WH;
 const int TW = WW;
