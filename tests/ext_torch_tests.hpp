@@ -4,6 +4,7 @@
 void external_test_sdp_fwd_f32();
 void external_test_sdp_bwd_f32();
 void external_test_sdp_masked_scaled_fwd_f32();
+void external_test_sdp_fwd_f32_2640_256();
 
 void external_test_cpu_softmax_bwd_f32();
 

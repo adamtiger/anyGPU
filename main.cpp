@@ -6,10 +6,10 @@ int main()
 {
 	//std::cout << print_cuda_device_props();
 
-	/*test_binary_add_f32();
-	test_binary_add_i32();
+	//test_binary_add_f32();
+	//test_binary_add_i32();
 
-	test_binary_mul_f32();
+	/*test_binary_mul_f32();
 	test_binary_mul_i32();
 
 	test_mm_f32();
@@ -75,8 +75,10 @@ int main()
 
 	//external_test_gemma2_decoder_fused_mlp();
 
-	external_test_mm_m1024_n2048_k2304_f32();
+	//external_test_mm_m1024_n2048_k2304_f32();
 	//external_test_mm_m1024_n2048_k2304_f16();
+
+	external_test_sdp_fwd_f32_2640_256();
 
 
 	/*std::string path = "C:\\Data\\AI\\projects\\anyGPU\\artifacts\\safetensors\\gemma2_2b\\model-00003-of-00003.safetensors";

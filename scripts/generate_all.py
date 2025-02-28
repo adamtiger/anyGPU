@@ -14,6 +14,7 @@ if __name__ == '__main__':
     # generate_sdp_bwd_nomask_noscore(path, "test_sdp_bwd_nomask_noscore_f32_16_64", 16, 64)
     # generate_softmax_bwd(path, "test_softmax_bwd_f32_16_64", 16, 64)
     # generate_sdp_fwd_masked_scaled(path, "test_sdp_fwd_masked_scaled_f32_16_128", 16, 128)
+    generate_sdp_fwd_nomask_noscore(path, "test_sdp_fwd_nomask_noscore_f32_2640_256", 2640, 256)
 
     # generate_sf_file_reading(path, "test_sf_diffuser_tensors")
 
@@ -38,4 +39,4 @@ if __name__ == '__main__':
     # fused_mlp_test.generate_fused_mlp_upproj_f32(path, "test_gemma2_fused_mlp_upproj_f32", 9)
     # fused_mlp_test.generate_fused_mlp_upproj_f32(path, "test_gemma2_fused_mlp_upproj_f32", 158)
 
-    generate_all_mm(path)
+    #generate_all_mm(path)

@@ -1,6 +1,7 @@
 #ifndef __SDP__
 #define __SDP__
 
+#include "flash_sdpa_fwd.cuh"
 #include "ops.hpp"
 
 #include "tensor.hpp"
@@ -43,6 +44,33 @@ inline Tensor<dtype, CUDA> sdp_attention_fwd_cuda_basic(
 	return y;
 }
 
+
+template<FloatingPointType dtype>
+inline Tensor<dtype, CUDA> sdp_attention_fwd_cuda_flash(
+	const Tensor<dtype, CUDA>& qw,
+	const Tensor<dtype, CUDA>& kw,
+	const Tensor<dtype, CUDA>& vw)
+{
+	int N = qw.shape[0];
+	int d = qw.shape[1];  // qw shape: (N, d)
+
+	ACASSERT(kw.shape[0] == N, "qw and kw differs in sequence length");
+	ACASSERT(vw.shape[0] == N, "qw and vw differs in sequence length");
+	ACASSERT(qw.shape[1] == 256, "hidden dimension for kw must be 256");
+	ACASSERT(kw.shape[1] == 256, "hidden dimension for kw must be 256");
+	ACASSERT(vw.shape[1] == 256, "hidden dimension for kw must be 256");
+
+	Tensor<dtype, CUDA> y(qw.dim, qw.shape);
+
+	dtype alpha = calculate_alpha<dtype>(d);
+	
+	if constexpr (std::is_same_v<dtype, float32>)
+	{
+		cu_flash_sdpa_fwd_d256_v1(static_cast<float32>(alpha), qw, kw, vw, y);
+	}
+
+	return y;
+}
 
 
 /*

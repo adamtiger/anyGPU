@@ -109,7 +109,7 @@ inline Tensor<float32, CUDA> single_head_attention_fwd<float32, CUDA>(
 	const Tensor<float32, CUDA>& kw,
 	const Tensor<float32, CUDA>& vw)
 {
-	return sdp_attention_fwd_cuda_basic(qw, kw, vw);
+	return sdp_attention_fwd_cuda_flash(qw, kw, vw);
 }
 
 
