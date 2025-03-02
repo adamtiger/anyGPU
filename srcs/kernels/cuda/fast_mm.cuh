@@ -53,6 +53,14 @@ void cu_fast_mm_f32_v4_1(
 	Tensor<float32, CUDA>& yt);
 
 
+// generic size, tiled mm, warp tiled mm, registered tile
+// applies double buffering too, transposed A
+void cu_fast_mm_f32_v4_2(
+	const Tensor<float32, CUDA>& xt,  // input (multiple of 128)
+	const Tensor<float32, CUDA>& wt,  // weight (multiple of 128)
+	Tensor<float32, CUDA>& yt);
+
+
 /* float16 versions */
 
 // baseline global
