@@ -31,7 +31,7 @@ __global__ void cu_tensor_rms_norm_f32_v1_kernel(
 	// mapping the y block index and thread index to the parallel regions
 	int r = blockDim.y * blockIdx.y + threadIdx.y;
 
-	__shared__ float32 shr_mem_x[1344];  // fixed size; can be dynamic shr
+	//__shared__ float32 shr_mem_x[1344];  // fixed size; can be dynamic shr
 	__shared__ float32 shr_mem_acc_sum[8];
 
 	if (r < num_norm_regions)
@@ -55,7 +55,7 @@ __global__ void cu_tensor_rms_norm_f32_v1_kernel(
 			{
 				float32 x = dx[gmem_base_offs + gmem_warp_offs + x_rel_offs];
 				accum_sum_sqr += x * x;
-				shr_mem_x[gmem_warp_offs + x_rel_offs] = x;
+				//shr_mem_x[gmem_warp_offs + x_rel_offs] = x;
 			}
 		}
 
@@ -82,7 +82,7 @@ __global__ void cu_tensor_rms_norm_f32_v1_kernel(
 			const int x_rel_offs = k * warpSize + tx;
 			if (x_rel_offs < warp_norm_reg_size)
 			{
-				float32 x = shr_mem_x[gmem_warp_offs + x_rel_offs];
+				float32 x = dx[gmem_base_offs + gmem_warp_offs + x_rel_offs];//shr_mem_x[gmem_warp_offs + x_rel_offs];
 				float32 w = dw[gmem_warp_offs + x_rel_offs] + delta;
 				float32 y = (x * rsqrtf(mean_sum_sqr + eps)) * w;
 				dy[gmem_base_offs + gmem_warp_offs + x_rel_offs] = y;
