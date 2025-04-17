@@ -36,8 +36,8 @@ int main()
 
 	external_test_sf_data_reading();
 
-	external_test_layer_norm_fwd_f32();
-	external_test_rms_norm_fwd_f32();*/
+	external_test_layer_norm_fwd_f32();*/
+	external_test_rms_norm_fwd_f32();
 	/*external_test_silu_fwd_f32();
 	external_test_gelu_fwd_f32();
 	external_test_gelu_approx_fwd_f32();
@@ -75,7 +75,7 @@ int main()
 
 	//external_test_gemma2_decoder_fused_mlp();
 
-	external_test_mm_m1024_n2048_k2304_f32();
+	//external_test_mm_m1024_n2048_k2304_f32();
 	//external_test_mm_m1024_n2048_k2304_f16();
 
 	//external_test_sdp_fwd_f32_2640_256();

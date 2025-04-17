@@ -162,6 +162,7 @@ set (KRN_CU_SRCS
     ${KERNEL_CU_DIR}/flash_sdpa_fwd_f32_d256_v1.cu
     ${KERNEL_CU_DIR}/conv_2d_f32_v1.cu
     ${KERNEL_CU_DIR}/norm_ops.cu
+    ${KERNEL_CU_DIR}/norm_rms_f32_v1.cu
     ${KERNEL_CU_DIR}/transp_ops.cu
     ${KERNEL_CU_DIR}/softmax_ops.cu
     ${KERNEL_CU_DIR}/quantize_ops.cu

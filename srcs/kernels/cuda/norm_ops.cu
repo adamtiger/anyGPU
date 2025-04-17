@@ -1,13 +1,13 @@
 #include "norm_ops.cuh"
 
-__device__ int calc_nk(const int region_size)
+static __device__ int calc_nk(const int region_size)
 {
 	int nk = region_size / warpSize;
 	nk += (region_size % warpSize > 0 ? 1 : 0);
 	return nk;
 }
 
-__device__ float32 sum_reduce_warp(const float32 thread_value)
+static __device__ float32 sum_reduce_warp(const float32 thread_value)
 {
 	float32 reduced = thread_value;
 	for (int k = 16; k >= 1; k = k / 2)
